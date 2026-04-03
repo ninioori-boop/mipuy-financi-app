@@ -10014,6 +10014,7 @@ function clientRestoreData(data) {
     if (creditTransactions.length > 0) {
       _ccCtx = '';
       renderCreditSummary();
+      populateVarExpensesFromCredit();
     }
   }
 }
