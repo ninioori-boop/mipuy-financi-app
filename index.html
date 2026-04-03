@@ -5470,6 +5470,7 @@ function getRows(listId) {
   const rows = list.querySelectorAll('.input-row');
   const result = [];
   rows.forEach(row => {
+    if (row.hasAttribute('data-auto')) return; // credit-auto rows are saved via credit.transactions
     const inputs = row.querySelectorAll('input');
     const name = inputs[0].value.trim();
     const amt = parseFloat(inputs[1].value) || 0;
@@ -5798,6 +5799,7 @@ function getVarRows() {
   const list = document.getElementById('var-list');
   const result = [];
   list.querySelectorAll('.input-row').forEach(function(row) {
+    if (row.hasAttribute('data-auto')) return; // credit-auto rows are saved via credit.transactions
     const inputs = row.querySelectorAll('input');
     const name = inputs[0].value.trim();
     const raw = parseFloat(inputs[1].value) || 0;
