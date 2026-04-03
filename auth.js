@@ -146,6 +146,7 @@ function fbErrMsg(code) {
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
 var _fbSaveTimer = null;
+var _fbRestoring = false;  // true while Firestore data is being restored
 
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
@@ -166,7 +167,10 @@ auth.onAuthStateChanged(function(user) {
   // Load data from Firestore
   loadUserData(user.uid).then(function(data) {
     if (data && typeof clientRestoreData === 'function') {
+      _fbRestoring = true;
+      clearTimeout(_fbAutoSaveTimer); // cancel any saves queued by clientInit/localStorage
       clientRestoreData(data);
+      _fbRestoring = false;
     }
     fbUpdateSaveStatus('✓ נטען');
   }).catch(function(err) {
@@ -230,7 +234,7 @@ function fbSaveNow() {
 }
 
 function fbDebouncedSave() {
-  if (!_fbUid) return;
+  if (!_fbUid || _fbRestoring) return;
   clearTimeout(_fbAutoSaveTimer);
   _fbAutoSaveTimer = setTimeout(fbSaveNow, 1000);
 }
