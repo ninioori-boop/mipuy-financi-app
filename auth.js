@@ -235,6 +235,17 @@ function fbDebouncedSave() {
   _fbAutoSaveTimer = setTimeout(fbSaveNow, 1000);
 }
 
-// Listen to ALL input/change events on the page
-document.addEventListener('input',  fbDebouncedSave);
-document.addEventListener('change', fbDebouncedSave);
+// Listen to input events (not 'change' — file uploads fire 'change' before parsing completes)
+document.addEventListener('input', fbDebouncedSave);
+
+// Patch populateVarExpensesFromCredit to save after credit data is fully processed
+window.addEventListener('load', function() {
+  if (typeof populateVarExpensesFromCredit === 'function' && !populateVarExpensesFromCredit._fbPatched) {
+    var _orig = populateVarExpensesFromCredit;
+    populateVarExpensesFromCredit = function() {
+      _orig.apply(this, arguments);
+      fbDebouncedSave();
+    };
+    populateVarExpensesFromCredit._fbPatched = true;
+  }
+});
