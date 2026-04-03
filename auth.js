@@ -211,53 +211,30 @@ function fbUpdateSaveStatus(text) {
   if (el) el.textContent = text;
 }
 
-/* ── Override clientSave to write to Firestore ─────────────────── */
-// Wait for DOMContentLoaded to make sure original function is defined
-document.addEventListener('DOMContentLoaded', function() {
-  fbPatchClientSave();
-});
-// Also try immediately (in case DOMContentLoaded already fired)
-fbPatchClientSave();
+/* ── Auto-save to Firestore on any input change ─────────────────── */
+var _fbAutoSaveTimer = null;
 
-function fbPatchClientSave() {
-  if (typeof clientSave !== 'function') return; // not ready yet
-  if (clientSave._fbPatched) return; // already patched
-
-  var _originalClientSave = clientSave;
-
-  clientSave = function fbClientSave() {
-    // Run original (saves to localStorage as fallback)
-    _originalClientSave();
-
-    // Also save to Firestore
-    if (!_fbUid) return;
-    if (typeof clientCollectData !== 'function') return;
-    var data = clientCollectData();
-    fbUpdateSaveStatus('שומר…');
-    saveUserData(_fbUid, data).then(function() {
-      var now = new Date();
-      var time = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-      fbUpdateSaveStatus('✓ נשמר ' + time);
-    }).catch(function(err) {
-      console.error('שגיאה בשמירה:', err);
-      fbUpdateSaveStatus('שגיאה בשמירה');
-    });
-  };
-
-  clientSave._fbPatched = true;
-
-  // Also patch the debounced auto-save
-  if (typeof clientAutoSave === 'function' && !clientAutoSave._fbPatched) {
-    var autoSaveTimer = null;
-    clientAutoSave = function fbAutoSave() {
-      clearTimeout(autoSaveTimer);
-      autoSaveTimer = setTimeout(clientSave, 800);
-    };
-    clientAutoSave._fbPatched = true;
-  }
+function fbSaveNow() {
+  if (!_fbUid) return;
+  if (typeof clientCollectData !== 'function') return;
+  var data = clientCollectData();
+  fbUpdateSaveStatus('שומר…');
+  saveUserData(_fbUid, data).then(function() {
+    var now = new Date();
+    var time = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    fbUpdateSaveStatus('✓ נשמר ' + time);
+  }).catch(function(err) {
+    console.error('שגיאה בשמירה:', err);
+    fbUpdateSaveStatus('שגיאה בשמירה');
+  });
 }
 
-// Retry patch after scripts finish loading
-window.addEventListener('load', function() {
-  fbPatchClientSave();
-});
+function fbDebouncedSave() {
+  if (!_fbUid) return;
+  clearTimeout(_fbAutoSaveTimer);
+  _fbAutoSaveTimer = setTimeout(fbSaveNow, 1000);
+}
+
+// Listen to ALL input/change events on the page
+document.addEventListener('input',  fbDebouncedSave);
+document.addEventListener('change', fbDebouncedSave);
