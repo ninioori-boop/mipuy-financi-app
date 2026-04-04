@@ -5574,7 +5574,6 @@ function updateLiveSummary() {
   var annuals   = getAnnualRows('annual-list');
   var subs      = getRows('sub-list');
   var insurance = getRows('insurance-list');
-  var variable  = getVarRows();
   var debts     = getDebtRows('debt-list');
   var assets    = getSavingRows();
   var varMonths = getVarMonths();
@@ -5584,7 +5583,20 @@ function updateLiveSummary() {
   var totalAnnual  = annuals.reduce(function(s,r){ return s+r.amt; }, 0);
   var totalSubs    = subs.reduce(function(s,r){ return s+r.amt; }, 0);
   var totalIns     = insurance.reduce(function(s,r){ return s+r.amt; }, 0);
-  var totalVar     = variable.reduce(function(s,r){ return s+r.amt; }, 0);
+  // Sum ALL var rows from DOM (including data-auto credit rows) for correct cash flow
+  var totalVar = (function() {
+    var list = document.getElementById('var-list');
+    if (!list) return 0;
+    var sum = 0;
+    list.querySelectorAll('.input-row').forEach(function(row) {
+      var inputs = row.querySelectorAll('input[type="number"]');
+      if (inputs.length) {
+        var raw = parseFloat(inputs[0].value) || 0;
+        sum += row.hasAttribute('data-inst') ? raw : raw / varMonths;
+      }
+    });
+    return sum;
+  })();
   var totalDebtMo  = debts.reduce(function(s,r){ return s+r.amt; }, 0);
   var totalDebtBal = debts.reduce(function(s,r){ return s+r.balance; }, 0);
   var totalAssetsAccum = assets.reduce(function(s,r){ return s+r.amt; }, 0);
@@ -5802,6 +5814,7 @@ function getVarRows() {
   const list = document.getElementById('var-list');
   const result = [];
   list.querySelectorAll('.input-row').forEach(function(row) {
+    if (row.hasAttribute('data-auto')) return; // auto rows come from credit.transactions
     const inputs = row.querySelectorAll('input');
     const name = inputs[0] ? inputs[0].value.trim() : '';
     const raw = parseFloat((inputs[1] || {value:''}).value) || 0;
