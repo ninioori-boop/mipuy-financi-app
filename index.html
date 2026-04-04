@@ -5570,19 +5570,28 @@ function updateAssetTotals() {
 /* ── LIVE CASHFLOW SUMMARY ── */
 function updateLiveSummary() {
   var incomes   = getRows('income-list');
-  var fixed     = getRows('fixed-list');
   var annuals   = getAnnualRows('annual-list');
-  var subs      = getRows('sub-list');
-  var insurance = getRows('insurance-list');
   var debts     = getDebtRows('debt-list');
   var assets    = getSavingRows();
   var varMonths = getVarMonths();
 
+  // Helper: sum ALL input-rows in a list (including data-auto credit rows)
+  function sumList(listId) {
+    var list = document.getElementById(listId);
+    if (!list) return 0;
+    var sum = 0;
+    list.querySelectorAll('.input-row').forEach(function(row) {
+      var inputs = row.querySelectorAll('input[type="number"]');
+      if (inputs.length) sum += parseFloat(inputs[0].value) || 0;
+    });
+    return sum;
+  }
+
   var totalIncome  = incomes.reduce(function(s,r){ return s+r.amt; }, 0);
-  var totalFixed   = fixed.reduce(function(s,r){ return s+r.amt; }, 0);
+  var totalFixed   = sumList('fixed-list');
   var totalAnnual  = annuals.reduce(function(s,r){ return s+r.amt; }, 0);
-  var totalSubs    = subs.reduce(function(s,r){ return s+r.amt; }, 0);
-  var totalIns     = insurance.reduce(function(s,r){ return s+r.amt; }, 0);
+  var totalSubs    = sumList('sub-list');
+  var totalIns     = sumList('insurance-list');
   // Sum ALL var rows from DOM (including data-auto credit rows) for correct cash flow
   var totalVar = (function() {
     var list = document.getElementById('var-list');
