@@ -6642,7 +6642,9 @@ function populateVarExpensesFromCredit() {
     else if (SUB_CATEGORIES.indexOf(cat) !== -1) listId = 'sub-list';
     if (!listId) return;
 
-    var storeAmt = isVar ? totalAmt : Math.round(totalAmt / months);
+    // For variable: store total, display divided by months (for averaging).
+    // For fixed/insurance/sub: store total as-is (no division) — pass through from report.
+    var storeAmt = totalAmt;
     var displayMonthly = isVar ? totalAmt / months : storeAmt;
     var icon = CATEGORY_ICONS[cat] || '📦';
     var txIndices = catTxs[cat] || [];
