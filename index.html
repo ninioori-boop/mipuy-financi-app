@@ -9757,6 +9757,7 @@ function clientCollectData() {
     },
     manual: {
       monthsInput: parseInt((document.getElementById('months-input')||{value:'3'}).value)||3,
+      varMonthsInput: parseInt((document.getElementById('var-months-input')||{value:'3'}).value)||3,
       income:    getRows('income-list'),
       fixed:     getRows('fixed-list'),
       annual:    getAnnualRows('annual-list'),
@@ -9854,6 +9855,8 @@ function clientRestoreData(data) {
   if (!m) return;
   var mi = document.getElementById('months-input');
   if (mi && m.monthsInput) mi.value = m.monthsInput;
+  var vmi = document.getElementById('var-months-input');
+  if (vmi && m.varMonthsInput) { vmi.value = m.varMonthsInput; varMonthsChange(0); }
 
   function restoreSimple(listId, rows, amtIdx) {
     var el = document.getElementById(listId); if (!el||!rows) return;
@@ -9891,7 +9894,7 @@ function clientRestoreData(data) {
     });
   }
 
-  // Variable
+  // Variable — restore raw amount (not pre-divided amt) to avoid double-division
   var varEl = document.getElementById('var-list');
   if (varEl && m.variable) {
     varEl.innerHTML = '';
@@ -9900,7 +9903,7 @@ function clientRestoreData(data) {
       var all = varEl.querySelectorAll('.input-row.var-row');
       var last = all[all.length-1];
       var inputs = last.querySelectorAll('input[type="number"]');
-      if (inputs[0]) inputs[0].value = r.amt||'';
+      if (inputs[0]) inputs[0].value = (r.raw != null ? r.raw : r.amt) || '';
     });
     updateVarTotals();
   }
