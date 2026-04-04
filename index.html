@@ -5802,10 +5802,9 @@ function getVarRows() {
   const list = document.getElementById('var-list');
   const result = [];
   list.querySelectorAll('.input-row').forEach(function(row) {
-    if (row.hasAttribute('data-auto')) return; // credit-auto rows are saved via credit.transactions
     const inputs = row.querySelectorAll('input');
-    const name = inputs[0].value.trim();
-    const raw = parseFloat(inputs[1].value) || 0;
+    const name = inputs[0] ? inputs[0].value.trim() : '';
+    const raw = parseFloat((inputs[1] || {value:''}).value) || 0;
     // inst rows store the monthly payment directly (÷1), all other rows divide by varMonths
     const isInst = row.hasAttribute('data-inst');
     if (name || raw) result.push({ name: name || '—', amt: isInst ? raw : raw / months, raw: raw });
