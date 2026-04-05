@@ -5768,7 +5768,7 @@ function getSavingRows() {
     var name   = row.querySelector('input[type="text"]').value.trim();
     var mo     = parseFloat((row.querySelector('.saving-monthly') || {value:''}).value) || 0;
     var accum  = parseFloat((row.querySelector('.saving-accum')  || {value:''}).value) || 0;
-    if (name || mo || accum) result.push({ name: name || '—', amt: accum, monthly: mo });
+    if (name || mo || accum) result.push({ name: name || '—', amt: accum, accum: accum, monthly: mo });
   });
   return result;
 }
@@ -5918,7 +5918,7 @@ function getDebtRows(listId) {
     const rate     = parseFloat((row.querySelector('.debt-rate')     || {value:''}).value) || 0;
     const months   = parseInt((row.querySelector('.debt-months')     || {value:''}).value) || 0;
     const monthly  = parseFloat((row.querySelector('.debt-monthly')  || {value:''}).value) || 0;
-    if (name || balance || monthly) result.push({ name: name || '—', original, balance, rate, months, amt: monthly });
+    if (name || balance || monthly) result.push({ name: name || '—', original, balance, rate, months, monthly, amt: monthly });
   });
   return result;
 }
@@ -7468,13 +7468,10 @@ function createMonthPanel(monthId, monthName) {
   var html = '<div class="tab-panel" id="panel-mo-' + monthId + '">' +
 
     // Title bar
-    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap">' +
-      '<div style="display:flex;align-items:center;gap:10px;flex:1;flex-wrap:wrap">' +
-        '<span style="font-size:1.2rem;font-weight:800;color:var(--accent)">📅 תקציב ' + monthName + '</span>' +
-        '<input class="bud-field" id="' + p('year') + '" type="number" placeholder="שנה" style="width:90px">' +
-        '<button onclick="moUploadCredit(\'' + monthId + '\')" style="background:rgba(67,233,123,.15);border:1px solid rgba(67,233,123,.4);border-radius:8px;color:var(--accent3);padding:5px 14px;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;white-space:nowrap">📂 העלה דוח אשראי</button>' +
-      '</div>' +
-      '<span class="bud-sec-total" id="' + p('cf') + '" style="font-size:1rem;padding:4px 16px">תזרים: ₪0</span>' +
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">' +
+      '<span style="font-size:1.2rem;font-weight:800;color:var(--accent)">📅 תקציב ' + monthName + '</span>' +
+      '<input class="bud-field" id="' + p('year') + '" type="number" placeholder="שנה" style="width:90px">' +
+      '<span class="bud-sec-total" id="' + p('cf') + '" style="display:none"></span>' +
     '</div>' +
 
     '<div class="grid2">' +
