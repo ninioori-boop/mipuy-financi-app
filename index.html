@@ -5857,6 +5857,7 @@ function getAnnualRows(listId) {
   const list = document.getElementById(listId);
   const result = [];
   list.querySelectorAll('.annual-row').forEach(function(row) {
+    if (row.hasAttribute('data-auto')) return; // auto rows restored by populateVarExpensesFromCredit
     const inputs = row.querySelectorAll('input');
     const name = inputs[0].value.trim();
     const yearly = parseFloat(inputs[1].value) || 0;
@@ -6570,11 +6571,12 @@ async function analyzeWithAI() {
 // Categories that map to variable expenses (not fixed/subscriptions)
 var VAR_CATEGORIES = [
   'מזון לבית','אוכל בחוץ ובילויים','פארם','דלק וחניה','ביגוד והנעלה',
-  'תחבצ','כבישי אגרה','תספורת וקוסמטיקה','תחביבים','חופשה וטיול',
+  'תחבצ','כבישי אגרה','תספורת וקוסמטיקה','תחביבים',
   'תיקוני רכב','בריאות','בעלי חיים','חינוך וקייטנות','שונות',
   'ביט ללא מעקב','מזומן ללא מעקב','מתנות','עוזרת בית','סיגריות',
   'צעצועים','כלי בית','ריהוט והבית','תרומות'
 ];
+var ANNUAL_CATEGORIES = ['חופשה וטיול'];
 var FIXED_CATEGORIES = [
   'קופת חולים','משכנתא','שכר דירה',
   'ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית'
@@ -6624,8 +6626,9 @@ function populateVarExpensesFromCredit() {
   });
 
   // Clear existing auto-filled rows
-  ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(listId) {
+  ['var-list','fixed-list','sub-list','insurance-list','annual-list'].forEach(function(listId) {
     var list = document.getElementById(listId);
+    if (!list) return;
     list.querySelectorAll('.cat-auto-wrap').forEach(function(r){ r.remove(); });
     list.querySelectorAll('.input-row[data-auto]').forEach(function(r){ r.remove(); });
   });
@@ -6634,21 +6637,46 @@ function populateVarExpensesFromCredit() {
     var cat = entry[0], totalAmt = entry[1];
     if (totalAmt <= 0) return;
     var listId = null;
-    var isVar = VAR_CATEGORIES.indexOf(cat) !== -1;
-    var isIns = INSURANCE_CATEGORIES.indexOf(cat) !== -1;
-    if (isVar) listId = 'var-list';
-    else if (isIns) listId = 'insurance-list';
+    var isVar    = VAR_CATEGORIES.indexOf(cat) !== -1;
+    var isAnnual = ANNUAL_CATEGORIES.indexOf(cat) !== -1;
+    var isIns    = INSURANCE_CATEGORIES.indexOf(cat) !== -1;
+    if (isVar)         listId = 'var-list';
+    else if (isAnnual) listId = 'annual-list';
+    else if (isIns)    listId = 'insurance-list';
     else if (FIXED_CATEGORIES.indexOf(cat) !== -1) listId = 'fixed-list';
-    else if (SUB_CATEGORIES.indexOf(cat) !== -1) listId = 'sub-list';
+    else if (SUB_CATEGORIES.indexOf(cat) !== -1)   listId = 'sub-list';
     if (!listId) return;
 
-    // For variable: store total, display divided by months (for averaging).
-    // For fixed/insurance/sub: store total as-is (no division) — pass through from report.
-    var storeAmt = totalAmt;
-    var displayMonthly = isVar ? totalAmt / months : storeAmt;
     var icon = CATEGORY_ICONS[cat] || '📦';
     var txIndices = catTxs[cat] || [];
-    var txCount = txIndices.length;
+    var txCount   = txIndices.length;
+    var storeAmt, displayMonthly;
+    if (isVar) {
+      storeAmt       = totalAmt;
+      displayMonthly = totalAmt / months;
+    } else if (isAnnual) {
+      storeAmt       = Math.round(totalAmt / months * 12); // אנואליזציה: N חודשים → שנה
+      displayMonthly = Math.round(storeAmt / 12);
+    } else {
+      storeAmt       = Math.round(totalAmt / Math.max(1, txCount)); // ממוצע לפי הופעות
+      displayMonthly = storeAmt;
+    }
+
+    // Annual categories get a dedicated annual-row (not cat-auto-wrap)
+    if (isAnnual) {
+      var annList = document.getElementById('annual-list');
+      if (!annList) return;
+      var annRow = document.createElement('div');
+      annRow.className = 'input-row annual-row';
+      annRow.setAttribute('data-auto', '1');
+      annRow.innerHTML =
+        '<input type="text" value="' + icon + ' ' + cat + '" readonly style="color:var(--accent);font-weight:600">' +
+        '<input type="number" value="' + storeAmt + '" min="0" step="1" oninput="updateAnnualTag(this);updateAnnualTotals()">' +
+        '<span class="yearly-tag">₪' + fmt(displayMonthly) + ' / חודש</span>' +
+        '<button class="btn-del" onclick="this.closest(\'.annual-row\').remove();updateAnnualTotals()">×</button>';
+      annList.appendChild(annRow);
+      return;
+    }
 
     var oninputAttr, ondelAttr;
     if (isVar) {
@@ -6709,6 +6737,7 @@ function populateVarExpensesFromCredit() {
   updateSectionTotal('sub-list', 'total-subs', 1);
   updateSectionTotal('insurance-list', 'total-ins', 1);
   updateVarTotals();
+  updateAnnualTotals();
 
   // Show notification
   showAutoFillNotice(months);
@@ -9900,21 +9929,17 @@ function clientRestoreData(data) {
   restoreSimple('sub-list',       m.subs);
   restoreSimple('insurance-list', m.insurance);
 
-  // Annual (two number inputs: amount + months)
+  // Annual — restore manual rows only (data-auto rows restored by populateVarExpensesFromCredit)
   var annEl = document.getElementById('annual-list');
   if (annEl && m.annual) {
     annEl.innerHTML = '';
     m.annual.forEach(function(r) {
-      if (typeof addAnnualRow === 'function') {
-        addAnnualRow('annual-list', r.name, false);
-      } else {
-        addRow('annual-list', '...', false, r.name);
-      }
-      var all = annEl.querySelectorAll('.input-row');
+      addAnnualRow('annual-list', r.name, false);
+      var all = annEl.querySelectorAll('.annual-row');
       var last = all[all.length-1];
       var inputs = last.querySelectorAll('input[type="number"]');
-      if (inputs[0]) inputs[0].value = r.amt||'';
-      if (inputs[1]) inputs[1].value = r.months||'';
+      if (inputs[0]) inputs[0].value = r.yearly != null ? r.yearly : (r.amt ? Math.round(r.amt * 12) : '');
+      updateAnnualTag(inputs[0]);
     });
   }
 
