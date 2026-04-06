@@ -8621,11 +8621,10 @@ function createMonthPanel(monthId, monthName) {
           'color:var(--accent);padding:5px 14px;cursor:pointer;font-family:inherit;font-size:.82rem;' +
           'font-weight:700;white-space:nowrap;display:none">📊 הצג ניתוח</button>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:4px 0 8px">' +
-        moKpi(p('k-income'),  'הכנסות',          'var(--accent3)') +
-        moKpi(p('k-exp'),     'הוצאות',           'var(--accent2)') +
-        moKpi(p('k-sav'),     'הפרשה לחיסכון',   'var(--accent)') +
-        moKpi(p('k-balance'), 'תזרים נטו',        'var(--accent4)') +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 0 8px">' +
+        moKpi(p('k-income'),  'הכנסות',  'var(--accent3)') +
+        moKpi(p('k-exp'),     'הוצאות',  'var(--accent2)') +
+        moKpi(p('k-balance'), 'תזרים נטו', 'var(--accent4)') +
       '</div>' +
     '</div>' +
 
@@ -8766,11 +8765,10 @@ function moRecalc(mid) {
   var tDebt   = moGetAmt(p('debt'),   2);
   var tSav    = moGetAmt(p('saving'), 1);
 
-  // Savings shown as separate KPI — excluded from הוצאות total so the 4 boxes add up cleanly
-  var bExp     = bFixed + bVar + bSub + bIns + tInst + tDebt;
-  var aExp     = aFixed + aVar + aSub + aIns + tInst + tDebt;
-  var bBalance = bIncome - bExp - tSav;
-  var aBalance = aIncome > 0 || aExp > 0 ? aIncome - aExp - tSav : null;
+  var bExp     = bFixed + bVar + bSub + bIns + tInst + tDebt + tSav;
+  var aExp     = aFixed + aVar + aSub + aIns + tInst + tDebt + tSav;
+  var bBalance = bIncome - bExp;
+  var aBalance = aIncome > 0 || aExp > 0 ? aIncome - aExp : null;
 
   // Update compare sections (sections with .bud-sec-compare)
   function setCompare(id, budget, actual, isIncome) {
@@ -8803,7 +8801,6 @@ function moRecalc(mid) {
   // KPI summary
   ms(p('k-income'),  mf(bIncome));
   ms(p('k-exp'),     mf(bExp));
-  ms(p('k-sav'),     mf(tSav));
   ms(p('k-balance'), mf(bBalance));
 
   // If actual data exists, update KPI with actual values (append sub-label)
