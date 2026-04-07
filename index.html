@@ -2072,10 +2072,11 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
         <p>גרור לכאן קבצי <strong>Excel / CSV</strong> או לחץ לבחירה</p>
-        <p style="margin-top:8px;font-size:.82rem">תומך בדוחות ויזה, מאסטרקארד, ישראכרט ועוד — ניתן לבחור מספר קבצים</p>
+        <p style="margin-top:8px;font-size:.82rem">תומך בדוחות ויזה, מאסטרקארד, ישראכרט ועוד — ניתן לבחור עד <strong>15 כרטיסים</strong> ומעלה בבת אחת</p>
       </div>
       <input type="file" id="file-input" accept=".xlsx,.xls,.csv" multiple>
       <div class="file-list" id="file-list"></div>
+      <div id="file-count-bar" style="display:none;margin-top:8px;font-size:.82rem;color:var(--accent);font-weight:600;text-align:center"></div>
       <button class="parse-btn" id="parse-btn" onclick="parseFiles()" style="display:none">נתח דוחות ⚡</button>
       <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);border-radius:10px;padding:11px 16px">
         <span style="font-size:1rem">🧠</span>
@@ -2515,14 +2516,21 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 <div class="main-wrap">
 
   <!-- Upload Zone -->
-  <div class="upload-zone" id="bank-upload-zone" onclick="document.getElementById('bank-file-input').click()" ondragover="event.preventDefault()" ondrop="bankDrop(event)">
+  <div class="upload-zone" id="bank-upload-zone"
+       onclick="document.getElementById('bank-file-input').click()"
+       ondragover="event.preventDefault();this.classList.add('drag-over')"
+       ondragleave="this.classList.remove('drag-over')"
+       ondrop="bankDrop(event)">
     <div style="font-size:2.2rem;margin-bottom:8px">🏦</div>
-    <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px">ייבוא דוח עו"ש</div>
-    <div style="color:var(--muted);font-size:.9rem">גרור קובץ Excel של דוח עו"ש מהבנק, או לחץ לבחירה</div>
-    <div style="color:var(--muted);font-size:.8rem;margin-top:6px">נתמכים: הפועלים, לאומי, דיסקונט, מזרחי, הבינלאומי</div>
-    <input type="file" id="bank-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleBankFiles(this.files)">
+    <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px">ייבוא דוחות עו"ש</div>
+    <div style="color:var(--muted);font-size:.9rem">גרור קבצי Excel של דוחות עו"ש מהבנק, או לחץ לבחירה</div>
+    <div style="color:var(--muted);font-size:.8rem;margin-top:6px">נתמכים: הפועלים, לאומי, דיסקונט, מזרחי, הבינלאומי — ניתן לבחור מספר חשבונות בבת אחת</div>
+    <input type="file" id="bank-file-input" accept=".xlsx,.xls,.csv" multiple style="display:none" onchange="bankHandleFileUpload(this.files);this.value=''">
     <input type="file" id="mo-credit-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="moHandleCreditUpload(this)">
   </div>
+  <div class="file-list" id="bank-file-list"></div>
+  <div id="bank-file-count-bar" style="display:none;margin-top:8px;font-size:.82rem;color:var(--accent);font-weight:600;text-align:center"></div>
+  <button class="parse-btn" id="bank-parse-btn" onclick="bankParseFiles()" style="display:none">נתח דוחות עו"ש ⚡</button>
 
   <!-- Insights Grid (hidden until data loaded) -->
   <div id="bank-insights-section" style="display:none">
@@ -2550,6 +2558,7 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
             <th>תאריך</th>
             <th>תיאור</th>
             <th>סוג</th>
+            <th id="bank-th-source" style="display:none">חשבון</th>
             <th>זכות</th>
             <th>חובה</th>
             <th>יתרה</th>
@@ -2930,11 +2939,12 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
         <line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
       <p>גרור לכאן קבצי <strong>Excel / CSV</strong> או לחץ לבחירה</p>
-      <p style="margin-top:8px;font-size:.82rem">תומך בדוחות ויזה, מאסטרקארד, ישראכרט ועוד — ניתן לבחור מספר קבצים</p>
+      <p style="margin-top:8px;font-size:.82rem">תומך בדוחות ויזה, מאסטרקארד, ישראכרט ועוד — ניתן לבחור עד <strong>15 כרטיסים</strong> ומעלה בבת אחת</p>
     </div>
     <input type="file" id="import-file-input" accept=".xlsx,.xls,.csv" multiple
            onchange="importHandleFileUpload(this.files)">
     <div class="file-list" id="import-file-list"></div>
+    <div id="import-file-count-bar" style="display:none;margin-top:8px;font-size:.82rem;color:var(--accent);font-weight:600;text-align:center"></div>
     <button class="parse-btn" id="import-parse-btn" onclick="importParseFiles()" style="display:none">נתח דוחות ⚡</button>
 
     <!-- Learned DB (shared with credit tab) -->
@@ -7495,6 +7505,15 @@ function renderFileList() {
     fl.appendChild(chip);
   });
   document.getElementById('parse-btn').style.display = pendingFiles.length ? 'block' : 'none';
+  const countBar = document.getElementById('file-count-bar');
+  if (countBar) {
+    if (pendingFiles.length > 0) {
+      countBar.style.display = 'block';
+      countBar.textContent = '📁 ' + pendingFiles.length + ' כרטיסים נבחרו';
+    } else {
+      countBar.style.display = 'none';
+    }
+  }
 }
 
 function removePendingFile(idx) {
@@ -7677,6 +7696,16 @@ async function parseFiles() {
       uploadedFiles.push({ name: f.name, rowCount: txs.length });
     }
     hideLoading();
+    // Auto-detect number of unique months and update months-input
+    if (!_ccCtx) {
+      var uniqueMonths = {};
+      creditTransactions.forEach(function(t) { if (t.date) uniqueMonths[t.date.substring(0,7)] = 1; });
+      var detectedMonths = Object.keys(uniqueMonths).length;
+      if (detectedMonths > 1) {
+        var mi = document.getElementById('months-input');
+        if (mi) { mi.value = detectedMonths; updateMonthsLabel(); }
+      }
+    }
     renderSmartAnalysis();
     renderCreditSummary();
     document.getElementById(_ccCtx + 'credit-results').style.display = 'block';
@@ -9413,6 +9442,15 @@ function importRenderFileList() {
   // sync learned-db-count2
   var el2 = document.getElementById('learned-db-count2');
   if (el2) el2.textContent = Object.keys(window.learnedDB || {}).length;
+  var countBar2 = document.getElementById('import-file-count-bar');
+  if (countBar2) {
+    if (importPendingFiles.length > 0) {
+      countBar2.style.display = 'block';
+      countBar2.textContent = '📁 ' + importPendingFiles.length + ' כרטיסים נבחרו';
+    } else {
+      countBar2.style.display = 'none';
+    }
+  }
 }
 
 function importRemoveFile(idx) {
@@ -9550,6 +9588,21 @@ function syncManualToMonth(mid) {
     });
     return items;
   }
+  function readVar() {
+    var list = document.getElementById('var-list');
+    if (!list) return [];
+    var months = Math.max(1, parseInt((document.getElementById('var-months-input')||{value:'3'}).value)||3);
+    var items = [];
+    list.querySelectorAll('.input-row').forEach(function(row) {
+      var inputs = row.querySelectorAll('input');
+      var name  = inputs[0] ? inputs[0].value.trim() : '';
+      var total = parseFloat(inputs[1] ? inputs[1].value : 0) || 0;
+      // inst rows are already monthly; var rows divide by months
+      var monthly = row.hasAttribute('data-inst') ? total : Math.round(total / months);
+      if (name || total) items.push({ name: name, amt: monthly });
+    });
+    return items;
+  }
   function readAssets() {
     var list = document.getElementById('asset-list');
     if (!list) return [];
@@ -9596,9 +9649,10 @@ function syncManualToMonth(mid) {
     });
     if (items.length === 0) { moAddSaving(mid); }
   }
-  populateSimple('fixed', readSimple('fixed-list'));
-  populateSimple('sub',   readSimple('sub-list'));
-  populateSimple('ins',   readSimple('insurance-list'));
+  populateSimple('fixed',    readSimple('fixed-list'));
+  populateSimple('sub',      readSimple('sub-list'));
+  populateSimple('ins',      readSimple('insurance-list'));
+  populateSimple('variable', readVar());
   populateSaving(readAssets());
 
   // Sync installments
@@ -11653,6 +11707,7 @@ document.addEventListener('DOMContentLoaded', function() {
 ════════════════════════════════════════ */
 var bankTransactions = [];
 var bankActiveFilter = 'all';
+var bankPendingFiles = [];
 
 // Keywords for classifying bank transactions
 var BANK_SALARY_KW   = ['משכורת','שכר','שכר עבודה','מעסיק','salary','גמלה','קצבה','ביטוח לאומי','עמית','פנסיה','קרן פנסיה'];
@@ -11664,21 +11719,65 @@ var BANK_FEE_KW      = ['עמלה','דמי ניהול','ריבית','עמלת','
 
 function bankDrop(e) {
   e.preventDefault();
+  document.getElementById('bank-upload-zone').classList.remove('drag-over');
   var files = e.dataTransfer.files;
-  if (files.length) handleBankFiles(files);
+  if (files.length) bankHandleFileUpload(files);
 }
 
-function handleBankFiles(files) {
+function bankHandleFileUpload(files) {
   if (!files || !files.length) return;
-  var file = files[0];
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var data = new Uint8Array(e.target.result);
-      var wb = XLSX.read(data, { type: 'array', cellDates: true });
-      var ws = wb.Sheets[wb.SheetNames[0]];
-      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      bankTransactions = extractBankTransactions(rows);
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (!bankPendingFiles.find(function(p){ return p.name === f.name; })) {
+      bankPendingFiles.push(f);
+    }
+  }
+  bankRenderFileList();
+}
+
+function bankRenderFileList() {
+  var fl = document.getElementById('bank-file-list');
+  if (!fl) return;
+  fl.innerHTML = '';
+  bankPendingFiles.forEach(function(f, i) {
+    var chip = document.createElement('div');
+    chip.className = 'file-chip';
+    chip.innerHTML = '<span><span class="chip-name">🏦 ' + f.name + '</span></span>' +
+      '<button class="btn-del" onclick="bankRemoveFile(' + i + ')">×</button>';
+    fl.appendChild(chip);
+  });
+  var btn = document.getElementById('bank-parse-btn');
+  if (btn) btn.style.display = bankPendingFiles.length ? 'block' : 'none';
+  var countBar = document.getElementById('bank-file-count-bar');
+  if (countBar) {
+    if (bankPendingFiles.length > 0) {
+      countBar.style.display = 'block';
+      countBar.textContent = '🏦 ' + bankPendingFiles.length + ' חשבונות נבחרו';
+    } else {
+      countBar.style.display = 'none';
+    }
+  }
+}
+
+function bankRemoveFile(idx) {
+  bankPendingFiles.splice(idx, 1);
+  bankRenderFileList();
+}
+
+function bankParseFiles() {
+  if (!bankPendingFiles.length) return;
+  var allTxs = [];
+  var pending = bankPendingFiles.slice();
+  var idx = 0;
+
+  function processNext() {
+    if (idx >= pending.length) {
+      bankTransactions = allTxs;
+      bankPendingFiles = [];
+      bankRenderFileList();
+      // Show/hide source column
+      var thSource = document.getElementById('bank-th-source');
+      if (thSource) thSource.style.display = pending.length > 1 ? '' : 'none';
       if (!bankTransactions.length) {
         document.getElementById('bank-empty-state').style.display = '';
         document.getElementById('bank-insights-section').style.display = 'none';
@@ -11688,11 +11787,34 @@ function handleBankFiles(files) {
         renderBankInsights();
         bankFilter('all');
       }
-    } catch(err) {
-      alert('שגיאה בקריאת הקובץ:\n' + err.message + '\n\n' + (err.stack||'').split('\n').slice(0,4).join('\n'));
+      return;
     }
-  };
-  reader.readAsArrayBuffer(file);
+    var file = pending[idx];
+    var sourceName = file.name.replace(/\.[^.]+$/, '');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = new Uint8Array(e.target.result);
+        var wb = XLSX.read(data, { type: 'array', cellDates: true });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        var txs = extractBankTransactions(rows, sourceName);
+        allTxs = allTxs.concat(txs);
+      } catch(err) {
+        alert('שגיאה בקריאת ' + file.name + ':\n' + err.message);
+      }
+      idx++;
+      processNext();
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  processNext();
+}
+
+// Keep legacy single-file handler for compatibility
+function handleBankFiles(files) {
+  if (!files || !files.length) return;
+  bankHandleFileUpload(files);
 }
 
 function detectBankColumns(headerRow) {
@@ -11747,7 +11869,7 @@ function parseBankAmount(val) {
   return Math.abs(parseFloat(s) || 0);
 }
 
-function extractBankTransactions(rows) {
+function extractBankTransactions(rows, sourceName) {
   var txs = [];
   var cols = null;
   var headerRowIdx = -1;
@@ -11804,7 +11926,8 @@ function extractBankTransactions(rows) {
       credit: credit,
       debit: debit,
       balance: balanceNum,
-      type: type
+      type: type,
+      source: sourceName || ''
     });
   }
   return txs;
@@ -11918,6 +12041,18 @@ function renderBankInsights() {
     '<div class="bic-sub">ללא חיובי אשראי</div>' +
   '</div>';
 
+  // Show account count chip if multiple sources
+  var sources = {};
+  bankTransactions.forEach(function(t){ if (t.source) sources[t.source] = 1; });
+  var sourceCount = Object.keys(sources).length;
+  if (sourceCount > 1) {
+    html += '<div class="bank-insight-chip" style="border-color:rgba(108,99,255,.4);background:rgba(108,99,255,.08)">' +
+      '<div class="bic-label">חשבונות בנק</div>' +
+      '<div class="bic-value">' + sourceCount + '</div>' +
+      '<div class="bic-sub">דוחות משולבים</div>' +
+    '</div>';
+  }
+
   grid.innerHTML = html;
 
   // Stats row
@@ -11946,8 +12081,13 @@ function bankFilter(filterType) {
 
 function renderBankTable(txs) {
   var tbody = document.getElementById('bank-tx-body');
+  var multiSource = bankTransactions.some(function(t){ return t.source; }) &&
+                    (new Set(bankTransactions.map(function(t){ return t.source; }))).size > 1;
+  var thSource = document.getElementById('bank-th-source');
+  if (thSource) thSource.style.display = multiSource ? '' : 'none';
+  var colspan = multiSource ? 8 : 7;
   if (!txs.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">אין תנועות בסינון זה</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align:center;padding:24px;color:var(--muted)">אין תנועות בסינון זה</td></tr>';
     return;
   }
 
@@ -11962,11 +12102,13 @@ function renderBankTable(txs) {
 
     var balanceCell = tx.balance !== null ? fmtC(tx.balance) : '—';
     var balClass = tx.balance !== null ? (tx.balance >= 0 ? 'bank-balance-val positive' : 'bank-balance-val negative') : '';
+    var sourceCell = multiSource ? '<td style="font-size:.75rem;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (tx.source||'') + '">' + (tx.source||'—') + '</td>' : '';
 
     html += '<tr style="' + rowStyle + '">' +
       '<td>' + tx.dateStr + '</td>' +
       '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + tx.desc + '">' + tx.desc + '</td>' +
       '<td>' + bankTypeHTML(tx.type) + '</td>' +
+      sourceCell +
       '<td class="bank-amount-in">' + (tx.credit ? fmtC(tx.credit) : '—') + '</td>' +
       '<td class="bank-amount-out">' + (tx.debit ? fmtC(tx.debit) : '—') + '</td>' +
       '<td class="' + balClass + '">' + balanceCell + '</td>' +
