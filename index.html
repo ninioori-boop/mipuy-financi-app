@@ -8242,15 +8242,25 @@ var VAR_CATEGORIES = [
   'תחבצ','כבישי אגרה','תספורת וקוסמטיקה','תחביבים',
   'תיקוני רכב','בריאות','בעלי חיים','חינוך וקייטנות','שונות',
   'ביט ללא מעקב','מזומן ללא מעקב','מתנות','עוזרת בית','סיגריות',
-  'צעצועים','כלי בית','ריהוט והבית','תרומות'
+  'צעצועים','כלי בית','ריהוט והבית','תרומות',
+  'ציוד עסקי/משרדי','חומרי בניין'
 ];
 var ANNUAL_CATEGORIES = ['חופשה וטיול'];
 var FIXED_CATEGORIES = [
   'קופת חולים','משכנתא','שכר דירה',
-  'ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית'
+  'ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית','מיסים'
 ];
 var INSURANCE_CATEGORIES = ['ביטוח','ביטוח לאומי'];
 var SUB_CATEGORIES = ['תקשורת','חדר כושר','עמלות בנק ואשראי'];
+var SKIP_CATEGORIES = ['הכנסות','חסכונות','השקעות','העברות ואשראי']; // לא הוצאות
+
+// Deleted auto categories — persisted across sessions
+var deletedAutoCats = {}; // { cat: true }
+
+function recordDeletedAutoCat(cat) {
+  deletedAutoCats[cat] = true;
+  if (typeof clientAutoSave === 'function') clientAutoSave();
+}
 
 function toggleCatDetail(btn) {
   var wrap = btn.closest('.cat-auto-wrap');
@@ -8304,6 +8314,8 @@ function populateVarExpensesFromCredit() {
   Object.entries(catMap).forEach(function(entry) {
     var cat = entry[0], totalAmt = entry[1];
     if (totalAmt <= 0) return;
+    if (SKIP_CATEGORIES.indexOf(cat) !== -1) return; // הכנסות/חסכונות/השקעות — לא הוצאות
+    if (deletedAutoCats[cat]) return;                // המשתמש מחק קטגוריה זו
     var listId = null;
     var isVar    = VAR_CATEGORIES.indexOf(cat) !== -1;
     var isAnnual = ANNUAL_CATEGORIES.indexOf(cat) !== -1;
@@ -8313,7 +8325,7 @@ function populateVarExpensesFromCredit() {
     else if (isIns)    listId = 'insurance-list';
     else if (FIXED_CATEGORIES.indexOf(cat) !== -1) listId = 'fixed-list';
     else if (SUB_CATEGORIES.indexOf(cat) !== -1)   listId = 'sub-list';
-    if (!listId) return;
+    if (!listId) return; // קטגוריה לא מוכרת — מתעלמים
 
     var icon = CATEGORY_ICONS[cat] || '📦';
     var txIndices = catTxs[cat] || [];
@@ -8341,24 +8353,25 @@ function populateVarExpensesFromCredit() {
         '<input type="text" value="' + icon + ' ' + cat + '" readonly style="color:var(--accent);font-weight:600">' +
         '<input type="number" value="' + storeAmt + '" min="0" step="1" oninput="updateAnnualTag(this);updateAnnualTotals()">' +
         '<span class="yearly-tag">₪' + fmt(displayMonthly) + ' / חודש</span>' +
-        '<button class="btn-del" onclick="this.closest(\'.annual-row\').remove();updateAnnualTotals()">×</button>';
+        '<button class="btn-del" onclick="recordDeletedAutoCat(\'' + cat.replace(/'/g,"\\'") + '\');this.closest(\'.annual-row\').remove();updateAnnualTotals()">×</button>';
       annList.appendChild(annRow);
       return;
     }
 
     var oninputAttr, ondelAttr;
+    var delRecord = "recordDeletedAutoCat('" + cat.replace(/'/g,"\\'") + "');";
     if (isVar) {
       oninputAttr = 'updateVarTag(this);updateVarTotals()';
-      ondelAttr   = "this.closest('.cat-auto-wrap').remove();updateVarTotals()";
+      ondelAttr   = delRecord + "this.closest('.cat-auto-wrap').remove();updateVarTotals()";
     } else if (listId === 'fixed-list') {
       oninputAttr = "updateSectionTotal('fixed-list','total-fixed',1)";
-      ondelAttr   = "this.closest('.cat-auto-wrap').remove();updateSectionTotal('fixed-list','total-fixed',1)";
+      ondelAttr   = delRecord + "this.closest('.cat-auto-wrap').remove();updateSectionTotal('fixed-list','total-fixed',1)";
     } else if (listId === 'insurance-list') {
       oninputAttr = "updateSectionTotal('insurance-list','total-ins',1)";
-      ondelAttr   = "this.closest('.cat-auto-wrap').remove();updateSectionTotal('insurance-list','total-ins',1)";
+      ondelAttr   = delRecord + "this.closest('.cat-auto-wrap').remove();updateSectionTotal('insurance-list','total-ins',1)";
     } else {
       oninputAttr = "updateSectionTotal('sub-list','total-subs',1)";
-      ondelAttr   = "this.closest('.cat-auto-wrap').remove();updateSectionTotal('sub-list','total-subs',1)";
+      ondelAttr   = delRecord + "this.closest('.cat-auto-wrap').remove();updateSectionTotal('sub-list','total-subs',1)";
     }
 
     var monthlyTag = isVar
@@ -11911,7 +11924,10 @@ function clientCollectData() {
       assets:    getSavingRows()
     },
     monthly: {},
-    credit: { transactions: creditTransactions || [] }
+    credit: {
+      transactions: creditTransactions || [],
+      deletedAutoCats: Object.keys(deletedAutoCats)
+    }
   };
 
   MONTHS_LIST.forEach(function(mo) {
@@ -12158,6 +12174,11 @@ function clientRestoreData(data) {
   // Credit
   if (data.credit && data.credit.transactions) {
     creditTransactions = data.credit.transactions;
+    // Restore which categories the user manually deleted
+    deletedAutoCats = {};
+    if (data.credit.deletedAutoCats) {
+      data.credit.deletedAutoCats.forEach(function(c){ deletedAutoCats[c] = true; });
+    }
     if (creditTransactions.length > 0) {
       _ccCtx = '';
       renderCreditSummary();
