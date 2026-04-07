@@ -1821,6 +1821,33 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 .an-view-btn { background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; font-family: inherit; font-size: .78rem; font-weight: 700; padding: 5px 12px; transition: all .15s; }
 .an-view-btn.active { background: rgba(108,99,255,.18); border-color: rgba(108,99,255,.5); color: var(--accent); }
 
+/* Annual planning rows */
+.an-plan-heads { grid-template-columns: 1.4fr 110px 80px 110px 32px !important; }
+.an-plan-row { display: grid; grid-template-columns: 1.4fr 110px 80px 110px 32px; gap: 7px; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.03); }
+.an-plan-row:last-child { border-bottom: none; }
+.an-plan-row:hover { background: rgba(255,255,255,.012); border-radius: 6px; }
+.an-plan-row input { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 7px; color: var(--text); font-family: inherit; font-size: .87rem; padding: 5px 9px; width: 100%; }
+.an-plan-row input:focus { outline: none; border-color: var(--accent); }
+.an-plan-row .an-yr-input { border-color: rgba(108,99,255,.3) !important; direction: ltr; text-align: left; }
+.an-plan-row .an-yr-input:focus { border-color: var(--accent) !important; }
+.an-plan-row .an-mo-disp { font-size: .78rem; color: var(--accent4); text-align: left; direction: ltr; padding: 5px 6px; font-weight: 600; }
+.an-plan-row .an-act-disp { font-size: .86rem; color: var(--accent3); text-align: left; direction: ltr; padding: 5px 8px; font-weight: 700; background: rgba(67,233,123,.04); border: 1px solid rgba(67,233,123,.15); border-radius: 7px; }
+.an-plan-row .an-act-disp.zero { color: var(--muted); background: transparent; border-color: transparent; font-weight: 400; }
+.an-debt-plan-row { display: grid; grid-template-columns: 1.5fr 110px 80px 110px 100px 32px; gap: 7px; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.03); }
+.an-debt-plan-row:last-child { border-bottom: none; }
+.an-debt-plan-row input { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 7px; color: var(--text); font-family: inherit; font-size: .87rem; padding: 5px 9px; width: 100%; }
+.an-debt-plan-row input:focus { outline: none; border-color: var(--accent); }
+.an-debt-plan-row .an-yr-input { border-color: rgba(108,99,255,.3) !important; direction: ltr; text-align: left; }
+.an-debt-plan-row .an-mo-disp { font-size: .78rem; color: var(--accent4); padding: 5px 6px; font-weight: 600; text-align: left; direction: ltr; }
+.an-debt-plan-row .an-act-disp { font-size: .86rem; color: var(--accent3); padding: 5px 8px; font-weight: 700; background: rgba(67,233,123,.04); border: 1px solid rgba(67,233,123,.15); border-radius: 7px; text-align: left; direction: ltr; }
+.an-debt-plan-row .an-act-disp.zero { color: var(--muted); background: transparent; border-color: transparent; font-weight: 400; }
+.an-debt-plan-row .an-balance { border-color: rgba(255,101,132,.3) !important; direction: ltr; text-align: left; }
+.an-sec-total-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 0; margin-top: 8px; border-top: 1px solid var(--border); font-size: .88rem; }
+.an-sec-total { font-weight: 800; font-size: 1rem; }
+.an-sec-total.green { color: var(--accent3); }
+.an-sec-total.red   { color: var(--accent2); }
+.an-sec-total.blue  { color: var(--accent); }
+
 @media (max-width: 768px) {
   .an-kpi-row { grid-template-columns: 1fr 1fr; }
   .an-compare-heads, .an-compare-row { grid-template-columns: 1fr 90px 90px; }
@@ -3072,10 +3099,11 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 <div class="main-wrap">
 
   <!-- Title bar -->
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
     <span style="font-size:1.25rem;font-weight:800;color:var(--accent4)">📅 תוכנית שנתית</span>
-    <span id="an-year-disp" style="background:rgba(247,151,30,.1);border:1px solid rgba(247,151,30,.3);border-radius:8px;color:var(--accent4);font-size:.88rem;font-weight:700;padding:4px 12px"></span>
-    <button onclick="annualRender()" style="background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.35);border-radius:8px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;padding:6px 14px">🔄 רענן מתקציבים חודשיים</button>
+    <select id="an-year-sel" onchange="anChangeYear()" style="background:var(--card2);border:1px solid rgba(247,151,30,.4);border-radius:8px;color:var(--accent4);font-family:inherit;font-size:.9rem;font-weight:700;padding:5px 12px;cursor:pointer"></select>
+    <button onclick="anPullActuals()" style="background:rgba(67,233,123,.1);border:1px solid rgba(67,233,123,.35);border-radius:8px;color:var(--accent3);cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;padding:6px 14px">🔄 רענן ביצוע מחודשים</button>
+    <span id="an-save-status" style="font-size:.75rem;color:var(--muted)"></span>
   </div>
 
   <!-- KPI Row -->
@@ -3087,7 +3115,7 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     </div>
     <div class="an-kpi-card kpi-green" style="border-style:dashed">
       <div class="an-kpi-label">הכנסה בפועל YTD</div>
-      <div class="an-kpi-val" id="an-k-inc-act">₪0</div>
+      <div class="an-kpi-val" id="an-k-inc-act">—</div>
       <div class="an-kpi-sub" id="an-k-inc-act-sub">חודשים עם נתוני ביצוע: 0</div>
     </div>
     <div class="an-kpi-card kpi-red">
@@ -3098,57 +3126,121 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     <div class="an-kpi-card kpi-yellow">
       <div class="an-kpi-label">תזרים שנתי מתוכנן</div>
       <div class="an-kpi-val" id="an-k-cf">₪0</div>
-      <div class="an-kpi-sub" id="an-k-cf-sub">תזרים בפועל YTD: ₪0</div>
+      <div class="an-kpi-sub" id="an-k-cf-sub">תזרים בפועל YTD: —</div>
     </div>
   </div>
 
-  <!-- Sections grid -->
+  <!-- PLANNING SECTIONS -->
   <div class="grid2">
 
-    <!-- Income -->
+    <!-- INCOME -->
     <div class="section-card">
       <div class="section-header">
-        <div class="section-title">💰 הכנסות — שנתי</div>
+        <div class="section-title">💰 הכנסות שנתיות</div>
         <div class="bud-sec-compare" id="an-tot-income">
           <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
           <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
         </div>
       </div>
-      <div class="an-compare-heads"><span>קטגוריה</span><span style="text-align:left;direction:ltr">תכנון שנתי</span><span style="text-align:left;direction:ltr">ביצוע בפועל</span><span style="text-align:center">מצב</span></div>
-      <div id="an-income-rows"></div>
+      <div class="bud-col-heads an-plan-heads"><span>פריט</span><span>תכנון שנתי</span><span>÷12/חודש</span><span>ביצוע YTD</span><span></span></div>
+      <div id="an-income"></div>
+      <button class="btn-add" onclick="anAddRow('an-income','income')">+ הוסף הכנסה</button>
+      <div class="an-sec-total-row">
+        <span style="color:var(--muted);font-size:.85rem;font-weight:600">סה"כ הכנסות שנתיות</span>
+        <span class="an-sec-total green" id="an-tot-income-val">₪0</span>
+      </div>
     </div>
 
-    <!-- All expenses -->
+    <!-- FIXED EXPENSES -->
     <div class="section-card">
       <div class="section-header">
-        <div class="section-title">📤 הוצאות — שנתי</div>
-        <div class="bud-sec-compare" id="an-tot-exp">
+        <div class="section-title">📌 הוצאות קבועות שנתיות</div>
+        <div class="bud-sec-compare" id="an-tot-fixed">
           <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
           <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
         </div>
       </div>
-      <div class="an-compare-heads"><span>קטגוריה</span><span style="text-align:left;direction:ltr">תכנון שנתי</span><span style="text-align:left;direction:ltr">ביצוע בפועל</span><span style="text-align:center">מצב</span></div>
-      <div id="an-exp-rows"></div>
+      <div class="bud-col-heads an-plan-heads"><span>פריט</span><span>תכנון שנתי</span><span>÷12/חודש</span><span>ביצוע YTD</span><span></span></div>
+      <div id="an-fixed"></div>
+      <button class="btn-add" onclick="anAddRow('an-fixed','fixed')">+ הוסף הוצאה קבועה</button>
+      <div class="an-sec-total-row">
+        <span style="color:var(--muted);font-size:.85rem;font-weight:600">סה"כ הוצאות קבועות</span>
+        <span class="an-sec-total red" id="an-tot-fixed-val">₪0</span>
+      </div>
     </div>
 
-    <!-- Debt & Loans -->
+    <!-- VARIABLE -->
     <div class="section-card">
       <div class="section-header">
-        <div class="section-title">💳 החזרי הלוואות — שנתי</div>
-        <span class="bud-sec-total" id="an-tot-debt-disp">₪0</span>
+        <div class="section-title">🛒 הוצאות משתנות שנתיות</div>
+        <div class="bud-sec-compare" id="an-tot-var">
+          <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
+          <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
+        </div>
       </div>
-      <div class="an-compare-heads"><span>חודש</span><span style="text-align:left;direction:ltr">עסקאות</span><span style="text-align:left;direction:ltr">הלוואות</span><span style="text-align:center">סה"כ</span></div>
-      <div id="an-debt-rows"></div>
+      <div class="bud-col-heads an-plan-heads"><span>פריט</span><span>תכנון שנתי</span><span>÷12/חודש</span><span>ביצוע YTD</span><span></span></div>
+      <div id="an-var"></div>
+      <button class="btn-add" onclick="anAddRow('an-var','var')">+ הוסף הוצאה משתנה</button>
+      <div class="an-sec-total-row">
+        <span style="color:var(--muted);font-size:.85rem;font-weight:600">סה"כ הוצאות משתנות</span>
+        <span class="an-sec-total red" id="an-tot-var-val">₪0</span>
+      </div>
     </div>
 
-    <!-- Savings -->
+    <!-- SUBS + INS -->
     <div class="section-card">
       <div class="section-header">
-        <div class="section-title">🏦 חיסכון — שנתי</div>
-        <span class="bud-sec-total" id="an-tot-sav-disp">₪0</span>
+        <div class="section-title">🔄 מנויים וביטוחים שנתיים</div>
+        <div class="bud-sec-compare" id="an-tot-sub">
+          <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
+          <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
+        </div>
       </div>
-      <div class="an-compare-heads"><span>חודש</span><span style="text-align:left;direction:ltr">תכנון</span><span style="text-align:left;direction:ltr">—</span><span style="text-align:center">—</span></div>
-      <div id="an-sav-rows"></div>
+      <div class="bud-col-heads an-plan-heads"><span>פריט</span><span>תכנון שנתי</span><span>÷12/חודש</span><span>ביצוע YTD</span><span></span></div>
+      <div id="an-sub"></div>
+      <button class="btn-add" onclick="anAddRow('an-sub','sub')">+ הוסף מנוי / ביטוח</button>
+      <div class="an-sec-total-row">
+        <span style="color:var(--muted);font-size:.85rem;font-weight:600">סה"כ מנויים + ביטוחים</span>
+        <span class="an-sec-total red" id="an-tot-sub-val">₪0</span>
+      </div>
+    </div>
+
+    <!-- LOANS (full width) -->
+    <div class="section-card" style="grid-column:1/-1">
+      <div class="section-header">
+        <div class="section-title">💳 החזרי הלוואות שנתיים</div>
+        <div class="bud-sec-compare" id="an-tot-debt">
+          <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
+          <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
+        </div>
+      </div>
+      <div class="bud-col-heads" style="display:grid;grid-template-columns:1.5fr 110px 90px 110px 100px 32px;gap:8px;font-size:.73rem">
+        <span>שם הלוואה</span><span>תכנון שנתי</span><span>÷12/חודש</span><span>ביצוע YTD</span><span>יתרה לסגירה</span><span></span>
+      </div>
+      <div id="an-debt"></div>
+      <button class="btn-add" onclick="anAddDebtRow()">+ הוסף הלוואה</button>
+      <div class="an-sec-total-row">
+        <span style="color:var(--muted);font-size:.85rem;font-weight:600">סה"כ החזרי הלוואות שנתיים</span>
+        <span class="an-sec-total red" id="an-tot-debt-val">₪0</span>
+      </div>
+    </div>
+
+    <!-- SAVINGS (full width) -->
+    <div class="section-card" style="grid-column:1/-1">
+      <div class="section-header">
+        <div class="section-title">🏦 יעדי חיסכון שנתיים</div>
+        <div class="bud-sec-compare" id="an-tot-sav">
+          <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
+          <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
+        </div>
+      </div>
+      <div class="bud-col-heads an-plan-heads"><span>מטרת חיסכון</span><span>יעד שנתי</span><span>÷12/חודש</span><span>ביצוע YTD</span><span></span></div>
+      <div id="an-sav"></div>
+      <button class="btn-add" onclick="anAddRow('an-sav','sav')">+ הוסף יעד חיסכון</button>
+      <div class="an-sec-total-row">
+        <span style="color:var(--muted);font-size:.85rem;font-weight:600">סה"כ חיסכון שנתי</span>
+        <span class="an-sec-total blue" id="an-tot-sav-val">₪0</span>
+      </div>
     </div>
 
   </div><!-- /grid2 -->
@@ -3156,7 +3248,7 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
   <!-- Monthly breakdown table -->
   <div class="section-card">
     <div class="section-header">
-      <div class="section-title">📆 פירוט חודשי</div>
+      <div class="section-title">📆 פירוט חודשי — תכנון מול ביצוע</div>
       <div class="an-view-toggle">
         <button class="an-view-btn active" id="an-btn-plan"   onclick="anSetView('plan')">תכנון</button>
         <button class="an-view-btn"        id="an-btn-actual" onclick="anSetView('actual')">ביצוע</button>
@@ -3173,25 +3265,13 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     <div class="an-cf-main">
       <div class="an-cf-label">תזרים שנתי מתוכנן</div>
       <div class="an-cf-val" id="an-cf-val">₪0</div>
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">ממוצע לחודש: <strong id="an-cf-mo">₪0</strong></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">ממוצע לחודש: <strong id="an-cf-mo">₪0</strong> &nbsp;|&nbsp; בפועל YTD: <strong id="an-cf-act">—</strong></div>
     </div>
     <div class="an-cf-side">
-      <div class="an-cf-item">
-        <div class="an-cf-label">הכנסות</div>
-        <div class="an-cf-num" id="an-cf-inc" style="color:var(--accent3)">₪0</div>
-      </div>
-      <div class="an-cf-item">
-        <div class="an-cf-label">הוצאות</div>
-        <div class="an-cf-num" id="an-cf-exp" style="color:var(--accent2)">₪0</div>
-      </div>
-      <div class="an-cf-item">
-        <div class="an-cf-label">הלוואות + תשלומים</div>
-        <div class="an-cf-num" id="an-cf-debt" style="color:#ff9f7f">₪0</div>
-      </div>
-      <div class="an-cf-item">
-        <div class="an-cf-label">הפרשות לחיסכון</div>
-        <div class="an-cf-num" id="an-cf-sav" style="color:var(--accent)">₪0</div>
-      </div>
+      <div class="an-cf-item"><div class="an-cf-label">הכנסות (תכנון)</div><div class="an-cf-num" id="an-cf-inc" style="color:var(--accent3)">₪0</div></div>
+      <div class="an-cf-item"><div class="an-cf-label">הוצאות (תכנון)</div><div class="an-cf-num" id="an-cf-exp" style="color:var(--accent2)">₪0</div></div>
+      <div class="an-cf-item"><div class="an-cf-label">הלוואות (תכנון)</div><div class="an-cf-num" id="an-cf-debt" style="color:#ff9f7f">₪0</div></div>
+      <div class="an-cf-item"><div class="an-cf-label">חיסכון (תכנון)</div><div class="an-cf-num" id="an-cf-sav" style="color:var(--accent)">₪0</div></div>
     </div>
   </div>
 
@@ -9990,17 +10070,403 @@ switchTab = function(tab) {
 };
 
 /* ════════════════════════════════════════
-   ANNUAL TAB
+   ANNUAL TAB — planning + actuals from monthly
 ════════════════════════════════════════ */
-var AN_MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+var AN_MONTHS      = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 var AN_MONTH_SHORT = ['ינו','פבר','מרץ','אפר','מאי','יוני','יולי','אוג','ספט','אוק','נוב','דצמ'];
 var AN_MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-var anCurrentView = 'plan'; // 'plan' | 'actual' | 'both'
+var anCurrentView  = 'plan';
+var anActuals      = {};   // populated by anPullActuals()
 
 function anFmt(n) { return '₪' + Math.round(n || 0).toLocaleString('he-IL'); }
 function anSetEl(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; }
 
-function annualCollect() {
+/* ── Year selector ── */
+function anInitYears() {
+  var sel = document.getElementById('an-year-sel');
+  if (!sel || sel.options.length) return;
+  var cur = new Date().getFullYear();
+  for (var y = cur - 1; y <= cur + 4; y++) {
+    var o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    if (y === cur) o.selected = true;
+    sel.appendChild(o);
+  }
+}
+function anGetYear() {
+  var s = document.getElementById('an-year-sel');
+  return s ? parseInt(s.value) : new Date().getFullYear();
+}
+function anChangeYear() { anLoadPlan(); anPullActuals(); anLive(); }
+
+/* ── LocalStorage persistence ── */
+function anSaveKey() { return 'anPlan_' + anGetYear(); }
+function anSavePlan() {
+  var data = {
+    income: anReadSection('an-income'),
+    fixed:  anReadSection('an-fixed'),
+    var:    anReadSection('an-var'),
+    sub:    anReadSection('an-sub'),
+    debt:   anReadDebtSection(),
+    sav:    anReadSection('an-sav')
+  };
+  try { localStorage.setItem(anSaveKey(), JSON.stringify(data)); } catch(e) {}
+  var st = document.getElementById('an-save-status');
+  if (st) { st.textContent = '✓ נשמר'; setTimeout(function(){ st.textContent=''; }, 2000); }
+}
+function anLoadPlan() {
+  var raw; try { raw = localStorage.getItem(anSaveKey()); } catch(e) {}
+  var data = raw ? JSON.parse(raw) : null;
+  ['an-income','an-fixed','an-var','an-sub','an-sav'].forEach(function(id) {
+    var key = id.replace('an-','');
+    document.getElementById(id).innerHTML = '';
+    var items = (data && data[key]) ? data[key] : anPlanDefaults(key);
+    items.forEach(function(item) { anAddRow(id, key, item.name, item.yr); });
+  });
+  document.getElementById('an-debt').innerHTML = '';
+  var debtItems = (data && data.debt) ? data.debt : [{name:'', yr:0, balance:0}];
+  debtItems.forEach(function(item) { anAddDebtRow(item.name, item.yr, item.balance); });
+}
+function anPlanDefaults(key) {
+  var defs = {
+    income: ['שכר עבודה (נטו)','הכנסה נוספת'],
+    fixed:  ['שכירות / משכנתא','ארנונה','ועד בית','חשמל','מים וגז'],
+    var:    ['מזון וסופר','דלק ורכב','בריאות','ילדים וחינוך','פנאי ובילויים','ביגוד ושונות'],
+    sub:    ['טלפון','אינטרנט','סטרימינג','ביטוח חיים','ביטוח בריאות','ביטוח רכב'],
+    sav:    ['קרן חירום','פנסיה / השקעות']
+  };
+  return (defs[key] || []).map(function(n){ return {name:n, yr:0}; });
+}
+
+/* ── Row factories ── */
+function anMakeRow(listId, secKey, name, yr) {
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="an-plan-row">' +
+      '<input type="text" placeholder="פריט" value="' + (name||'') + '" oninput="anLive();anSavePlan()">' +
+      '<input type="number" class="an-yr-input" placeholder="0" value="' + (yr||'') + '" oninput="anLive();anSavePlan()">' +
+      '<div class="an-mo-disp">—</div>' +
+      '<div class="an-act-disp zero">—</div>' +
+      '<button class="bud-del" onclick="this.closest(\'.an-plan-row\').remove();anLive();anSavePlan()">✕</button>' +
+    '</div>';
+  return d.firstChild;
+}
+function anAddRow(listId, secKey, name, yr) {
+  document.getElementById(listId).appendChild(anMakeRow(listId, secKey, name, yr));
+  anLive();
+}
+function anAddDebtRow(name, yr, balance) {
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="an-debt-plan-row">' +
+      '<input type="text" placeholder="שם הלוואה" value="' + (name||'') + '" oninput="anLive();anSavePlan()">' +
+      '<input type="number" class="an-yr-input" placeholder="תכנון שנתי" value="' + (yr||'') + '" oninput="anLive();anSavePlan()">' +
+      '<div class="an-mo-disp">—</div>' +
+      '<div class="an-act-disp zero">—</div>' +
+      '<input type="number" class="an-balance" placeholder="יתרה לסגירה" value="' + (balance||'') + '" oninput="anLive();anSavePlan()">' +
+      '<button class="bud-del" onclick="this.closest(\'.an-debt-plan-row\').remove();anLive();anSavePlan()">✕</button>' +
+    '</div>';
+  document.getElementById('an-debt').appendChild(d.firstChild);
+  anLive();
+}
+
+/* ── Read plan data ── */
+function anReadSection(listId) {
+  var rows = [];
+  document.getElementById(listId).querySelectorAll('.an-plan-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var name = inp[0] ? inp[0].value.trim() : '';
+    var yr   = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (name || yr) rows.push({name: name||'—', yr: yr});
+  });
+  return rows;
+}
+function anReadDebtSection() {
+  var rows = [];
+  document.getElementById('an-debt').querySelectorAll('.an-debt-plan-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var name    = inp[0] ? inp[0].value.trim() : '';
+    var yr      = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    var balance = parseFloat(inp[2] ? inp[2].value : 0) || 0;
+    if (name || yr || balance) rows.push({name: name||'—', yr: yr, balance: balance});
+  });
+  return rows;
+}
+function anSectionTotal(listId) {
+  return anReadSection(listId).reduce(function(s,r){ return s+r.yr; }, 0);
+}
+function anDebtTotal() {
+  return anReadDebtSection().reduce(function(s,r){ return s+r.yr; }, 0);
+}
+
+/* ── Pull actuals from monthly tabs ── */
+function anPullActuals() {
+  var act = { income:0, fixed:0, var:0, sub:0, ins:0, inst:0, debt:0, sav:0, activeMonths:0 };
+  AN_MONTHS.forEach(function(mid) {
+    var p = 'mo-' + mid + '-';
+    var aInc = moGetAmt(p+'income',   2);
+    var aFix = moGetAmt(p+'fixed',    2);
+    var aVar = moGetAmt(p+'variable', 2);
+    var aSub = moGetAmt(p+'sub',      2);
+    var aIns = moGetAmt(p+'ins',      2);
+    var tInst= moGetAmt(p+'inst',     2);
+    var tDebt= moGetAmt(p+'debt',     2);
+    var bSav = moGetAmt(p+'saving',   1);
+    act.income += aInc; act.fixed += aFix; act.var += aVar;
+    act.sub    += aSub; act.ins   += aIns; act.inst += tInst;
+    act.debt   += tDebt; act.sav  += bSav;
+    if (aInc > 0 || aFix > 0 || aVar > 0) act.activeMonths++;
+  });
+  anActuals = act;
+  anUpdateActualDisplays();
+}
+
+function anUpdateActualDisplays() {
+  var act = anActuals;
+  var totalActExp = (act.fixed||0) + (act.var||0) + (act.sub||0) + (act.ins||0);
+  var totalActDebt= (act.inst||0) + (act.debt||0);
+
+  // Update section compare badges
+  function setCompare(id, plan, actual, isIncome) {
+    var el = document.getElementById(id); if (!el) return;
+    var pv = el.querySelector('.bsc-plan .bsc-val');
+    var av = el.querySelector('.bsc-actual .bsc-val');
+    if (pv) pv.textContent = anFmt(plan);
+    if (av) av.textContent = actual > 0 ? anFmt(actual) : '—';
+    var old = el.querySelector('.bsc-diff'); if (old) old.remove();
+    if (actual > 0 && plan > 0) {
+      var diff = isIncome ? actual - plan : plan - actual;
+      var badge = document.createElement('span');
+      badge.className = 'bsc-diff ' + (diff >= 0 ? 'ok' : 'over');
+      badge.textContent = (diff >= 0 ? '+' : '') + anFmt(diff);
+      el.appendChild(badge);
+    }
+  }
+
+  var pInc  = anSectionTotal('an-income');
+  var pFix  = anSectionTotal('an-fixed');
+  var pVar  = anSectionTotal('an-var');
+  var pSub  = anSectionTotal('an-sub');
+  var pDebt = anDebtTotal();
+  var pSav  = anSectionTotal('an-sav');
+
+  setCompare('an-tot-income', pInc,  act.income,              true);
+  setCompare('an-tot-fixed',  pFix,  act.fixed,               false);
+  setCompare('an-tot-var',    pVar,  act.var,                  false);
+  setCompare('an-tot-sub',    pSub,  (act.sub||0)+(act.ins||0),false);
+  setCompare('an-tot-debt',   pDebt, totalActDebt,             false);
+  setCompare('an-tot-sav',    pSav,  act.sav,                  false);
+
+  // Update actual display cells in rows (section totals only)
+  function setActCell(listId, actualTotal) {
+    var rows = document.getElementById(listId).querySelectorAll('.an-plan-row, .an-debt-plan-row');
+    var count = rows.length;
+    if (!count) return;
+    rows.forEach(function(row, i) {
+      var cell = row.querySelector('.an-act-disp');
+      if (!cell) return;
+      if (actualTotal > 0 && i === 0) {
+        cell.textContent = anFmt(actualTotal) + ' (YTD)';
+        cell.className = 'an-act-disp';
+      } else if (i === 0) {
+        cell.textContent = '—'; cell.className = 'an-act-disp zero';
+      } else {
+        cell.textContent = '—'; cell.className = 'an-act-disp zero';
+      }
+    });
+  }
+  setActCell('an-income', act.income);
+  setActCell('an-fixed',  act.fixed);
+  setActCell('an-var',    act.var);
+  setActCell('an-sub',    (act.sub||0)+(act.ins||0));
+  setActCell('an-debt',   totalActDebt);
+  setActCell('an-sav',    act.sav);
+
+  anSetEl('an-k-inc-act', act.income > 0 ? anFmt(act.income) : '—');
+  anSetEl('an-k-inc-act-sub', 'חודשים עם נתוני ביצוע: ' + (act.activeMonths||0));
+}
+
+/* ── Live recalc ── */
+function anLive() {
+  var pInc  = anSectionTotal('an-income');
+  var pFix  = anSectionTotal('an-fixed');
+  var pVar  = anSectionTotal('an-var');
+  var pSub  = anSectionTotal('an-sub');
+  var pDebt = anDebtTotal();
+  var pSav  = anSectionTotal('an-sav');
+  var pExpTotal = pFix + pVar + pSub + pDebt + pSav;
+  var pCF       = pInc - pExpTotal;
+
+  // Update ÷12 labels in each row
+  function updateMoLabels(listId, isDebt) {
+    var cls = isDebt ? '.an-debt-plan-row' : '.an-plan-row';
+    document.getElementById(listId).querySelectorAll(cls).forEach(function(row) {
+      var inp = row.querySelectorAll('input');
+      var yrIdx = isDebt ? 1 : 1;
+      var yr  = parseFloat(inp[yrIdx] ? inp[yrIdx].value : 0) || 0;
+      var lbl = row.querySelector('.an-mo-disp');
+      if (lbl) lbl.textContent = yr ? anFmt(yr/12) + '/חודש' : '—';
+    });
+  }
+  updateMoLabels('an-income');
+  updateMoLabels('an-fixed');
+  updateMoLabels('an-var');
+  updateMoLabels('an-sub');
+  updateMoLabels('an-debt', true);
+  updateMoLabels('an-sav');
+
+  // Section total values
+  anSetEl('an-tot-income-val', anFmt(pInc));
+  anSetEl('an-tot-fixed-val',  anFmt(pFix));
+  anSetEl('an-tot-var-val',    anFmt(pVar));
+  anSetEl('an-tot-sub-val',    anFmt(pSub));
+  anSetEl('an-tot-debt-val',   anFmt(pDebt));
+  anSetEl('an-tot-sav-val',    anFmt(pSav));
+
+  // KPIs
+  anSetEl('an-k-inc-plan',    anFmt(pInc));
+  anSetEl('an-k-inc-plan-mo', anFmt(pInc/12) + ' ממוצע לחודש');
+  anSetEl('an-k-exp-plan',    anFmt(pExpTotal));
+  anSetEl('an-k-exp-plan-mo', anFmt(pExpTotal/12) + ' ממוצע לחודש');
+  var cfEl = document.getElementById('an-k-cf');
+  if (cfEl) { cfEl.textContent = (pCF>=0?'+':'')+anFmt(pCF); cfEl.style.color = pCF>=0?'var(--accent3)':'var(--accent2)'; }
+
+  // Cashflow banner
+  var banner = document.getElementById('an-cf-banner');
+  if (banner) banner.className = 'an-cf-banner ' + (pCF >= 0 ? 'pos' : 'neg');
+  anSetEl('an-cf-val',  (pCF>=0?'+':'')+anFmt(pCF));
+  anSetEl('an-cf-mo',   (pCF>=0?'+':'')+anFmt(pCF/12));
+  anSetEl('an-cf-inc',  anFmt(pInc));
+  anSetEl('an-cf-exp',  anFmt(pFix+pVar+pSub));
+  anSetEl('an-cf-debt', anFmt(pDebt));
+  anSetEl('an-cf-sav',  anFmt(pSav));
+
+  // Actual CF
+  var act = anActuals;
+  if (act && act.income > 0) {
+    var actExp = (act.fixed||0)+(act.var||0)+(act.sub||0)+(act.ins||0)+(act.inst||0)+(act.debt||0)+(act.sav||0);
+    var actCF  = (act.income||0) - actExp;
+    anSetEl('an-cf-act', (actCF>=0?'+':'')+anFmt(actCF));
+    anSetEl('an-k-cf-sub', 'תזרים בפועל YTD: '+(actCF>=0?'+':'')+anFmt(actCF));
+  }
+
+  // Update compare badges
+  anUpdateActualDisplays();
+
+  // Rebuild monthly table
+  anBuildMoTable(pInc, pFix, pVar, pSub, pDebt, pSav);
+}
+
+/* ── Monthly breakdown table ── */
+function anBuildMoTable(pInc, pFix, pVar, pSub, pDebt, pSav) {
+  var table = document.getElementById('an-mo-table');
+  if (!table) return;
+  var view = anCurrentView;
+
+  // Per-month plan (evenly distributed)
+  var moInc  = pInc  / 12;
+  var moFix  = pFix  / 12;
+  var moVar  = pVar  / 12;
+  var moSub  = pSub  / 12;
+  var moDebt = pDebt / 12;
+  var moSav  = pSav  / 12;
+  var moExp  = moFix + moVar + moSub;
+  var moCF   = moInc - moFix - moVar - moSub - moDebt - moSav;
+
+  // Collect actuals per month
+  var moActs = AN_MONTHS.map(function(mid) {
+    var p = 'mo-' + mid + '-';
+    var aInc = moGetAmt(p+'income',   2);
+    var aFix = moGetAmt(p+'fixed',    2);
+    var aVar = moGetAmt(p+'variable', 2);
+    var aSub = (moGetAmt(p+'sub',2) + moGetAmt(p+'ins',2));
+    var aDbt = (moGetAmt(p+'inst',2) + moGetAmt(p+'debt',2));
+    var aSav = moGetAmt(p+'saving',1);
+    return { aInc:aInc, aFix:aFix, aVar:aVar, aSub:aSub, aDbt:aDbt, aSav:aSav,
+             hasAct: aInc>0||aFix>0||aVar>0 };
+  });
+
+  function fv(v) { return v ? anFmt(v) : '—'; }
+  function cls(v, isInc) {
+    if (!v) return 'an-cell-zero';
+    return isInc ? 'an-cell-plan' : 'an-cell-plan';
+  }
+
+  var html = '<thead><tr><th>קטגוריה</th>';
+  AN_MONTH_SHORT.forEach(function(m){ html += '<th>' + m + '</th>'; });
+  html += '<th style="color:var(--accent)">שנתי</th></tr></thead><tbody>';
+
+  function makeRow(label, planVal, getAct, total, totalAct) {
+    var tr = '<tr><td>' + label + '</td>';
+    moActs.forEach(function(m, i) {
+      var act = getAct(m);
+      if (view === 'both' && m.hasAct) {
+        tr += '<td style="font-size:.68rem;line-height:1.4">' +
+          '<span style="color:var(--accent)">' + (planVal?anFmt(planVal):'—') + '</span><br>' +
+          '<span style="color:' + (act?'var(--accent3)':'var(--muted)') + '">' + (act?anFmt(act):'—') + '</span>' +
+          '</td>';
+      } else if (view === 'actual') {
+        tr += '<td class="' + (act?'an-cell-pos':'an-cell-zero') + '">' + (act?anFmt(act):'—') + '</td>';
+      } else {
+        tr += '<td class="an-cell-plan">' + (planVal?anFmt(planVal):'—') + '</td>';
+      }
+    });
+    var tVal = view === 'actual' ? (totalAct||0) : total;
+    tr += '<td class="an-cell-total">' + anFmt(tVal) + '</td></tr>';
+    return tr;
+  }
+
+  var totActInc  = moActs.reduce(function(s,m){return s+m.aInc;},0);
+  var totActFix  = moActs.reduce(function(s,m){return s+m.aFix;},0);
+  var totActVar  = moActs.reduce(function(s,m){return s+m.aVar;},0);
+  var totActSub  = moActs.reduce(function(s,m){return s+m.aSub;},0);
+  var totActDbt  = moActs.reduce(function(s,m){return s+m.aDbt;},0);
+  var totActSav  = moActs.reduce(function(s,m){return s+m.aSav;},0);
+
+  html += makeRow('💰 הכנסות',      moInc,  function(m){return m.aInc;}, pInc,  totActInc);
+  html += makeRow('📌 הוצ׳ קבועות', moFix,  function(m){return m.aFix;}, pFix,  totActFix);
+  html += makeRow('🛒 הוצ׳ משתנות', moVar,  function(m){return m.aVar;}, pVar,  totActVar);
+  html += makeRow('🔄 מנויים+ביטוח',moSub,  function(m){return m.aSub;}, pSub,  totActSub);
+  html += makeRow('💳 הלוואות',      moDebt, function(m){return m.aDbt;}, pDebt, totActDbt);
+  html += makeRow('🏦 חיסכון',       moSav,  function(m){return m.aSav;}, pSav,  totActSav);
+
+  // Net cashflow row
+  html += '<tr class="tr-sep"><td>📊 תזרים נטו</td>';
+  moActs.forEach(function(m, i) {
+    var pNet = moCF;
+    var aNet = m.aInc - m.aFix - m.aVar - m.aSub - m.aDbt - m.aSav;
+    var val = (view === 'actual' && m.hasAct) ? aNet : pNet;
+    if (!val && val !== 0) { html += '<td class="an-cell-zero">—</td>'; return; }
+    html += '<td class="' + (val>=0?'an-cell-pos':'an-cell-neg') + '">' + (val>=0?'+':'') + anFmt(val) + '</td>';
+  });
+  var annCF = view === 'actual'
+    ? totActInc - totActFix - totActVar - totActSub - totActDbt - totActSav
+    : pInc - pFix - pVar - pSub - pDebt - pSav;
+  html += '<td class="' + (annCF>=0?'an-cell-pos':'an-cell-neg') + '">' + (annCF>=0?'+':'') + anFmt(annCF) + '</td></tr>';
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+/* ── View toggle ── */
+function anSetView(view) {
+  anCurrentView = view;
+  ['plan','actual','both'].forEach(function(v) {
+    var btn = document.getElementById('an-btn-' + v);
+    if (btn) btn.classList.toggle('active', v === view);
+  });
+  anLive();
+}
+
+/* ── Entry point ── */
+function annualRender() {
+  anInitYears();
+  anLoadPlan();
+  anPullActuals();
+  anLive();
+}
+
+function annualCollect_UNUSED() {
   var rows = [];
   AN_MONTHS.forEach(function(mid, i) {
     var p = 'mo-' + mid + '-';
@@ -10029,7 +10495,7 @@ function annualCollect() {
   return rows;
 }
 
-function anDiffBadge(plan, actual, isIncome) {
+function anDiffBadge_UNUSED(plan, actual, isIncome) {
   if (!actual) return '<span class="an-compare-diff an-diff-none">—</span>';
   var diff = isIncome ? actual - plan : plan - actual;
   var cls  = diff >= 0 ? 'an-diff-ok' : 'an-diff-over';
@@ -10037,7 +10503,7 @@ function anDiffBadge(plan, actual, isIncome) {
   return '<span class="an-compare-diff ' + cls + '">' + sign + anFmt(diff) + '</span>';
 }
 
-function anCompareRow(label, plan, actual, isIncome) {
+function anCompareRow_UNUSED(label, plan, actual, isIncome) {
   var actCls = actual ? '' : ' zero';
   var actTxt = actual ? anFmt(actual) : '—';
   var progPct = plan > 0 ? Math.min(100, Math.round(actual / plan * 100)) : 0;
@@ -10053,7 +10519,7 @@ function anCompareRow(label, plan, actual, isIncome) {
   '</div>';
 }
 
-function anSetCompare(id, plan, actual, isIncome) {
+function anSetCompare_UNUSED(id, plan, actual, isIncome) {
   var el = document.getElementById(id);
   if (!el) return;
   var pv = el.querySelector('.bsc-plan .bsc-val');
@@ -10070,7 +10536,7 @@ function anSetCompare(id, plan, actual, isIncome) {
   }
 }
 
-function anRenderMoTable(rows, view) {
+function anRenderMoTable_UNUSED(rows, view) {
   var table = document.getElementById('an-mo-table');
   if (!table) return;
   var months = rows.map(function(r) { return r.short; });
@@ -10144,18 +10610,8 @@ function anRenderMoTable(rows, view) {
   table.innerHTML = html;
 }
 
-function anSetView(view) {
-  anCurrentView = view;
-  ['plan','actual','both'].forEach(function(v) {
-    var btn = document.getElementById('an-btn-' + v);
-    if (btn) btn.classList.toggle('active', v === view);
-  });
-  var rows = annualCollect();
-  anRenderMoTable(rows, view);
-}
-
-function annualRender() {
-  var rows = annualCollect();
+function annualRender_STUB() {
+  var rows = [];
   var currentYear = new Date().getFullYear();
   // Try to detect year from first month panel with a year input
   var yearEl = document.getElementById('mo-jan-year');
