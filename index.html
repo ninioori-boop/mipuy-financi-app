@@ -1757,6 +1757,76 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
   padding: 6px 9px; color: var(--text); font-family: inherit; font-size: .85rem; direction: rtl;
 }
 .client-info-field input:focus { outline: none; border-color: var(--accent); }
+
+/* ══ ANNUAL TAB ══ */
+.an-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.an-kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+.an-kpi-label { font-size: .73rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.an-kpi-val { font-size: 1.45rem; font-weight: 900; line-height: 1; }
+.an-kpi-sub { font-size: .73rem; color: var(--muted); margin-top: 4px; }
+.an-kpi-card.kpi-green { border-color: rgba(67,233,123,.3); }
+.an-kpi-card.kpi-green .an-kpi-val { color: var(--accent3); }
+.an-kpi-card.kpi-red   { border-color: rgba(255,101,132,.3); }
+.an-kpi-card.kpi-red   .an-kpi-val { color: var(--accent2); }
+.an-kpi-card.kpi-blue  { border-color: rgba(108,99,255,.3); }
+.an-kpi-card.kpi-blue  .an-kpi-val { color: var(--accent); }
+.an-kpi-card.kpi-yellow{ border-color: rgba(247,151,30,.3); }
+.an-kpi-card.kpi-yellow .an-kpi-val { color: var(--accent4); }
+
+.an-compare-heads { display: grid; grid-template-columns: 1fr 105px 105px 80px; gap: 6px; padding: 4px 0 6px; font-size: .71rem; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.an-compare-row { display: grid; grid-template-columns: 1fr 105px 105px 80px; gap: 6px; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.03); }
+.an-compare-row:last-child { border-bottom: none; }
+.an-compare-row:hover { background: rgba(255,255,255,.015); border-radius: 6px; }
+.an-compare-name { font-size: .88rem; font-weight: 600; }
+.an-compare-plan   { font-size: .86rem; font-weight: 700; color: var(--accent);  text-align: left; direction: ltr; font-variant-numeric: tabular-nums; }
+.an-compare-actual { font-size: .86rem; font-weight: 700; color: var(--accent3); text-align: left; direction: ltr; font-variant-numeric: tabular-nums; }
+.an-compare-actual.zero { color: var(--muted); font-weight: 400; }
+.an-compare-diff { font-size: .73rem; font-weight: 700; padding: 2px 7px; border-radius: 20px; text-align: center; }
+.an-diff-ok   { background: rgba(67,233,123,.12); color: var(--accent3); border: 1px solid rgba(67,233,123,.3); }
+.an-diff-over { background: rgba(255,101,132,.12); color: var(--accent2); border: 1px solid rgba(255,101,132,.3); }
+.an-diff-none { background: rgba(255,255,255,.04); color: var(--muted);   border: 1px solid rgba(255,255,255,.08); }
+
+.an-prog-wrap { margin-top: 3px; height: 3px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+.an-prog-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+.an-prog-green  { background: var(--accent3); }
+.an-prog-yellow { background: var(--accent4); }
+.an-prog-red    { background: var(--accent2); }
+
+.an-mo-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.an-mo-table th { padding: 7px 8px; font-size: .68rem; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--border); text-align: center; white-space: nowrap; background: rgba(255,255,255,.02); }
+.an-mo-table th:first-child { text-align: right; width: 120px; }
+.an-mo-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,.025); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.an-mo-table td:first-child { text-align: right; font-weight: 600; font-size: .8rem; }
+.an-mo-table tr:hover td { background: rgba(255,255,255,.012); }
+.an-mo-table .tr-sep td { border-top: 1px solid var(--border); background: rgba(255,255,255,.02); font-weight: 800; font-size: .8rem; }
+.an-mo-table .tr-sep td:first-child { color: var(--text); }
+.an-cell-pos { color: var(--accent3); font-weight: 700; }
+.an-cell-neg { color: var(--accent2); font-weight: 700; }
+.an-cell-zero { color: var(--muted); }
+.an-cell-plan { color: var(--accent); }
+.an-cell-total { background: rgba(108,99,255,.06) !important; color: var(--accent); font-weight: 800; }
+
+.an-cf-banner { border-radius: 14px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.an-cf-banner.pos { background: linear-gradient(135deg,rgba(67,233,123,.14),rgba(67,233,123,.05)); border: 1px solid rgba(67,233,123,.4); }
+.an-cf-banner.neg { background: linear-gradient(135deg,rgba(255,101,132,.14),rgba(255,101,132,.05)); border: 1px solid rgba(255,101,132,.4); }
+.an-cf-main .an-cf-label { font-size: .75rem; color: var(--muted); font-weight: 600; }
+.an-cf-main .an-cf-val { font-size: 2.2rem; font-weight: 900; line-height: 1; }
+.an-cf-banner.pos .an-cf-val { color: var(--accent3); }
+.an-cf-banner.neg .an-cf-val { color: var(--accent2); }
+.an-cf-side { display: flex; gap: 24px; flex-wrap: wrap; }
+.an-cf-item .an-cf-label { font-size: .7rem; color: var(--muted); font-weight: 600; }
+.an-cf-item .an-cf-num { font-size: 1.1rem; font-weight: 800; }
+
+.an-view-toggle { display: flex; gap: 6px; }
+.an-view-btn { background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; font-family: inherit; font-size: .78rem; font-weight: 700; padding: 5px 12px; transition: all .15s; }
+.an-view-btn.active { background: rgba(108,99,255,.18); border-color: rgba(108,99,255,.5); color: var(--accent); }
+
+@media (max-width: 768px) {
+  .an-kpi-row { grid-template-columns: 1fr 1fr; }
+  .an-compare-heads, .an-compare-row { grid-template-columns: 1fr 90px 90px; }
+  .an-compare-row .an-compare-diff { display: none; }
+  .an-mo-table { font-size: .68rem; }
+}
 </style>
 </head>
 <body>
@@ -2999,7 +3069,133 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 <div id="month-panels-container"></div>
 
 <div class="tab-panel" id="panel-annual">
-  <iframe src="taktziv-shanti.html" style="width:100%;height:calc(100vh - 140px);border:none;display:block;" title="תוכנית שנתית"></iframe>
+<div class="main-wrap">
+
+  <!-- Title bar -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    <span style="font-size:1.25rem;font-weight:800;color:var(--accent4)">📅 תוכנית שנתית</span>
+    <span id="an-year-disp" style="background:rgba(247,151,30,.1);border:1px solid rgba(247,151,30,.3);border-radius:8px;color:var(--accent4);font-size:.88rem;font-weight:700;padding:4px 12px"></span>
+    <button onclick="annualRender()" style="background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.35);border-radius:8px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;padding:6px 14px">🔄 רענן מתקציבים חודשיים</button>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="an-kpi-row">
+    <div class="an-kpi-card kpi-green">
+      <div class="an-kpi-label">הכנסה שנתית מתוכננת</div>
+      <div class="an-kpi-val" id="an-k-inc-plan">₪0</div>
+      <div class="an-kpi-sub" id="an-k-inc-plan-mo">₪0 ממוצע לחודש</div>
+    </div>
+    <div class="an-kpi-card kpi-green" style="border-style:dashed">
+      <div class="an-kpi-label">הכנסה בפועל YTD</div>
+      <div class="an-kpi-val" id="an-k-inc-act">₪0</div>
+      <div class="an-kpi-sub" id="an-k-inc-act-sub">חודשים עם נתוני ביצוע: 0</div>
+    </div>
+    <div class="an-kpi-card kpi-red">
+      <div class="an-kpi-label">הוצאות שנתיות מתוכננות</div>
+      <div class="an-kpi-val" id="an-k-exp-plan">₪0</div>
+      <div class="an-kpi-sub" id="an-k-exp-plan-mo">₪0 ממוצע לחודש</div>
+    </div>
+    <div class="an-kpi-card kpi-yellow">
+      <div class="an-kpi-label">תזרים שנתי מתוכנן</div>
+      <div class="an-kpi-val" id="an-k-cf">₪0</div>
+      <div class="an-kpi-sub" id="an-k-cf-sub">תזרים בפועל YTD: ₪0</div>
+    </div>
+  </div>
+
+  <!-- Sections grid -->
+  <div class="grid2">
+
+    <!-- Income -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">💰 הכנסות — שנתי</div>
+        <div class="bud-sec-compare" id="an-tot-income">
+          <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
+          <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
+        </div>
+      </div>
+      <div class="an-compare-heads"><span>קטגוריה</span><span style="text-align:left;direction:ltr">תכנון שנתי</span><span style="text-align:left;direction:ltr">ביצוע בפועל</span><span style="text-align:center">מצב</span></div>
+      <div id="an-income-rows"></div>
+    </div>
+
+    <!-- All expenses -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">📤 הוצאות — שנתי</div>
+        <div class="bud-sec-compare" id="an-tot-exp">
+          <div class="bsc-item bsc-plan"><span class="bsc-lbl">תכנון</span><span class="bsc-val">₪0</span></div>
+          <div class="bsc-item bsc-actual"><span class="bsc-lbl">ביצוע</span><span class="bsc-val">—</span></div>
+        </div>
+      </div>
+      <div class="an-compare-heads"><span>קטגוריה</span><span style="text-align:left;direction:ltr">תכנון שנתי</span><span style="text-align:left;direction:ltr">ביצוע בפועל</span><span style="text-align:center">מצב</span></div>
+      <div id="an-exp-rows"></div>
+    </div>
+
+    <!-- Debt & Loans -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">💳 החזרי הלוואות — שנתי</div>
+        <span class="bud-sec-total" id="an-tot-debt-disp">₪0</span>
+      </div>
+      <div class="an-compare-heads"><span>חודש</span><span style="text-align:left;direction:ltr">עסקאות</span><span style="text-align:left;direction:ltr">הלוואות</span><span style="text-align:center">סה"כ</span></div>
+      <div id="an-debt-rows"></div>
+    </div>
+
+    <!-- Savings -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">🏦 חיסכון — שנתי</div>
+        <span class="bud-sec-total" id="an-tot-sav-disp">₪0</span>
+      </div>
+      <div class="an-compare-heads"><span>חודש</span><span style="text-align:left;direction:ltr">תכנון</span><span style="text-align:left;direction:ltr">—</span><span style="text-align:center">—</span></div>
+      <div id="an-sav-rows"></div>
+    </div>
+
+  </div><!-- /grid2 -->
+
+  <!-- Monthly breakdown table -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">📆 פירוט חודשי</div>
+      <div class="an-view-toggle">
+        <button class="an-view-btn active" id="an-btn-plan"   onclick="anSetView('plan')">תכנון</button>
+        <button class="an-view-btn"        id="an-btn-actual" onclick="anSetView('actual')">ביצוע</button>
+        <button class="an-view-btn"        id="an-btn-both"   onclick="anSetView('both')">שניהם</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="an-mo-table" id="an-mo-table"></table>
+    </div>
+  </div>
+
+  <!-- Cash flow banner -->
+  <div id="an-cf-banner" class="an-cf-banner pos">
+    <div class="an-cf-main">
+      <div class="an-cf-label">תזרים שנתי מתוכנן</div>
+      <div class="an-cf-val" id="an-cf-val">₪0</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">ממוצע לחודש: <strong id="an-cf-mo">₪0</strong></div>
+    </div>
+    <div class="an-cf-side">
+      <div class="an-cf-item">
+        <div class="an-cf-label">הכנסות</div>
+        <div class="an-cf-num" id="an-cf-inc" style="color:var(--accent3)">₪0</div>
+      </div>
+      <div class="an-cf-item">
+        <div class="an-cf-label">הוצאות</div>
+        <div class="an-cf-num" id="an-cf-exp" style="color:var(--accent2)">₪0</div>
+      </div>
+      <div class="an-cf-item">
+        <div class="an-cf-label">הלוואות + תשלומים</div>
+        <div class="an-cf-num" id="an-cf-debt" style="color:#ff9f7f">₪0</div>
+      </div>
+      <div class="an-cf-item">
+        <div class="an-cf-label">הפרשות לחיסכון</div>
+        <div class="an-cf-num" id="an-cf-sav" style="color:var(--accent)">₪0</div>
+      </div>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <!-- generate button removed — summary updates live -->
@@ -9790,7 +9986,297 @@ switchTab = function(tab) {
   if (tab === 'mo-oct') syncManualToMonth('oct');
   if (tab === 'mo-nov') syncManualToMonth('nov');
   if (tab === 'mo-dec') syncManualToMonth('dec');
+  if (tab === 'annual') annualRender();
 };
+
+/* ════════════════════════════════════════
+   ANNUAL TAB
+════════════════════════════════════════ */
+var AN_MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+var AN_MONTH_SHORT = ['ינו','פבר','מרץ','אפר','מאי','יוני','יולי','אוג','ספט','אוק','נוב','דצמ'];
+var AN_MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+var anCurrentView = 'plan'; // 'plan' | 'actual' | 'both'
+
+function anFmt(n) { return '₪' + Math.round(n || 0).toLocaleString('he-IL'); }
+function anSetEl(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; }
+
+function annualCollect() {
+  var rows = [];
+  AN_MONTHS.forEach(function(mid, i) {
+    var p = 'mo-' + mid + '-';
+    var bIncome = moGetAmt(p + 'income',   1); var aIncome = moGetAmt(p + 'income',   2);
+    var bFixed  = moGetAmt(p + 'fixed',    1); var aFixed  = moGetAmt(p + 'fixed',    2);
+    var bVar    = moGetAmt(p + 'variable', 1); var aVar    = moGetAmt(p + 'variable', 2);
+    var bSub    = moGetAmt(p + 'sub',      1); var aSub    = moGetAmt(p + 'sub',      2);
+    var bIns    = moGetAmt(p + 'ins',      1); var aIns    = moGetAmt(p + 'ins',      2);
+    var tInst   = moGetAmt(p + 'inst',     2);
+    var tDebt   = moGetAmt(p + 'debt',     2);
+    var bSav    = moGetAmt(p + 'saving',   1);
+    rows.push({
+      mid: mid, name: AN_MONTH_NAMES[i], short: AN_MONTH_SHORT[i],
+      bIncome: bIncome, aIncome: aIncome,
+      bFixed:  bFixed,  aFixed:  aFixed,
+      bVar:    bVar,    aVar:    aVar,
+      bSub:    bSub,    aSub:    aSub,
+      bIns:    bIns,    aIns:    aIns,
+      tInst:   tInst,   tDebt:   tDebt,  bSav: bSav,
+      bExp: bFixed + bVar + bSub + bIns,
+      aExp: aFixed + aVar + aSub + aIns,
+      bTotal: bFixed + bVar + bSub + bIns + tInst + tDebt + bSav,
+      hasActual: (aIncome > 0 || aFixed > 0 || aVar > 0)
+    });
+  });
+  return rows;
+}
+
+function anDiffBadge(plan, actual, isIncome) {
+  if (!actual) return '<span class="an-compare-diff an-diff-none">—</span>';
+  var diff = isIncome ? actual - plan : plan - actual;
+  var cls  = diff >= 0 ? 'an-diff-ok' : 'an-diff-over';
+  var sign = diff >= 0 ? '+' : '';
+  return '<span class="an-compare-diff ' + cls + '">' + sign + anFmt(diff) + '</span>';
+}
+
+function anCompareRow(label, plan, actual, isIncome) {
+  var actCls = actual ? '' : ' zero';
+  var actTxt = actual ? anFmt(actual) : '—';
+  var progPct = plan > 0 ? Math.min(100, Math.round(actual / plan * 100)) : 0;
+  var progCls = progPct > 110 ? 'an-prog-red' : progPct > 90 ? 'an-prog-green' : 'an-prog-yellow';
+  if (isIncome) { progCls = progPct >= 100 ? 'an-prog-green' : progPct >= 80 ? 'an-prog-yellow' : 'an-prog-red'; }
+  return '<div class="an-compare-row">' +
+    '<div class="an-compare-name">' + label +
+      '<div class="an-prog-wrap"><div class="an-prog-fill ' + progCls + '" style="width:' + progPct + '%"></div></div>' +
+    '</div>' +
+    '<div class="an-compare-plan">'  + anFmt(plan) + '</div>' +
+    '<div class="an-compare-actual' + actCls + '">' + actTxt + '</div>' +
+    anDiffBadge(plan, actual, isIncome) +
+  '</div>';
+}
+
+function anSetCompare(id, plan, actual, isIncome) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var pv = el.querySelector('.bsc-plan .bsc-val');
+  var av = el.querySelector('.bsc-actual .bsc-val');
+  if (pv) pv.textContent = anFmt(plan);
+  if (av) av.textContent = actual > 0 ? anFmt(actual) : '—';
+  var old = el.querySelector('.bsc-diff'); if (old) old.remove();
+  if (actual > 0 && plan > 0) {
+    var diff = isIncome ? actual - plan : plan - actual;
+    var badge = document.createElement('span');
+    badge.className = 'bsc-diff ' + (diff >= 0 ? 'ok' : 'over');
+    badge.textContent = (diff >= 0 ? '+' : '') + anFmt(diff);
+    el.appendChild(badge);
+  }
+}
+
+function anRenderMoTable(rows, view) {
+  var table = document.getElementById('an-mo-table');
+  if (!table) return;
+  var months = rows.map(function(r) { return r.short; });
+  var annualInc  = rows.reduce(function(s,r){ return s + r.bIncome; }, 0);
+  var annualExp  = rows.reduce(function(s,r){ return s + r.bExp;    }, 0);
+  var annualDebt = rows.reduce(function(s,r){ return s + r.tInst + r.tDebt; }, 0);
+  var annualSav  = rows.reduce(function(s,r){ return s + r.bSav;    }, 0);
+  var annualCF   = rows.reduce(function(s,r){ return s + r.bIncome - r.bTotal; }, 0);
+  var annualActInc = rows.reduce(function(s,r){ return s + r.aIncome; }, 0);
+  var annualActExp = rows.reduce(function(s,r){ return s + r.aExp;    }, 0);
+
+  function cell(val, cls) {
+    if (!val) return '<td class="an-cell-zero">—</td>';
+    return '<td class="' + (cls || '') + '">' + anFmt(val) + '</td>';
+  }
+  function cfCell(val) {
+    if (!val && val !== 0) return '<td class="an-cell-zero">—</td>';
+    var cls = val >= 0 ? 'an-cell-pos' : 'an-cell-neg';
+    return '<td class="' + cls + '">' + (val >= 0 ? '+' : '') + anFmt(val) + '</td>';
+  }
+
+  var html = '<thead><tr><th>קטגוריה</th>';
+  months.forEach(function(m) { html += '<th>' + m + '</th>'; });
+  html += '<th style="color:var(--accent)">שנתי</th></tr></thead><tbody>';
+
+  function makeRow(label, getVal, totalVal, extraCls) {
+    var row = '<tr><td>' + label + '</td>';
+    rows.forEach(function(r) {
+      var v = getVal(r);
+      row += (view === 'both' && r.hasActual)
+        ? '<td style="font-size:.7rem;line-height:1.3">' +
+            '<span class="an-cell-plan">' + (v.plan ? anFmt(v.plan) : '—') + '</span><br>' +
+            '<span class="' + (v.actual ? 'an-cell-pos' : 'an-cell-zero') + '">' + (v.actual ? anFmt(v.actual) : '—') + '</span>' +
+          '</td>'
+        : cell(view === 'actual' ? v.actual : v.plan, extraCls);
+    });
+    row += '<td class="an-cell-total">' + anFmt(totalVal) + '</td></tr>';
+    return row;
+  }
+
+  html += makeRow('💰 הכנסות',
+    function(r){ return { plan: r.bIncome, actual: r.aIncome }; },
+    view === 'actual' ? annualActInc : annualInc);
+  html += makeRow('📌 הוצ׳ קבועות',
+    function(r){ return { plan: r.bFixed, actual: r.aFixed }; },
+    view === 'actual' ? rows.reduce(function(s,r){ return s+r.aFixed; },0) : rows.reduce(function(s,r){ return s+r.bFixed; },0));
+  html += makeRow('🛒 הוצ׳ משתנות',
+    function(r){ return { plan: r.bVar, actual: r.aVar }; },
+    view === 'actual' ? rows.reduce(function(s,r){ return s+r.aVar; },0) : rows.reduce(function(s,r){ return s+r.bVar; },0));
+  html += makeRow('🔄 מנויים + ביטוחים',
+    function(r){ return { plan: r.bSub + r.bIns, actual: r.aSub + r.aIns }; },
+    rows.reduce(function(s,r){ return s + (view === 'actual' ? r.aSub+r.aIns : r.bSub+r.bIns); },0));
+  html += makeRow('💳 הלוואות + תשלומים',
+    function(r){ return { plan: r.tInst + r.tDebt, actual: r.tInst + r.tDebt }; },
+    annualDebt);
+  html += makeRow('🏦 חיסכון',
+    function(r){ return { plan: r.bSav, actual: 0 }; },
+    annualSav);
+
+  // Net cashflow row
+  html += '<tr class="tr-sep"><td>📊 תזרים נטו</td>';
+  rows.forEach(function(r) {
+    var cf = r.bIncome - r.bTotal;
+    if (view === 'actual' && r.hasActual) cf = r.aIncome - r.aExp - r.tInst - r.tDebt - r.bSav;
+    html += cfCell(cf);
+  });
+  html += '<td class="' + (annualCF >= 0 ? 'an-cell-pos' : 'an-cell-neg') + '">' +
+    (annualCF >= 0 ? '+' : '') + anFmt(annualCF) + '</td></tr>';
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function anSetView(view) {
+  anCurrentView = view;
+  ['plan','actual','both'].forEach(function(v) {
+    var btn = document.getElementById('an-btn-' + v);
+    if (btn) btn.classList.toggle('active', v === view);
+  });
+  var rows = annualCollect();
+  anRenderMoTable(rows, view);
+}
+
+function annualRender() {
+  var rows = annualCollect();
+  var currentYear = new Date().getFullYear();
+  // Try to detect year from first month panel with a year input
+  var yearEl = document.getElementById('mo-jan-year');
+  if (yearEl && yearEl.value) currentYear = yearEl.value;
+  anSetEl('an-year-disp', 'שנת ' + currentYear);
+
+  // Aggregated totals
+  var T = {
+    bInc:0,  aInc:0,
+    bFix:0,  aFix:0,
+    bVar:0,  aVar:0,
+    bSub:0,  aSub:0,
+    bIns:0,  aIns:0,
+    tInst:0, tDebt:0, bSav:0
+  };
+  var activeMonths = 0;
+  rows.forEach(function(r) {
+    T.bInc  += r.bIncome; T.aInc  += r.aIncome;
+    T.bFix  += r.bFixed;  T.aFix  += r.aFixed;
+    T.bVar  += r.bVar;    T.aVar  += r.aVar;
+    T.bSub  += r.bSub;    T.aSub  += r.aSub;
+    T.bIns  += r.bIns;    T.aIns  += r.aIns;
+    T.tInst += r.tInst;   T.tDebt += r.tDebt;
+    T.bSav  += r.bSav;
+    if (r.hasActual) activeMonths++;
+  });
+  var bExpTotal  = T.bFix + T.bVar + T.bSub + T.bIns;
+  var aExpTotal  = T.aFix + T.aVar + T.aSub + T.aIns;
+  var bDebtTotal = T.tInst + T.tDebt;
+  var bAllOut    = bExpTotal + bDebtTotal + T.bSav;
+  var aAllOut    = aExpTotal + bDebtTotal + T.bSav;
+  var bCF        = T.bInc - bAllOut;
+  var aCF        = T.aInc - aAllOut;
+
+  // KPIs
+  anSetEl('an-k-inc-plan',    anFmt(T.bInc));
+  anSetEl('an-k-inc-plan-mo', anFmt(T.bInc / 12) + ' ממוצע לחודש');
+  anSetEl('an-k-inc-act',     T.aInc > 0 ? anFmt(T.aInc) : '—');
+  anSetEl('an-k-inc-act-sub', 'חודשים עם נתוני ביצוע: ' + activeMonths);
+  anSetEl('an-k-exp-plan',    anFmt(bAllOut));
+  anSetEl('an-k-exp-plan-mo', anFmt(bAllOut / 12) + ' ממוצע לחודש');
+  anSetEl('an-k-cf',          (bCF >= 0 ? '+' : '') + anFmt(bCF));
+  var cfEl = document.getElementById('an-k-cf');
+  if (cfEl) cfEl.style.color = bCF >= 0 ? 'var(--accent3)' : 'var(--accent2)';
+  anSetEl('an-k-cf-sub', 'תזרים בפועל YTD: ' + (T.aInc > 0 ? (aCF >= 0 ? '+' : '') + anFmt(aCF) : '—'));
+
+  // Income section
+  anSetCompare('an-tot-income', T.bInc, T.aInc, true);
+  var incRows = document.getElementById('an-income-rows');
+  if (incRows) incRows.innerHTML =
+    anCompareRow('שכר ועבודה',   T.bInc * 0 + T.bInc, T.aInc, true);
+    // Note: we show total income (all categories aggregated from monthly tabs)
+
+  // Actually show each income line properly – just the section total
+  if (incRows) incRows.innerHTML =
+    anCompareRow('סה"כ הכנסות (כל המקורות)', T.bInc, T.aInc, true);
+
+  // Expense section
+  anSetCompare('an-tot-exp', bExpTotal, aExpTotal, false);
+  var expRows = document.getElementById('an-exp-rows');
+  if (expRows) expRows.innerHTML =
+    anCompareRow('📌 הוצאות קבועות',   T.bFix, T.aFix, false) +
+    anCompareRow('🛒 הוצאות משתנות',   T.bVar, T.aVar, false) +
+    anCompareRow('🔄 מנויים',          T.bSub, T.aSub, false) +
+    anCompareRow('🛡️ ביטוחים',         T.bIns, T.aIns, false);
+
+  // Debt section - per month
+  var debtRows = document.getElementById('an-debt-rows');
+  if (debtRows) {
+    var dHtml = '';
+    rows.forEach(function(r) {
+      if (r.tInst > 0 || r.tDebt > 0) {
+        dHtml +=
+          '<div class="an-compare-row">' +
+            '<div class="an-compare-name">' + r.name + '</div>' +
+            '<div class="an-compare-plan">' + (r.tInst ? anFmt(r.tInst) : '—') + '</div>' +
+            '<div class="an-compare-actual">' + (r.tDebt ? anFmt(r.tDebt) : '—') + '</div>' +
+            '<div class="an-compare-diff an-diff-none">' + anFmt(r.tInst + r.tDebt) + '</div>' +
+          '</div>';
+      }
+    });
+    if (!dHtml) dHtml = '<div style="color:var(--muted);font-size:.85rem;padding:10px 0">אין נתוני הלוואות / תשלומים בתקציבים החודשיים</div>';
+    debtRows.innerHTML = dHtml;
+    anSetEl('an-tot-debt-disp', anFmt(bDebtTotal) + ' /שנה');
+  }
+
+  // Savings section - per month
+  var savRows = document.getElementById('an-sav-rows');
+  if (savRows) {
+    var sHtml = '';
+    rows.forEach(function(r) {
+      if (r.bSav > 0) {
+        sHtml +=
+          '<div class="an-compare-row">' +
+            '<div class="an-compare-name">' + r.name + '</div>' +
+            '<div class="an-compare-plan">' + anFmt(r.bSav) + '</div>' +
+            '<div class="an-compare-actual">—</div>' +
+            '<div class="an-compare-diff an-diff-none">—</div>' +
+          '</div>';
+      }
+    });
+    if (!sHtml) sHtml = '<div style="color:var(--muted);font-size:.85rem;padding:10px 0">אין נתוני חיסכון בתקציבים החודשיים</div>';
+    savRows.innerHTML = sHtml;
+    anSetEl('an-tot-sav-disp', anFmt(T.bSav) + ' /שנה');
+  }
+
+  // Monthly table
+  anRenderMoTable(rows, anCurrentView);
+
+  // Cash flow banner
+  var banner = document.getElementById('an-cf-banner');
+  if (banner) {
+    banner.className = 'an-cf-banner ' + (bCF >= 0 ? 'pos' : 'neg');
+    anSetEl('an-cf-val',  (bCF >= 0 ? '+' : '') + anFmt(bCF));
+    anSetEl('an-cf-mo',   (bCF >= 0 ? '+' : '') + anFmt(bCF / 12));
+    anSetEl('an-cf-inc',  anFmt(T.bInc));
+    anSetEl('an-cf-exp',  anFmt(bExpTotal));
+    anSetEl('an-cf-debt', anFmt(bDebtTotal));
+    anSetEl('an-cf-sav',  anFmt(T.bSav));
+  }
+}
 
 initMonths();
 
