@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תוכנית שנתית</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --card: #20243a;
+  --border: rgba(255,255,255,.08);
+  --text: #e8eaf6;
+  --muted: #7b82a0;
+  --accent: #7c83ff;
+  --accent2: #ff6584;
+  --accent3: #43e97b;
+  --accent4: #f9ca24;
+  --accent5: #a29bfe;
+  --accent6: #38bdf8;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 60px;
+}
+
+/* ── TOP BAR ── */
+.top-bar {
+  background: linear-gradient(135deg, #1a1d27, #20243a);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-bar-title { font-size: 1.3rem; font-weight: 800; color: var(--accent4); letter-spacing: .5px; }
+.top-bar-sub { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.top-bar-actions { display: flex; gap: 10px; }
+
+/* ── BUTTONS ── */
+.btn {
+  border: none; cursor: pointer; border-radius: 10px;
+  font-family: inherit; font-weight: 700; font-size: .9rem;
+  padding: 9px 20px; transition: opacity .15s, transform .1s;
+}
+.btn:hover { opacity: .88; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-yellow { background: var(--accent4); color: #1a1400; }
+.btn-green  { background: var(--accent3); color: #0a1a10; }
+.btn-red    { background: var(--accent2); color: #fff; }
+.btn-ghost  { background: rgba(255,255,255,.07); color: var(--text); }
+.btn-print  { background: rgba(124,131,255,.15); color: var(--accent); border: 1px solid rgba(124,131,255,.3); }
+
+/* ── CONTAINER ── */
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.card-hdr-title { font-size: 1.05rem; font-weight: 700; }
+.card-hdr-total {
+  font-size: 1rem; font-weight: 800;
+  color: var(--accent4);
+  background: rgba(249,202,36,.1);
+  border: 1px solid rgba(249,202,36,.25);
+  border-radius: 8px;
+  padding: 3px 12px;
+}
+.card-hdr-total.green {
+  color: var(--accent3);
+  background: rgba(67,233,123,.1);
+  border-color: rgba(67,233,123,.25);
+}
+.card-hdr-total.red {
+  color: var(--accent2);
+  background: rgba(255,101,132,.1);
+  border-color: rgba(255,101,132,.25);
+}
+.card-hdr-total.blue {
+  color: var(--accent6);
+  background: rgba(56,189,248,.1);
+  border-color: rgba(56,189,248,.25);
+}
+.card-body { padding: 16px 20px; }
+
+/* ── CLIENT INFO ── */
+.client-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label { font-size: .78rem; color: var(--muted); font-weight: 600; }
+.field-input {
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .92rem;
+  padding: 8px 12px;
+  width: 100%;
+  transition: border-color .15s;
+}
+.field-input:focus { outline: none; border-color: var(--accent); background: rgba(124,131,255,.08); }
+
+/* ── YEAR SELECTOR ── */
+.year-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 16px;
+}
+.year-selector label { font-size: .85rem; color: var(--muted); font-weight: 600; }
+.year-selector select {
+  background: rgba(255,255,255,.07);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .95rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.year-selector select:focus { outline: none; border-color: var(--accent); }
+
+/* ── SECTION ROWS ── */
+.col-heads {
+  display: grid;
+  gap: 8px;
+  padding: 6px 0 4px;
+  font-size: .75rem;
+  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.input-row {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  transition: background .1s;
+}
+.input-row:last-child { border-bottom: none; }
+.input-row:hover { background: rgba(255,255,255,.015); border-radius: 6px; }
+
+.row-input {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .88rem;
+  padding: 6px 10px;
+  width: 100%;
+  transition: border-color .15s;
+}
+.row-input:focus { outline: none; border-color: var(--accent); background: rgba(124,131,255,.07); }
+.row-input[type=number] { text-align: left; direction: ltr; }
+.row-input.readonly-annual { color: var(--accent4); font-weight: 700; background: rgba(249,202,36,.06); border-color: rgba(249,202,36,.2); cursor: default; pointer-events: none; }
+.row-input.readonly-green { color: var(--accent3); font-weight: 700; background: rgba(67,233,123,.06); border-color: rgba(67,233,123,.2); cursor: default; pointer-events: none; }
+
+.row-badge {
+  font-size: .75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+.badge-mo { background: rgba(56,189,248,.1); color: var(--accent6); border: 1px solid rgba(56,189,248,.2); }
+.badge-yr { background: rgba(249,202,36,.1); color: var(--accent4); border: 1px solid rgba(249,202,36,.2); }
+
+.row-btn-del {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 1rem; padding: 4px 6px;
+  border-radius: 6px; transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.row-btn-del:hover { color: var(--accent2); background: rgba(255,101,132,.1); }
+
+.add-row-btn {
+  margin-top: 10px; width: 100%;
+  background: rgba(124,131,255,.08);
+  border: 1px dashed rgba(124,131,255,.3);
+  border-radius: 8px; color: var(--accent);
+  font-family: inherit; font-size: .85rem; font-weight: 600;
+  padding: 8px; cursor: pointer;
+  transition: background .15s;
+}
+.add-row-btn:hover { background: rgba(124,131,255,.15); }
+
+.section-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0 0; margin-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: .88rem;
+}
+.section-total-label { color: var(--muted); font-weight: 600; }
+.section-total-value { font-weight: 800; color: var(--accent4); font-size: 1rem; }
+.section-total-value.green { color: var(--accent3); }
+.section-total-value.blue  { color: var(--accent6); }
+.section-total-value.red   { color: var(--accent2); }
+
+/* Row grid templates */
+.inc-row  { grid-template-columns: 1.5fr 120px 120px 34px; }
+.exp-row  { grid-template-columns: 1.5fr 120px 120px 34px; }
+.loan-row { grid-template-columns: 1.5fr 100px 100px 100px 80px 34px; }
+.save-row { grid-template-columns: 1.5fr 120px 120px 34px; }
+.onetime-row { grid-template-columns: 1.5fr 80px 130px 34px; }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap { margin-top: 14px; }
+.progress-label { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); margin-bottom: 5px; }
+.progress-bar-bg { background: rgba(255,255,255,.06); border-radius: 99px; height: 8px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
+.fill-green  { background: linear-gradient(90deg, #43e97b, #38f9d7); }
+.fill-yellow { background: linear-gradient(90deg, #f9ca24, #f0932b); }
+.fill-red    { background: linear-gradient(90deg, #ff6584, #ff5252); }
+
+/* ── QUARTER GRID ── */
+.quarter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.quarter-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.quarter-label { font-size: .75rem; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+.quarter-val { font-size: 1.05rem; font-weight: 800; }
+.quarter-sub { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+/* ── DASHBOARD ── */
+#dashboard { display: none; }
+
+.dash-title {
+  font-size: 1.5rem; font-weight: 900; text-align: center;
+  color: var(--accent4); padding: 8px 0 4px;
+}
+.dash-subtitle { text-align: center; font-size: .88rem; color: var(--muted); margin-bottom: 16px; }
+
+.report-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.report-col { display: flex; flex-direction: column; gap: 0; }
+.report-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.report-card-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 16px; font-weight: 700; font-size: .95rem;
+}
+.hdr-income  { background: rgba(67,233,123,.1);  color: var(--accent3); border-bottom: 1px solid rgba(67,233,123,.2); }
+.hdr-expense { background: rgba(255,101,132,.1);  color: var(--accent2); border-bottom: 1px solid rgba(255,101,132,.2); }
+.hdr-loan    { background: rgba(255,101,132,.08); color: var(--accent2); border-bottom: 1px solid rgba(255,101,132,.15); }
+.hdr-saving  { background: rgba(124,131,255,.1);  color: var(--accent);  border-bottom: 1px solid rgba(124,131,255,.2); }
+.hdr-net     { background: rgba(249,202,36,.08);  color: var(--accent4); border-bottom: 1px solid rgba(249,202,36,.2); }
+
+.report-sub-hdr {
+  display: flex; justify-content: space-between;
+  padding: 7px 16px; font-size: .8rem; font-weight: 700;
+  color: var(--muted);
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.report-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 16px 5px 24px; font-size: .85rem;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+}
+.report-row:last-child { border-bottom: none; }
+.rr-name { color: var(--text); }
+.rr-amt  { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.rr-zero { opacity: .4; }
+.report-grand {
+  display: flex; justify-content: space-between;
+  padding: 10px 16px; font-weight: 800;
+  border-top: 1px solid var(--border);
+}
+.grand-income .rr-amt  { color: var(--accent3); }
+.grand-expense .rr-amt { color: var(--accent2); }
+
+/* ── SUMMARY CARDS ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.sum-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.sum-card-label { font-size: .78rem; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.sum-card-num   { font-size: 1.65rem; font-weight: 900; line-height: 1; }
+.sum-card-sub   { font-size: .78rem; color: var(--muted); margin-top: 5px; }
+.sum-green { border-color: rgba(67,233,123,.3); }
+.sum-green .sum-card-num { color: var(--accent3); }
+.sum-red   { border-color: rgba(255,101,132,.3); }
+.sum-red   .sum-card-num { color: var(--accent2); }
+.sum-yellow{ border-color: rgba(249,202,36,.3); }
+.sum-yellow .sum-card-num { color: var(--accent4); }
+.sum-blue  { border-color: rgba(56,189,248,.3); }
+.sum-blue  .sum-card-num { color: var(--accent6); }
+.sum-purple{ border-color: rgba(162,155,254,.3); }
+.sum-purple .sum-card-num { color: var(--accent5); }
+
+/* ── CASHFLOW BANNER ── */
+.cashflow-banner {
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.cashflow-banner.positive { background: linear-gradient(135deg,rgba(67,233,123,.18),rgba(67,233,123,.08)); border: 1px solid rgba(67,233,123,.45); }
+.cashflow-banner.negative { background: linear-gradient(135deg,rgba(255,101,132,.18),rgba(255,101,132,.08)); border: 1px solid rgba(255,101,132,.45); }
+.cf-main { display: flex; flex-direction: column; align-items: flex-start; }
+.cf-label { font-size: .8rem; color: var(--muted); font-weight: 600; }
+.cf-value { font-size: 2.6rem; font-weight: 900; line-height: 1; }
+.positive .cf-value { color: var(--accent3); }
+.negative .cf-value { color: var(--accent2); }
+.cf-side { display: flex; gap: 28px; flex-wrap: wrap; }
+.cf-side-item { display: flex; flex-direction: column; gap: 3px; }
+.cf-num { font-size: 1.15rem; font-weight: 800; }
+.cf-inc  .cf-num { color: var(--accent3); }
+.cf-exp  .cf-num { color: var(--accent2); }
+.cf-loan .cf-num { color: #ff9f7f; }
+.cf-sav  .cf-num { color: var(--accent); }
+
+/* ── QUARTERLY REPORT ── */
+.q-report-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.q-card {
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.q-card-title { font-size: .8rem; font-weight: 700; color: var(--muted); margin-bottom: 8px; text-align: center; }
+.q-row { display: flex; justify-content: space-between; font-size: .78rem; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+.q-row:last-child { border-bottom: none; }
+.q-row span:last-child { font-weight: 700; }
+.q-net { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 800; padding: 6px 0 0; margin-top: 4px; border-top: 1px solid var(--border); }
+
+/* ── PRINT ── */
+@media print {
+  .top-bar, .add-row-btn, .row-btn-del, .btn, #plan-form { display: none !important; }
+  #dashboard { display: block !important; }
+  body { background: #fff; color: #000; }
+  .card, .report-card { border: 1px solid #ddd; box-shadow: none; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 720px) {
+  .report-wrap { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .q-report-grid { grid-template-columns: 1fr 1fr; }
+  .loan-row { grid-template-columns: 1.2fr 90px 90px 90px 34px; }
+  .loan-row .loan-end { display: none; }
+  .top-bar { padding: 12px 16px; }
+  .container { padding: 16px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div>
+    <div class="top-bar-title">📅 תוכנית שנתית</div>
+    <div class="top-bar-sub">ציפיות הכנסה · הוצאות · החזרי הלוואות · יעדי חיסכון</div>
+  </div>
+  <div class="top-bar-actions">
+    <button class="btn btn-ghost" onclick="clearAll()">🗑️ נקה הכל</button>
+    <button class="btn btn-print" onclick="printReport()">🖨️ הדפס</button>
+    <button class="btn btn-yellow" onclick="generateReport()">📊 צור תוכנית שנתית</button>
+  </div>
+</div>
+
+<div id="plan-form">
+<div class="container">
+
+  <!-- PLAN INFO -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">📋 פרטי התוכנית</span>
+    </div>
+    <div class="card-body">
+      <div class="client-grid">
+        <div class="field-group">
+          <label class="field-label">שם הלקוח</label>
+          <input class="field-input" id="client-name" type="text" placeholder="שם מלא">
+        </div>
+        <div class="field-group">
+          <label class="field-label">שנת התוכנית</label>
+          <select class="field-input" id="plan-year" oninput="liveUpdate()">
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">שם היועץ</label>
+          <input class="field-input" id="advisor-name" type="text" placeholder="שם היועץ">
+        </div>
+        <div class="field-group">
+          <label class="field-label">הערות</label>
+          <input class="field-input" id="plan-notes" type="text" placeholder="מטרות, הערות חופשיות...">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCOME EXPECTATIONS -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">💰 ציפיות הכנסה שנתיות</span>
+      <span class="card-hdr-total green" id="total-income-disp">₪0</span>
+    </div>
+    <div class="card-body">
+      <div class="col-heads inc-row">
+        <span>מקור הכנסה</span>
+        <span style="text-align:left">חודשי נטו</span>
+        <span style="text-align:left">שנתי מחושב</span>
+        <span></span>
+      </div>
+      <div id="income-list"></div>
+      <button class="add-row-btn" onclick="addIncRow()">+ הוסף מקור הכנסה</button>
+      <div class="section-total-row">
+        <span class="section-total-label">סה"כ הכנסות שנתיות</span>
+        <span class="section-total-value green" id="total-income">₪0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIXED EXPENSES -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">📌 הוצאות קבועות שנתיות</span>
+      <span class="card-hdr-total red" id="total-fixed-disp">₪0</span>
+    </div>
+    <div class="card-body">
+      <div class="col-heads exp-row">
+        <span>תיאור הוצאה</span>
+        <span style="text-align:left">חודשי ממוצע</span>
+        <span style="text-align:left">שנתי מחושב</span>
+        <span></span>
+      </div>
+      <div id="fixed-list"></div>
+      <button class="add-row-btn" onclick="addExpRow('fixed-list', 'הוצאה קבועה חדשה')">+ הוסף הוצאה קבועה</button>
+      <div class="section-total-row">
+        <span class="section-total-label">סה"כ הוצאות קבועות שנתיות</span>
+        <span class="section-total-value red" id="total-fixed">₪0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIABLE EXPENSES -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">🛒 הוצאות משתנות שנתיות</span>
+      <span class="card-hdr-total red" id="total-var-disp">₪0</span>
+    </div>
+    <div class="card-body">
+      <div class="col-heads exp-row">
+        <span>קטגוריה</span>
+        <span style="text-align:left">חודשי ממוצע</span>
+        <span style="text-align:left">שנתי מחושב</span>
+        <span></span>
+      </div>
+      <div id="var-list"></div>
+      <button class="add-row-btn" onclick="addExpRow('var-list', 'הוצאה משתנה')">+ הוסף הוצאה משתנה</button>
+      <div class="section-total-row">
+        <span class="section-total-label">סה"כ הוצאות משתנות שנתיות</span>
+        <span class="section-total-value red" id="total-var">₪0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONE-TIME ANNUAL EXPENSES -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">🎯 הוצאות חד-פעמיות שנתיות</span>
+      <span class="card-hdr-total red" id="total-onetime-disp">₪0</span>
+    </div>
+    <div class="card-body">
+      <div class="col-heads onetime-row">
+        <span>תיאור</span>
+        <span style="text-align:center">רבעון</span>
+        <span style="text-align:left">סכום שנתי</span>
+        <span></span>
+      </div>
+      <div id="onetime-list"></div>
+      <button class="add-row-btn" onclick="addOnetimeRow()">+ הוסף הוצאה חד-פעמית</button>
+      <div class="section-total-row">
+        <span class="section-total-label">סה"כ הוצאות חד-פעמיות</span>
+        <span class="section-total-value red" id="total-onetime">₪0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOAN REPAYMENTS -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">💳 החזרי הלוואות</span>
+      <span class="card-hdr-total red" id="total-loan-disp">₪0 /שנה</span>
+    </div>
+    <div class="card-body">
+      <div class="col-heads loan-row" style="font-size:.72rem">
+        <span>שם / גוף מלווה</span>
+        <span style="text-align:left">יתרה נוכחית</span>
+        <span style="text-align:left">החזר חודשי</span>
+        <span style="text-align:left">שנתי מחושב</span>
+        <span style="text-align:center">נותרו חודשים</span>
+        <span></span>
+      </div>
+      <div id="loan-list"></div>
+      <button class="add-row-btn" onclick="addLoanRow()">+ הוסף הלוואה</button>
+      <div class="section-total-row">
+        <span class="section-total-label">סה"כ יתרות / החזר שנתי</span>
+        <span class="section-total-value red" id="total-loan">₪0 | ₪0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVINGS GOALS -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-hdr-title">🏦 יעדי חיסכון שנתיים</span>
+      <span class="card-hdr-total blue" id="total-save-disp">₪0 /שנה</span>
+    </div>
+    <div class="card-body">
+      <div class="col-heads save-row">
+        <span>שם / מטרת חיסכון</span>
+        <span style="text-align:left">הפרשה חודשית</span>
+        <span style="text-align:left">יעד שנתי</span>
+        <span></span>
+      </div>
+      <div id="save-list"></div>
+      <button class="add-row-btn" onclick="addSaveRow()">+ הוסף יעד חיסכון</button>
+      <div class="section-total-row">
+        <span class="section-total-label">סה"כ חיסכון שנתי</span>
+        <span class="section-total-value blue" id="total-save">₪0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATE BUTTON -->
+  <div style="text-align:center;padding:10px 0 20px">
+    <button class="btn btn-yellow" style="font-size:1.1rem;padding:14px 44px" onclick="generateReport()">📊 צור תוכנית שנתית מלאה</button>
+  </div>
+
+</div><!-- /container -->
+</div><!-- /plan-form -->
+
+<!-- ═══════════════════════════════════════════ DASHBOARD ═══════════════════════════════════════════ -->
+<div id="dashboard">
+  <div class="container">
+
+    <div class="dash-title">📅 תוכנית שנתית</div>
+    <div class="dash-subtitle" id="dash-subtitle"></div>
+
+    <button class="btn btn-ghost" style="margin-bottom:16px" onclick="backToForm()">← חזור לטופס</button>
+    <button class="btn btn-print" style="margin-bottom:16px;margin-right:8px" onclick="window.print()">🖨️ הדפס</button>
+
+    <!-- CASH FLOW BANNER -->
+    <div id="cf-banner" class="cashflow-banner positive">
+      <div class="cf-main">
+        <div class="cf-label">תזרים שנתי נקי</div>
+        <div class="cf-value" id="cf-value">₪0</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px">
+          ÷12 לחודש: <strong id="cf-monthly">₪0</strong>
+        </div>
+      </div>
+      <div class="cf-side">
+        <div class="cf-side-item cf-inc">
+          <div class="cf-label">סה"כ הכנסות</div>
+          <div class="cf-num" id="cf-inc-num">₪0</div>
+        </div>
+        <div class="cf-side-item cf-exp">
+          <div class="cf-label">סה"כ הוצאות</div>
+          <div class="cf-num" id="cf-exp-num">₪0</div>
+        </div>
+        <div class="cf-side-item cf-loan">
+          <div class="cf-label">החזרי הלוואות</div>
+          <div class="cf-num" id="cf-loan-num">₪0</div>
+        </div>
+        <div class="cf-side-item cf-sav">
+          <div class="cf-label">חיסכון מתוכנן</div>
+          <div class="cf-num" id="cf-sav-num">₪0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY NUMBERS -->
+    <div class="summary-grid">
+      <div class="sum-card sum-green">
+        <div class="sum-card-label">סה"כ הכנסות שנתיות</div>
+        <div class="sum-card-num" id="s-income">₪0</div>
+        <div class="sum-card-sub" id="s-income-mo">₪0 ממוצע לחודש</div>
+      </div>
+      <div class="sum-card sum-red">
+        <div class="sum-card-label">סה"כ הוצאות שנתיות</div>
+        <div class="sum-card-num" id="s-expenses">₪0</div>
+        <div class="sum-card-sub" id="s-expenses-mo">₪0 ממוצע לחודש</div>
+      </div>
+      <div class="sum-card sum-red">
+        <div class="sum-card-label">סה"כ החזרי הלוואות</div>
+        <div class="sum-card-num" id="s-loans">₪0</div>
+        <div class="sum-card-sub" id="s-loans-mo">₪0 לחודש</div>
+      </div>
+      <div class="sum-card sum-blue">
+        <div class="sum-card-label">חיסכון מתוכנן שנתי</div>
+        <div class="sum-card-num" id="s-saving">₪0</div>
+        <div class="sum-card-sub" id="s-saving-mo">₪0 לחודש</div>
+      </div>
+      <div class="sum-card sum-yellow">
+        <div class="sum-card-label">יתרת חובות כוללת</div>
+        <div class="sum-card-num" id="s-debt-balance">₪0</div>
+        <div class="sum-card-sub" id="s-debt-months">סך כל ההלוואות</div>
+      </div>
+      <div class="sum-card sum-purple">
+        <div class="sum-card-label">שיעור הוצאות מהכנסה</div>
+        <div class="sum-card-num" id="s-ratio">0%</div>
+        <div class="sum-card-sub" id="s-ratio-sub">מומלץ: עד 70%</div>
+      </div>
+    </div>
+
+    <!-- INCOME | EXPENSES SIDE BY SIDE -->
+    <div class="report-wrap">
+      <div class="report-col">
+        <div class="report-card">
+          <div class="report-card-hdr hdr-income"><span>💰 הכנסות שנתיות</span><span id="r-income-hdr">₪0</span></div>
+          <div id="r-income-rows"></div>
+          <div class="report-grand grand-income"><span class="rr-name">סה"כ הכנסות</span><span class="rr-amt" id="r-income-total">₪0</span></div>
+        </div>
+      </div>
+      <div class="report-col">
+        <div class="report-card">
+          <div class="report-card-hdr hdr-expense"><span>📤 הוצאות שנתיות</span><span id="r-exp-hdr">₪0</span></div>
+          <div id="r-exp-rows"></div>
+          <div class="report-grand grand-expense"><span class="rr-name">סה"כ הוצאות + הלוואות</span><span class="rr-amt" id="r-exp-total">₪0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUARTERLY BREAKDOWN -->
+    <div class="report-card" style="margin-bottom:16px">
+      <div class="report-card-hdr hdr-net"><span>📆 פירוט רבעוני</span><span id="r-year-label">2025</span></div>
+      <div style="padding:16px 16px 8px">
+        <div class="q-report-grid" id="q-grid"></div>
+      </div>
+    </div>
+
+    <!-- LOANS DETAIL -->
+    <div class="report-card" id="r-loan-card" style="margin-bottom:16px;display:none">
+      <div class="report-card-hdr hdr-loan"><span>💳 פירוט הלוואות</span><span id="r-loan-hdr">₪0</span></div>
+      <div id="r-loan-rows"></div>
+      <div class="report-grand" style="border-top:1px solid var(--border)">
+        <span class="rr-name" style="color:var(--muted)">החזר שנתי כולל</span>
+        <span class="rr-amt" style="color:var(--accent2)" id="r-loan-annual">₪0</span>
+      </div>
+    </div>
+
+    <!-- SAVINGS DETAIL -->
+    <div class="report-card" id="r-save-card" style="margin-bottom:24px;display:none">
+      <div class="report-card-hdr hdr-saving"><span>🏦 יעדי חיסכון</span><span id="r-save-hdr">₪0</span></div>
+      <div id="r-save-rows"></div>
+      <div class="report-grand" style="border-top:1px solid var(--border)">
+        <span class="rr-name" style="color:var(--muted)">חיסכון שנתי כולל</span>
+        <span class="rr-amt" style="color:var(--accent)" id="r-save-annual">₪0</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── UTILS ──
+function fmt(n) {
+  if (isNaN(n) || n == null) return '0';
+  return Math.round(n).toLocaleString('he-IL');
+}
+function fmtF(n) { return '₪' + fmt(n); }
+function setText(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── INIT YEAR SELECTOR ──
+function initYearSelector() {
+  var sel = document.getElementById('plan-year');
+  var cur = new Date().getFullYear();
+  for (var y = cur - 1; y <= cur + 5; y++) {
+    var opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    if (y === cur) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+// ── ROW BUILDER ──
+function mkInput(ph, type, cls, extra) {
+  type = type || 'text';
+  cls  = cls  || '';
+  extra= extra|| '';
+  return '<input class="row-input ' + cls + '" type="' + type + '" placeholder="' + ph + '" ' + extra + ' oninput="liveUpdate()">';
+}
+
+// ── INCOME ROWS ──
+function addIncRow(name, monthly) {
+  var list = document.getElementById('income-list');
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="input-row inc-row">' +
+      mkInput('מקור הכנסה (לדוג׳ שכר עבודה)') +
+      mkInput('0', 'number') +
+      '<input class="row-input readonly-green" type="text" readonly tabindex="-1" placeholder="—">' +
+      '<button class="row-btn-del" onclick="delRow(this)">✕</button>' +
+    '</div>';
+  var row = d.firstChild;
+  if (name)    row.querySelectorAll('input')[0].value = name;
+  if (monthly) row.querySelectorAll('input')[1].value = monthly;
+  list.appendChild(row);
+  liveUpdate();
+}
+
+// ── EXPENSE ROWS (fixed & variable) ──
+function addExpRow(listId, defaultName, monthly) {
+  var list = document.getElementById(listId);
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="input-row exp-row">' +
+      mkInput(defaultName || 'הוצאה') +
+      mkInput('0', 'number') +
+      '<input class="row-input readonly-annual" type="text" readonly tabindex="-1" placeholder="—">' +
+      '<button class="row-btn-del" onclick="delRow(this)">✕</button>' +
+    '</div>';
+  var row = d.firstChild;
+  if (monthly) row.querySelectorAll('input')[1].value = monthly;
+  list.appendChild(row);
+  liveUpdate();
+}
+
+// ── ONE-TIME ROWS ──
+function addOnetimeRow(name, quarter, amount) {
+  var list = document.getElementById('onetime-list');
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="input-row onetime-row">' +
+      mkInput('תיאור ההוצאה') +
+      '<select class="row-input" style="text-align:center" oninput="liveUpdate()">' +
+        '<option value="1">ר׳ 1</option>' +
+        '<option value="2">ר׳ 2</option>' +
+        '<option value="3">ר׳ 3</option>' +
+        '<option value="4">ר׳ 4</option>' +
+      '</select>' +
+      mkInput('0', 'number') +
+      '<button class="row-btn-del" onclick="delRow(this)">✕</button>' +
+    '</div>';
+  var row = d.firstChild;
+  var inputs = row.querySelectorAll('input');
+  var selects = row.querySelectorAll('select');
+  if (name)   inputs[0].value = name;
+  if (quarter) selects[0].value = quarter;
+  if (amount) inputs[1].value = amount;
+  list.appendChild(row);
+  liveUpdate();
+}
+
+// ── LOAN ROWS ──
+function addLoanRow(name, balance, monthly, remaining) {
+  var list = document.getElementById('loan-list');
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="input-row loan-row">' +
+      mkInput('שם / גוף מלווה') +
+      mkInput('0', 'number') +
+      mkInput('0', 'number') +
+      '<input class="row-input readonly-annual" type="text" readonly tabindex="-1" placeholder="—">' +
+      '<input class="row-input" type="number" placeholder="0" min="0" style="text-align:center" oninput="liveUpdate()">' +
+      '<button class="row-btn-del" onclick="delRow(this)">✕</button>' +
+    '</div>';
+  var row = d.firstChild;
+  var inputs = row.querySelectorAll('input');
+  if (name)      inputs[0].value = name;
+  if (balance)   inputs[1].value = balance;
+  if (monthly)   inputs[2].value = monthly;
+  if (remaining) inputs[4].value = remaining;
+  list.appendChild(row);
+  liveUpdate();
+}
+
+// ── SAVE ROWS ──
+function addSaveRow(name, monthly) {
+  var list = document.getElementById('save-list');
+  var d = document.createElement('div');
+  d.innerHTML =
+    '<div class="input-row save-row">' +
+      mkInput('לדוג׳ קרן חירום, פנסיה...') +
+      mkInput('0', 'number') +
+      '<input class="row-input readonly-green" type="text" readonly tabindex="-1" placeholder="—">' +
+      '<button class="row-btn-del" onclick="delRow(this)">✕</button>' +
+    '</div>';
+  var row = d.firstChild;
+  if (name)    row.querySelectorAll('input')[0].value = name;
+  if (monthly) row.querySelectorAll('input')[1].value = monthly;
+  list.appendChild(row);
+  liveUpdate();
+}
+
+// ── DELETE ROW ──
+function delRow(btn) {
+  btn.closest('.input-row').remove();
+  liveUpdate();
+}
+
+// ── READ DATA ──
+function readIncomes() {
+  var rows = [];
+  document.getElementById('income-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var name = inp[0] ? inp[0].value.trim() : '';
+    var mo   = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (name || mo) rows.push({ name: name || '—', mo: mo, yr: mo * 12 });
+  });
+  return rows;
+}
+
+function readExpenses(listId) {
+  var rows = [];
+  document.getElementById(listId).querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var name = inp[0] ? inp[0].value.trim() : '';
+    var mo   = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (name || mo) rows.push({ name: name || '—', mo: mo, yr: mo * 12 });
+  });
+  return rows;
+}
+
+function readOnetimes() {
+  var rows = [];
+  document.getElementById('onetime-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var sel = row.querySelector('select');
+    var name    = inp[0] ? inp[0].value.trim() : '';
+    var quarter = sel ? parseInt(sel.value) : 1;
+    var amount  = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (name || amount) rows.push({ name: name || '—', quarter: quarter, yr: amount });
+  });
+  return rows;
+}
+
+function readLoans() {
+  var rows = [];
+  document.getElementById('loan-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var name      = inp[0] ? inp[0].value.trim() : '';
+    var balance   = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    var mo        = parseFloat(inp[2] ? inp[2].value : 0) || 0;
+    var remaining = parseFloat(inp[4] ? inp[4].value : 0) || 0;
+    if (name || mo || balance) rows.push({ name: name || '—', balance: balance, mo: mo, yr: mo * 12, remaining: remaining });
+  });
+  return rows;
+}
+
+function readSavings() {
+  var rows = [];
+  document.getElementById('save-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var name = inp[0] ? inp[0].value.trim() : '';
+    var mo   = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (name || mo) rows.push({ name: name || '—', mo: mo, yr: mo * 12 });
+  });
+  return rows;
+}
+
+// ── LIVE UPDATE ──
+function liveUpdate() {
+  var incomes  = readIncomes();
+  var fixed    = readExpenses('fixed-list');
+  var vars     = readExpenses('var-list');
+  var onetimes = readOnetimes();
+  var loans    = readLoans();
+  var savings  = readSavings();
+
+  var tIncY  = incomes.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tFixY  = fixed.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tVarY  = vars.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tOneY  = onetimes.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tLoanY = loans.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tLoanB = loans.reduce(function(s,r){ return s+r.balance; }, 0);
+  var tSavY  = savings.reduce(function(s,r){ return s+r.yr; }, 0);
+
+  // Update computed annual fields — income
+  document.getElementById('income-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var mo = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (inp[2]) inp[2].value = mo ? fmtF(mo * 12) : '';
+  });
+  // fixed
+  document.getElementById('fixed-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var mo = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (inp[2]) inp[2].value = mo ? fmtF(mo * 12) : '';
+  });
+  // var
+  document.getElementById('var-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var mo = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (inp[2]) inp[2].value = mo ? fmtF(mo * 12) : '';
+  });
+  // loans
+  document.getElementById('loan-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var mo = parseFloat(inp[2] ? inp[2].value : 0) || 0;
+    if (inp[3]) inp[3].value = mo ? fmtF(mo * 12) : '';
+  });
+  // savings
+  document.getElementById('save-list').querySelectorAll('.input-row').forEach(function(row) {
+    var inp = row.querySelectorAll('input');
+    var mo = parseFloat(inp[1] ? inp[1].value : 0) || 0;
+    if (inp[2]) inp[2].value = mo ? fmtF(mo * 12) : '';
+  });
+
+  setText('total-income-disp', fmtF(tIncY));
+  setText('total-income',      fmtF(tIncY));
+  setText('total-fixed-disp',  fmtF(tFixY));
+  setText('total-fixed',       fmtF(tFixY));
+  setText('total-var-disp',    fmtF(tVarY));
+  setText('total-var',         fmtF(tVarY));
+  setText('total-onetime-disp',fmtF(tOneY));
+  setText('total-onetime',     fmtF(tOneY));
+  setText('total-loan-disp',   fmtF(tLoanY) + ' /שנה');
+  setText('total-loan',        fmtF(tLoanB) + ' | ' + fmtF(tLoanY));
+  setText('total-save-disp',   fmtF(tSavY) + ' /שנה');
+  setText('total-save',        fmtF(tSavY));
+}
+
+// ── GENERATE REPORT ──
+function generateReport() {
+  var incomes  = readIncomes();
+  var fixed    = readExpenses('fixed-list');
+  var vars     = readExpenses('var-list');
+  var onetimes = readOnetimes();
+  var loans    = readLoans();
+  var savings  = readSavings();
+
+  var tIncY   = incomes.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tFixY   = fixed.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tVarY   = vars.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tOneY   = onetimes.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tLoanY  = loans.reduce(function(s,r){ return s+r.yr; }, 0);
+  var tLoanB  = loans.reduce(function(s,r){ return s+r.balance; }, 0);
+  var tSavY   = savings.reduce(function(s,r){ return s+r.yr; }, 0);
+
+  var totalExpY = tFixY + tVarY + tOneY + tLoanY + tSavY;
+  var totalExpNoSav = tFixY + tVarY + tOneY + tLoanY;
+  var netFlow   = tIncY - totalExpY;
+  var year      = document.getElementById('plan-year').value;
+
+  // Subtitle
+  var clientName  = document.getElementById('client-name').value;
+  var advisorName = document.getElementById('advisor-name').value;
+  var parts = [];
+  if (clientName)  parts.push('לקוח: ' + clientName);
+  if (advisorName) parts.push('יועץ: ' + advisorName);
+  parts.push('שנת התוכנית: ' + year);
+  setText('dash-subtitle', parts.join('  •  '));
+  setText('r-year-label', year);
+
+  // Cash flow banner
+  var banner = document.getElementById('cf-banner');
+  banner.className = 'cashflow-banner ' + (netFlow >= 0 ? 'positive' : 'negative');
+  setText('cf-value',    (netFlow >= 0 ? '+' : '') + fmtF(netFlow));
+  setText('cf-monthly',  (netFlow >= 0 ? '+' : '') + fmtF(netFlow / 12));
+  setText('cf-inc-num',  fmtF(tIncY));
+  setText('cf-exp-num',  fmtF(totalExpNoSav));
+  setText('cf-loan-num', fmtF(tLoanY));
+  setText('cf-sav-num',  fmtF(tSavY));
+
+  // Summary cards
+  setText('s-income',      fmtF(tIncY));
+  setText('s-income-mo',   fmtF(tIncY / 12) + ' ממוצע לחודש');
+  setText('s-expenses',    fmtF(tFixY + tVarY + tOneY));
+  setText('s-expenses-mo', fmtF((tFixY + tVarY + tOneY) / 12) + ' ממוצע לחודש');
+  setText('s-loans',       fmtF(tLoanY));
+  setText('s-loans-mo',    fmtF(tLoanY / 12) + ' לחודש');
+  setText('s-saving',      fmtF(tSavY));
+  setText('s-saving-mo',   fmtF(tSavY / 12) + ' לחודש');
+  setText('s-debt-balance',fmtF(tLoanB));
+  var ratio = tIncY > 0 ? Math.round(totalExpNoSav / tIncY * 100) : 0;
+  setText('s-ratio', ratio + '%');
+  var ratioEl = document.getElementById('s-ratio');
+  if (ratioEl) {
+    ratioEl.style.color = ratio > 90 ? 'var(--accent2)' : ratio > 70 ? 'var(--accent4)' : 'var(--accent3)';
+  }
+  setText('s-ratio-sub', ratio > 90 ? '⚠️ גבוה מאוד' : ratio > 70 ? '⚠️ מעל המומלץ' : '✅ תקין');
+
+  // Income rows
+  var incRowsEl = document.getElementById('r-income-rows');
+  incRowsEl.innerHTML = '';
+  incomes.forEach(function(r) {
+    incRowsEl.innerHTML += reportRow(r.name + ' (' + fmtF(r.mo) + '/חודש)', r.yr);
+  });
+  setText('r-income-total', fmtF(tIncY));
+  setText('r-income-hdr',   fmtF(tIncY));
+
+  // Expense rows
+  var expRowsEl = document.getElementById('r-exp-rows');
+  expRowsEl.innerHTML = '';
+
+  function addSub(label, rows, total) {
+    if (!rows.length && total === 0) return;
+    expRowsEl.innerHTML += '<div class="report-sub-hdr"><span>' + label + '</span><span>' + fmtF(total) + '</span></div>';
+    rows.forEach(function(r) {
+      expRowsEl.innerHTML += reportRow(r.name, r.yr, r.yr === 0);
+    });
+  }
+  addSub('📌 הוצאות קבועות', fixed, tFixY);
+  addSub('🛒 הוצאות משתנות', vars, tVarY);
+  addSub('🎯 הוצאות חד-פעמיות', onetimes, tOneY);
+  addSub('💳 החזרי הלוואות', loans.map(function(l){ return {name:l.name, yr:l.yr}; }), tLoanY);
+  addSub('🏦 חיסכון מתוכנן', savings.map(function(s){ return {name:s.name, yr:s.yr}; }), tSavY);
+
+  setText('r-exp-total', fmtF(totalExpY));
+  setText('r-exp-hdr',   fmtF(totalExpY));
+
+  // Quarterly breakdown
+  var qGrid = document.getElementById('q-grid');
+  qGrid.innerHTML = '';
+  var qNames = ['רבעון 1\nינואר–מרץ', 'רבעון 2\nאפריל–יוני', 'רבעון 3\nיולי–ספטמבר', 'רבעון 4\nאוקטובר–דצמבר'];
+  for (var q = 1; q <= 4; q++) {
+    var qInc  = tIncY / 4;
+    var qFix  = tFixY / 4;
+    var qVar  = tVarY / 4;
+    var qOne  = onetimes.filter(function(r){ return r.quarter === q; }).reduce(function(s,r){ return s+r.yr; }, 0);
+    var qLoan = tLoanY / 4;
+    var qSav  = tSavY / 4;
+    var qExp  = qFix + qVar + qOne + qLoan + qSav;
+    var qNet  = qInc - qExp;
+    var qColor = qNet >= 0 ? 'var(--accent3)' : 'var(--accent2)';
+    var lines = qNames[q-1].split('\n');
+    qGrid.innerHTML +=
+      '<div class="q-card">' +
+        '<div class="q-card-title">' + lines[0] + '<br><span style="font-weight:400;font-size:.7rem">' + lines[1] + '</span></div>' +
+        '<div class="q-row"><span>הכנסות</span><span style="color:var(--accent3)">' + fmtF(qInc) + '</span></div>' +
+        '<div class="q-row"><span>הוצאות</span><span style="color:var(--accent2)">' + fmtF(qFix+qVar) + '</span></div>' +
+        (qOne > 0 ? '<div class="q-row"><span>חד-פעמיות</span><span style="color:#ff9f7f">' + fmtF(qOne) + '</span></div>' : '') +
+        '<div class="q-row"><span>הלוואות</span><span style="color:#ff9f7f">' + fmtF(qLoan) + '</span></div>' +
+        '<div class="q-row"><span>חיסכון</span><span style="color:var(--accent)">' + fmtF(qSav) + '</span></div>' +
+        '<div class="q-net"><span>תזרים</span><span style="color:' + qColor + '">' + (qNet >= 0 ? '+' : '') + fmtF(qNet) + '</span></div>' +
+      '</div>';
+  }
+
+  // Loans detail
+  var loanCard = document.getElementById('r-loan-card');
+  if (loans.length) {
+    loanCard.style.display = 'block';
+    var loanRowsEl = document.getElementById('r-loan-rows');
+    loanRowsEl.innerHTML = '';
+    loans.forEach(function(l) {
+      var sub = fmtF(l.mo) + '/חודש';
+      if (l.remaining) sub += ' · נותרו ' + l.remaining + ' חודשים';
+      if (l.balance)   sub += ' · יתרה ' + fmtF(l.balance);
+      loanRowsEl.innerHTML +=
+        '<div class="report-row">' +
+          '<span class="rr-name">' + esc(l.name) + '<br><span style="font-size:.75rem;color:var(--muted)">' + sub + '</span></span>' +
+          '<span class="rr-amt" style="color:var(--accent2)">' + fmtF(l.yr) + '</span>' +
+        '</div>';
+    });
+    setText('r-loan-hdr',    fmtF(tLoanB) + ' יתרה');
+    setText('r-loan-annual', fmtF(tLoanY));
+  } else {
+    loanCard.style.display = 'none';
+  }
+
+  // Savings detail
+  var saveCard = document.getElementById('r-save-card');
+  if (savings.length) {
+    saveCard.style.display = 'block';
+    var saveRowsEl = document.getElementById('r-save-rows');
+    saveRowsEl.innerHTML = '';
+    savings.forEach(function(s) {
+      saveRowsEl.innerHTML += reportRow(s.name + ' (' + fmtF(s.mo) + '/חודש)', s.yr);
+    });
+    setText('r-save-hdr',    fmtF(tSavY / 12) + ' /חודש');
+    setText('r-save-annual', fmtF(tSavY));
+  } else {
+    saveCard.style.display = 'none';
+  }
+
+  // Show dashboard
+  document.getElementById('plan-form').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function reportRow(name, amt, isZero) {
+  return '<div class="report-row' + (isZero ? ' rr-zero' : '') + '">' +
+    '<span class="rr-name">' + esc(name) + '</span>' +
+    '<span class="rr-amt">' + fmtF(amt) + '</span>' +
+  '</div>';
+}
+
+function backToForm() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('plan-form').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function printReport() {
+  generateReport();
+  setTimeout(function(){ window.print(); }, 200);
+}
+
+function clearAll() {
+  if (!confirm('למחוק את כל הנתונים ולהתחיל מחדש?')) return;
+  ['income-list','fixed-list','var-list','onetime-list','loan-list','save-list'].forEach(function(id) {
+    document.getElementById(id).innerHTML = '';
+  });
+  ['client-name','advisor-name','plan-notes'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  initDefaultRows();
+}
+
+// ── DEFAULT ROWS ──
+function initDefaultRows() {
+  // Income
+  [
+    ['שכר עבודה (נטו)', 0],
+    ['קצבאות / הכנסה נוספת', 0]
+  ].forEach(function(r){ addIncRow(r[0], r[1]); });
+
+  // Fixed
+  [
+    'שכירות / משכנתא', 'ארנונה', 'ועד בית',
+    'חשמל', 'מים וגז', 'טלפון ואינטרנט'
+  ].forEach(function(n){ addExpRow('fixed-list', n); });
+
+  // Variable
+  [
+    'מזון וסופר', 'דלק ורכב', 'בריאות ותרופות',
+    'ילדים וחינוך', 'פנאי ובילויים', 'ביטוחים', 'ביגוד ושונות'
+  ].forEach(function(n){ addExpRow('var-list', n); });
+
+  // One-time
+  addOnetimeRow('חופשה משפחתית', 3, 0);
+  addOnetimeRow('ביטוח רכב / טסט שנתי', 1, 0);
+  addOnetimeRow('הוצאות בית / שיפוצים', 2, 0);
+
+  // Loans
+  addLoanRow('', 0, 0, 0);
+
+  // Savings
+  addSaveRow('קרן חירום', 0);
+  addSaveRow('חיסכון / השקעה', 0);
+}
+
+// ── INIT ──
+initYearSelector();
+initDefaultRows();
+</script>
+</body>
+</html>
