@@ -1839,6 +1839,7 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
   <button class="tab-btn" id="tab-control" onclick="switchTab('control')">📊 בקרת תקציב</button>
   <button class="tab-btn" id="tab-goals" onclick="switchTab('goals')">🎯 יעדים פיננסיים</button>
   <button class="tab-btn" id="tab-import" onclick="switchTab('import')">📥 ייבוא לתקציב</button>
+  <button class="tab-btn" id="tab-annual" onclick="switchTab('annual')">📅 תוכנית שנתית</button>
   <div id="month-tab-btns"></div>
 </div>
 
@@ -2996,6 +2997,10 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 
 <!-- Month panels injected by JS -->
 <div id="month-panels-container"></div>
+
+<div class="tab-panel" id="panel-annual">
+  <iframe src="taktziv-shanti.html" style="width:100%;height:calc(100vh - 140px);border:none;display:block;" title="תוכנית שנתית"></iframe>
+</div>
 
 <!-- generate button removed — summary updates live -->
 
