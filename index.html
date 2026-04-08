@@ -885,6 +885,8 @@ body {
 .bud-row-2 input { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 7px; color: var(--text); font-family: inherit; font-size: .87rem; padding: 5px 9px; }
 .bud-row-2 input:focus { outline: none; border-color: var(--accent); }
 .bud-row-2 input[type=number] { text-align: left; direction: ltr; }
+.bud-row-2 input.input-invalid { border-color: #e05555 !important; background: rgba(224,85,85,.08) !important; }
+.bud-row-2 input.input-invalid:focus { border-color: #ff7070 !important; }
 .bud-row-2 .bud-name  { flex: 1; }
 .bud-row-2 .bud-amt   { width: 100px; border-color: rgba(108,99,255,.3) !important; }
 .bud-row-2 .bud-actual { width: 100px; border-color: rgba(67,233,123,.35) !important; background: rgba(67,233,123,.04) !important; }
@@ -12923,6 +12925,29 @@ function bankAddToMapping(txIdx) {
     }
   }, 150);
 }
+
+/* ── Input validation for numeric fields ───────────────────────── */
+document.addEventListener('input', function(e) {
+  var inp = e.target;
+  if (inp.tagName !== 'INPUT') return;
+  // רק שדות מספריים שאינם type=number (שהם כבר מוגנים ע"י הדפדפן)
+  if (inp.type === 'number') return;
+  // בדוק רק שדות שנראים פיננסיים (שם class מכיל amt/actual/saving/monthly/balance)
+  var cls = inp.className || '';
+  var isFinancial = /bud-amt|bud-actual|saving-monthly|saving-accum|debt-balance|debt-monthly|an-inp/.test(cls);
+  if (!isFinancial) return;
+
+  var val = inp.value.trim();
+  if (val === '' || val === '-') { inp.classList.remove('input-invalid'); return; }
+  var num = Number(val.replace(/,/g, ''));
+  if (isNaN(num)) {
+    inp.classList.add('input-invalid');
+    inp.title = 'יש להזין מספר בלבד';
+  } else {
+    inp.classList.remove('input-invalid');
+    inp.title = '';
+  }
+});
 </script>
 
 <!-- Firebase Auth layer — must load after main app script -->

@@ -199,7 +199,15 @@ auth.onAuthStateChanged(function(user) {
     fbUpdateSaveStatus('✓ נטען');
   }).catch(function(err) {
     console.error('שגיאה בטעינת נתונים:', err);
-    fbUpdateSaveStatus('שגיאה בטעינה');
+    var isOffline = !navigator.onLine || err.code === 'unavailable';
+    var msg = isOffline
+      ? '⚠️ אין חיבור — הנתונים נטענו מהזיכרון המקומי'
+      : '⚠️ שגיאה בטעינת נתונים מהשרת';
+    fbUpdateSaveStatus(msg);
+    // נסה לטעון מ-localStorage כגיבוי
+    if (typeof clientInit === 'function') {
+      try { clientInit(); } catch(e) {}
+    }
   });
 });
 
@@ -241,18 +249,27 @@ function fbUpdateSaveStatus(text) {
 /* ── Auto-save to Firestore ────────────────────────────────────── */
 var _fbAutoSaveTimer = null;
 
+var _fbSavePending = false;
+
 function fbSaveNow() {
   if (!_fbUid) return;
   if (typeof clientCollectData !== 'function') return;
+  if (!navigator.onLine) {
+    fbUpdateSaveStatus('⚠️ אין חיבור — ישמר כשיחזור');
+    _fbSavePending = true;
+    return;
+  }
   var data = clientCollectData();
   fbUpdateSaveStatus('שומר…');
   saveUserData(_fbUid, data).then(function() {
+    _fbSavePending = false;
     var now = new Date();
     var time = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
     fbUpdateSaveStatus('✓ נשמר ' + time);
   }).catch(function(err) {
     console.error('שגיאה בשמירה:', err);
-    fbUpdateSaveStatus('שגיאה בשמירה');
+    _fbSavePending = true;
+    fbUpdateSaveStatus('⚠️ לא נשמר — ינסה שוב');
   });
 }
 
@@ -261,6 +278,18 @@ function fbDebouncedSave() {
   clearTimeout(_fbAutoSaveTimer);
   _fbAutoSaveTimer = setTimeout(fbSaveNow, 1000);
 }
+
+// שמור אוטומטית כשחוזר אונליין
+window.addEventListener('online', function() {
+  if (_fbSavePending) {
+    fbUpdateSaveStatus('חיבור חזר — שומר…');
+    setTimeout(fbSaveNow, 500);
+  }
+});
+
+window.addEventListener('offline', function() {
+  fbUpdateSaveStatus('⚠️ אין חיבור לאינטרנט');
+});
 
 document.addEventListener('input', fbDebouncedSave);
 
