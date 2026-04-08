@@ -264,6 +264,39 @@ function fbDebouncedSave() {
 
 document.addEventListener('input', fbDebouncedSave);
 
+/* ── Cookie consent banner ─────────────────────────────────────── */
+window.addEventListener('load', function() {
+  if (localStorage.getItem('cookie_consent') === 'accepted') return;
+
+  var banner = document.createElement('div');
+  banner.id = 'cookie-banner';
+  banner.style.cssText = [
+    'position:fixed;bottom:0;left:0;right:0;z-index:10000;',
+    'background:#1a1d27;border-top:1px solid #2a2d3e;',
+    'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;',
+    'padding:14px 24px;direction:rtl;font-family:inherit;'
+  ].join('');
+
+  banner.innerHTML = [
+    '<p style="font-size:.83rem;color:#9aa0c0;margin:0;flex:1;min-width:200px;">',
+    '  האתר משתמש ב-localStorage לשמירת הנתונים שלך מקומית בדפדפן.',
+    '  אין שימוש בעוגיות מעקב או שיווקיות.',
+    '  <a href="privacy.html" target="_blank" style="color:#6080d0;">מדיניות פרטיות</a>',
+    '</p>',
+    '<button id="cookie-accept-btn" style="',
+    '  background:#6c63ff;color:#fff;border:none;border-radius:8px;',
+    '  padding:8px 20px;cursor:pointer;font-size:.83rem;white-space:nowrap;',
+    '">הבנתי, אשר</button>'
+  ].join('');
+
+  document.body.appendChild(banner);
+
+  document.getElementById('cookie-accept-btn').addEventListener('click', function() {
+    localStorage.setItem('cookie_consent', 'accepted');
+    banner.remove();
+  });
+});
+
 window.addEventListener('load', function() {
   if (typeof populateVarExpensesFromCredit === 'function' && !populateVarExpensesFromCredit._fbPatched) {
     var _orig = populateVarExpensesFromCredit;
