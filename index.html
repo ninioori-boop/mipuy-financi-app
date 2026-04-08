@@ -8538,11 +8538,11 @@ function renderCreditSummary() {
         : '';
       tr.innerHTML =
         '<td>' + escHtml(t.desc) + instBadge + instAmtNote + '</td>' +
-        '<td class="amount-cell" id="tx-amt-cell-' + realIdx + '">' + fmt(t.amount) + '</td>' +
+        '<td class="amount-cell" id="' + ctx + 'tx-amt-cell-' + realIdx + '">' + fmt(t.amount) + '</td>' +
         '<td>' + buildCatSelect(t.category, realIdx, ctx) + '</td>' +
         '<td class="source-cell">' + escHtml(t.source.replace(/\.[^.]+$/,'')) + '</td>' +
         '<td><div class="tx-actions">' +
-          '<button class="tx-btn edit" title="ערוך סכום" onclick="startEditAmount(' + realIdx + ',\'' + ctx + '\')">✏️</button>' +
+          '<button class="tx-btn edit" title="ערוך סכום" onclick="startEditAmount(' + realIdx + ',\'' + ctx + '\',\'' + ctx + '\')">✏️</button>' +
           '<button class="tx-btn search" title="חפש באינטרנט" onclick="searchBusiness(\'' + escHtml(t.desc).replace(/'/g,'\\\'') + '\')">🔍</button>' +
           '<button class="tx-btn del" title="מחק עסקה" onclick="deleteTx(' + realIdx + ',\'' + ctx + '\')">🗑️</button>' +
         '</div></td>';
@@ -8605,25 +8605,27 @@ function toggleAccordion(cat, ctx) {
 }
 
 function buildCatSelect(selected, txIdx, ctx) {
+  var px = (ctx || '');
   var icon = CATEGORY_ICONS[selected] || '📦';
   var label = selected || 'שונות';
-  return '<div class="cat-picker" id="cp-' + txIdx + '" data-ctx="' + (ctx||'') + '">' +
-    '<button type="button" class="cat-picker-btn" onclick="catPickerOpen(' + txIdx + ',event)" title="' + label + '">' +
+  return '<div class="cat-picker" id="' + px + 'cp-' + txIdx + '" data-ctx="' + px + '">' +
+    '<button type="button" class="cat-picker-btn" onclick="catPickerOpen(\'' + px + '\',' + txIdx + ',event)" title="' + label + '">' +
       icon + ' ' + label +
     '</button>' +
-    '<div class="cat-picker-dropdown" id="cpd-' + txIdx + '">' +
+    '<div class="cat-picker-dropdown" id="' + px + 'cpd-' + txIdx + '">' +
       '<input class="cat-picker-search" type="text" placeholder="🔍 חפש קטגוריה..." ' +
-        'oninput="catPickerFilter(' + txIdx + ',this.value)" ' +
-        'onkeydown="catPickerKey(' + txIdx + ',event)" ' +
+        'oninput="catPickerFilter(\'' + px + '\',' + txIdx + ',this.value)" ' +
+        'onkeydown="catPickerKey(\'' + px + '\',' + txIdx + ',event)" ' +
         'autocomplete="off">' +
-      '<div class="cat-picker-list" id="cpl-' + txIdx + '">' +
-        catPickerOpts(selected, txIdx) +
+      '<div class="cat-picker-list" id="' + px + 'cpl-' + txIdx + '">' +
+        catPickerOpts(selected, txIdx, '', px) +
       '</div>' +
     '</div>' +
   '</div>';
 }
 
-function catPickerOpts(selected, txIdx, filter) {
+function catPickerOpts(selected, txIdx, filter, ctx) {
+  var px = (ctx || '');
   var q = (filter || '').toLowerCase().trim();
   var html = '';
   var cats = q ? ALL_CATEGORIES.filter(function(c){ return c.toLowerCase().includes(q); }) : ALL_CATEGORIES;
@@ -8631,27 +8633,27 @@ function catPickerOpts(selected, txIdx, filter) {
   cats.forEach(function(c) {
     var icon = CATEGORY_ICONS[c] || '📦';
     html += '<div class="cat-picker-opt' + (c === selected ? ' selected' : '') + '" ' +
-      'onclick="catPickerSelect(' + txIdx + ',\'' + c.replace(/'/g,"\\'") + '\',this)" ' +
+      'onclick="catPickerSelect(\'' + px + '\',' + txIdx + ',\'' + c.replace(/'/g,"\\'") + '\',this)" ' +
       'data-cat="' + c.replace(/"/g,'&quot;') + '">' +
       icon + ' ' + c + '</div>';
   });
   return html;
 }
 
-function catPickerOpen(txIdx, e) {
+function catPickerOpen(ctx, txIdx, e) {
   e.stopPropagation();
-  // Close any other open pickers
+  var px = (ctx || '');
   document.querySelectorAll('.cat-picker-dropdown.open').forEach(function(d) {
-    if (d.id !== 'cpd-' + txIdx) d.classList.remove('open');
+    if (d.id !== px + 'cpd-' + txIdx) d.classList.remove('open');
   });
-  var dd = document.getElementById('cpd-' + txIdx);
+  var dd = document.getElementById(px + 'cpd-' + txIdx);
   if (!dd) return;
   var isOpen = dd.classList.contains('open');
   dd.classList.toggle('open', !isOpen);
   if (!isOpen) {
     var inp = dd.querySelector('.cat-picker-search');
     if (inp) { inp.value = ''; inp.focus(); }
-    var list = document.getElementById('cpl-' + txIdx);
+    var list = document.getElementById(px + 'cpl-' + txIdx);
     if (list) {
       var sel = list.querySelector('.selected');
       if (sel) sel.scrollIntoView({ block: 'nearest' });
@@ -8659,14 +8661,16 @@ function catPickerOpen(txIdx, e) {
   }
 }
 
-function catPickerFilter(txIdx, q) {
+function catPickerFilter(ctx, txIdx, q) {
+  var px = (ctx || '');
   var selected = creditTransactions[txIdx] ? creditTransactions[txIdx].category : '';
-  var list = document.getElementById('cpl-' + txIdx);
-  if (list) list.innerHTML = catPickerOpts(selected, txIdx, q);
+  var list = document.getElementById(px + 'cpl-' + txIdx);
+  if (list) list.innerHTML = catPickerOpts(selected, txIdx, q, px);
 }
 
-function catPickerKey(txIdx, e) {
-  var list = document.getElementById('cpl-' + txIdx);
+function catPickerKey(ctx, txIdx, e) {
+  var px = (ctx || '');
+  var list = document.getElementById(px + 'cpl-' + txIdx);
   if (!list) return;
   var opts = list.querySelectorAll('.cat-picker-opt');
   var hi = list.querySelector('.highlighted');
@@ -8684,21 +8688,20 @@ function catPickerKey(txIdx, e) {
   } else if (e.key === 'Enter') {
     e.preventDefault();
     var target = hi || opts[0];
-    if (target) catPickerSelect(txIdx, target.dataset.cat, target);
+    if (target) catPickerSelect(px, txIdx, target.dataset.cat, target);
   } else if (e.key === 'Escape') {
-    var dd = document.getElementById('cpd-' + txIdx);
+    var dd = document.getElementById(px + 'cpd-' + txIdx);
     if (dd) dd.classList.remove('open');
   }
 }
 
-function catPickerSelect(txIdx, cat, optEl) {
-  var dd = document.getElementById('cpd-' + txIdx);
-  var btn = document.querySelector('#cp-' + txIdx + ' .cat-picker-btn');
+function catPickerSelect(ctx, txIdx, cat, optEl) {
+  var px = (ctx || '');
+  var dd = document.getElementById(px + 'cpd-' + txIdx);
+  var btn = document.querySelector('#' + px + 'cp-' + txIdx + ' .cat-picker-btn');
   if (btn) btn.textContent = (CATEGORY_ICONS[cat] || '📦') + ' ' + cat;
   if (dd) dd.classList.remove('open');
-  var picker = document.getElementById('cp-' + txIdx);
-  var ctx = picker ? (picker.dataset.ctx || '') : '';
-  updateTxCat(txIdx, cat, ctx);
+  updateTxCat(txIdx, cat, px);
 }
 
 // Close picker when clicking outside
@@ -8730,37 +8733,39 @@ function searchBusiness(desc) {
 }
 
 function startEditAmount(idx, ctx) {
-  const cell = document.getElementById('tx-amt-cell-' + idx);
+  var px = ctx || '';
+  const cell = document.getElementById(px + 'tx-amt-cell-' + idx);
   if (!cell || cell.querySelector('input')) return; // already editing
   const t = creditTransactions[idx];
-  var safeCtx = ctx || '';
   cell.innerHTML =
     '<div style="display:flex;gap:4px;align-items:center;direction:ltr">' +
-    '<input class="tx-amount-input" id="tx-amt-input-' + idx + '" type="number" step="0.01" value="' + t.amount + '">' +
-    '<button class="tx-btn edit" title="אשר" onclick="confirmEditAmount(' + idx + ',\'' + safeCtx + '\')">✓</button>' +
-    '<button class="tx-btn del" title="בטל" onclick="cancelEditAmount(' + idx + ')">✗</button>' +
+    '<input class="tx-amount-input" id="' + px + 'tx-amt-input-' + idx + '" type="number" step="0.01" value="' + t.amount + '">' +
+    '<button class="tx-btn edit" title="אשר" onclick="confirmEditAmount(' + idx + ',\'' + px + '\')">✓</button>' +
+    '<button class="tx-btn del" title="בטל" onclick="cancelEditAmount(' + idx + ',\'' + px + '\')">✗</button>' +
     '</div>';
-  const input = document.getElementById('tx-amt-input-' + idx);
+  const input = document.getElementById(px + 'tx-amt-input-' + idx);
   if (input) { input.focus(); input.select(); }
   input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') confirmEditAmount(idx, safeCtx);
-    if (e.key === 'Escape') cancelEditAmount(idx);
+    if (e.key === 'Enter') confirmEditAmount(idx, px);
+    if (e.key === 'Escape') cancelEditAmount(idx, px);
   });
 }
 
 function confirmEditAmount(idx, ctx) {
-  const input = document.getElementById('tx-amt-input-' + idx);
+  var px = ctx || '';
+  const input = document.getElementById(px + 'tx-amt-input-' + idx);
   if (!input) return;
   const val = parseFloat(input.value);
-  if (isNaN(val) || val < 0) { cancelEditAmount(idx); return; }
+  if (isNaN(val) || val < 0) { cancelEditAmount(idx, px); return; }
   creditTransactions[idx].amount = val;
-  _ccCtx = ctx || '';
+  _ccCtx = px;
   renderCreditSummary();
   if (!_ccCtx) populateVarExpensesFromCredit();
 }
 
-function cancelEditAmount(idx) {
-  const cell = document.getElementById('tx-amt-cell-' + idx);
+function cancelEditAmount(idx, ctx) {
+  var px = ctx || '';
+  const cell = document.getElementById(px + 'tx-amt-cell-' + idx);
   if (cell) cell.innerHTML = fmt(creditTransactions[idx].amount);
 }
 
