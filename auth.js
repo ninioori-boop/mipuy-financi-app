@@ -211,6 +211,57 @@ auth.onAuthStateChanged(function(user) {
   });
 });
 
+/* ── Backup / Restore ──────────────────────────────────────────── */
+function fbExportBackup() {
+  if (typeof clientCollectData !== 'function') return;
+  var data = clientCollectData();
+  var payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    uid: _fbUid,
+    data: data
+  };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var date = new Date().toLocaleDateString('he-IL').replace(/\./g, '-');
+  a.href = url;
+  a.download = 'mipuy-financi-backup-' + date + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  fbUpdateSaveStatus('✓ גיבוי הורד');
+}
+
+function fbImportBackup() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var payload = JSON.parse(ev.target.result);
+        var data = payload.data || payload; // תמיכה בפורמט ישן
+        if (!data || typeof data !== 'object') throw new Error('קובץ לא תקין');
+        if (!confirm('לשחזר נתונים מהגיבוי?\nכל הנתונים הנוכחיים יוחלפו.')) return;
+        if (typeof clientRestoreData === 'function') {
+          _fbRestoring = true;
+          clientRestoreData(data);
+          _fbRestoring = false;
+        }
+        fbSaveNow();
+        fbUpdateSaveStatus('✓ שוחזר בהצלחה');
+      } catch(err) {
+        alert('שגיאה בקריאת הקובץ: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
 /* ── Header bar ────────────────────────────────────────────────── */
 function fbUpdateBar(user) {
   var bar = document.getElementById('client-bar');
@@ -231,6 +282,8 @@ function fbUpdateBar(user) {
     '</div>',
     '<div style="display:flex;align-items:center;gap:10px;">',
     '  <span id="fb-save-status" style="font-size:.76rem;color:#8892b0;white-space:nowrap;"></span>',
+    '  <button onclick="fbExportBackup()" style="background:#1e2130;border:1px solid #2a2d3e;color:#a0a8c8;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;" title="הורד גיבוי של כל הנתונים">גיבוי</button>',
+    '  <button onclick="fbImportBackup()" style="background:#1e2130;border:1px solid #2a2d3e;color:#a0a8c8;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;" title="שחזר מגיבוי">שחזור</button>',
     '  <button onclick="fbSignOut()" style="background:#1e2130;border:1px solid #2a2d3e;color:#a0a8c8;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;">התנתק</button>',
     '  <button onclick="fbDeleteAccount()" style="background:transparent;border:1px solid #3a2030;color:#7a4050;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.78rem;" title="מחק חשבון וכל הנתונים">מחק חשבון</button>',
     '</div>'

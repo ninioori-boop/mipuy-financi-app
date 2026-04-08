@@ -1899,6 +1899,12 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     </div>
     <div style="font-weight:700;font-size:.82rem;color:var(--muted);margin-bottom:8px">לקוחות קיימים</div>
     <div class="cm-client-list" id="cm-client-list"></div>
+    <div style="font-weight:700;font-size:.82rem;color:var(--muted);margin:14px 0 8px;border-top:1px solid rgba(255,255,255,.06);padding-top:12px">📅 ארכיון שנתי</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
+      <button class="client-btn cm-primary" onclick="cmArchiveYear()" style="font-size:.8rem;">שמור ארכיון לשנה הנוכחית</button>
+      <span style="font-size:.76rem;color:var(--muted)">שומר snapshot של כל הנתונים עם תאריך</span>
+    </div>
+    <div class="cm-client-list" id="cm-archive-list"></div>
     <div style="text-align:left;margin-top:4px">
       <button class="client-btn" onclick="clientCloseModal()">✕ סגור</button>
     </div>
@@ -12417,6 +12423,27 @@ function clientRenderModal() {
       '<button class="client-btn" onclick="clientDelete(\''+id+'\')" style="flex-shrink:0;color:#fb7185;border-color:rgba(251,113,133,.4)">מחק</button>' +
     '</div>';
   }).join('');
+
+  // Render archive list
+  var arcEl = document.getElementById('cm-archive-list');
+  if (!arcEl) return;
+  var archives = cmGetArchives();
+  if (!archives.length) {
+    arcEl.innerHTML = '<p style="color:var(--muted);font-size:.8rem;text-align:center;padding:8px">אין ארכיונים שמורים עדיין.</p>';
+    return;
+  }
+  arcEl.innerHTML = archives.map(function(arc) {
+    var date = new Date(arc.savedAt).toLocaleDateString('he-IL');
+    return '<div class="cm-client-item">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="cm-client-name">📅 ' + arc.label + '</div>' +
+        '<div class="cm-client-meta">' + date + '</div>' +
+      '</div>' +
+      '<button class="client-btn" onclick="cmRestoreArchive(\'' + arc.id + '\')" style="flex-shrink:0">שחזר</button>' +
+      '<button class="client-btn" onclick="cmExportArchive(\'' + arc.id + '\')" style="flex-shrink:0">הורד</button>' +
+      '<button class="client-btn" onclick="cmDeleteArchive(\'' + arc.id + '\')" style="flex-shrink:0;color:#fb7185;border-color:rgba(251,113,133,.4)">מחק</button>' +
+    '</div>';
+  }).join('');
 }
 
 // Init on page load
@@ -12462,6 +12489,62 @@ function clientInit() {
   // Auto-save on page unload (both modes)
   window.addEventListener('beforeunload', function() { if (cmActiveId) clientSave(); });
 }
+/* ── Year Archive ──────────────────────────────────────────────── */
+var CM_ARCHIVE_KEY = 'finapp_archive_';
+
+function cmGetArchives(clientId) {
+  try { return JSON.parse(localStorage.getItem(CM_ARCHIVE_KEY + (clientId || cmActiveId)) || '[]'); }
+  catch(e) { return []; }
+}
+
+function cmSaveArchives(archives, clientId) {
+  localStorage.setItem(CM_ARCHIVE_KEY + (clientId || cmActiveId), JSON.stringify(archives));
+}
+
+function cmArchiveYear() {
+  if (!cmActiveId) { alert('אין לקוח פעיל'); return; }
+  var year = new Date().getFullYear();
+  var label = prompt('שם הארכיון:', 'שנת ' + year);
+  if (!label) return;
+  clientSave();
+  var data = clientCollectData();
+  var archives = cmGetArchives();
+  archives.unshift({ id: Date.now().toString(36), label: label, savedAt: new Date().toISOString(), data: data });
+  cmSaveArchives(archives);
+  clientRenderModal();
+  alert('ארכיון נשמר: ' + label);
+}
+
+function cmRestoreArchive(archiveId) {
+  var archives = cmGetArchives();
+  var arc = archives.find(function(a){ return a.id === archiveId; });
+  if (!arc) return;
+  if (!confirm('לשחזר את הארכיון "' + arc.label + '"?\nהנתונים הנוכחיים יוחלפו.')) return;
+  clientRestoreData(arc.data);
+  clientSave();
+  clientCloseModal();
+}
+
+function cmDeleteArchive(archiveId) {
+  if (!confirm('למחוק ארכיון זה לצמיתות?')) return;
+  var archives = cmGetArchives().filter(function(a){ return a.id !== archiveId; });
+  cmSaveArchives(archives);
+  clientRenderModal();
+}
+
+function cmExportArchive(archiveId) {
+  var archives = cmGetArchives();
+  var arc = archives.find(function(a){ return a.id === archiveId; });
+  if (!arc) return;
+  var blob = new Blob([JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), label: arc.label, data: arc.data }, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'archive-' + arc.label.replace(/[^a-zA-Z0-9א-ת]/g, '-') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 /* ════════ END CLIENT MANAGER ════════ */
 
 // Init client manager after page load
