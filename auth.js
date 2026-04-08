@@ -15,6 +15,7 @@
     '  <input id="fb-password" type="password" placeholder="סיסמה (לפחות 6 תווים)" autocomplete="current-password" dir="ltr">',
     '  <button id="fb-signin-btn" onclick="fbSignIn()">התחבר</button>',
     '  <button id="fb-signup-btn" onclick="fbSignUp()">הרשמה — משתמש חדש</button>',
+    '  <p style="font-size:.74rem;color:#5a6080;text-align:center;margin-top:4px;">בהרשמה אתה מסכים ל<a href="terms.html" target="_blank" style="color:#6080d0;">תנאי השימוש</a> ו<a href="privacy.html" target="_blank" style="color:#6080d0;">מדיניות הפרטיות</a></p>',
     '  <div id="fb-divider"><span>או</span></div>',
     '  <button id="fb-google-btn" onclick="fbGoogleSignIn()">',
     '    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:18px;vertical-align:middle;margin-left:8px">',
@@ -127,6 +128,33 @@ function fbSignOut() {
   auth.signOut();
 }
 
+function fbDeleteAccount() {
+  var user = auth.currentUser;
+  if (!user) return;
+  if (!confirm('האם למחוק את החשבון וכל הנתונים שלך לצמיתות?\nפעולה זו אינה הפיכה.')) return;
+
+  fbUpdateSaveStatus('מוחק...');
+
+  // מחיקת נתוני המשתמש מ-Firestore
+  db.collection('users').doc(user.uid).delete()
+    .catch(function() {}) // אם אין מסמך — לא נכשל
+    .then(function() {
+      // מחיקת החשבון עצמו
+      return user.delete();
+    })
+    .then(function() {
+      alert('החשבון וכל הנתונים נמחקו בהצלחה.');
+    })
+    .catch(function(err) {
+      if (err.code === 'auth/requires-recent-login') {
+        alert('מסיבות אבטחה, עליך להתחבר מחדש לפני מחיקת החשבון.\nהתנתק, התחבר מחדש, ואז נסה שוב.');
+      } else {
+        alert('שגיאה במחיקת החשבון: ' + err.message);
+      }
+      fbUpdateSaveStatus('');
+    });
+}
+
 function fbErrMsg(code) {
   var map = {
     'auth/user-not-found':     'משתמש לא נמצא — נסה להירשם',
@@ -196,6 +224,7 @@ function fbUpdateBar(user) {
     '<div style="display:flex;align-items:center;gap:10px;">',
     '  <span id="fb-save-status" style="font-size:.76rem;color:#8892b0;white-space:nowrap;"></span>',
     '  <button onclick="fbSignOut()" style="background:#1e2130;border:1px solid #2a2d3e;color:#a0a8c8;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;">התנתק</button>',
+    '  <button onclick="fbDeleteAccount()" style="background:transparent;border:1px solid #3a2030;color:#7a4050;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.78rem;" title="מחק חשבון וכל הנתונים">מחק חשבון</button>',
     '</div>'
   ].join('');
 }
