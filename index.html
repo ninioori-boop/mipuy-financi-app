@@ -12183,6 +12183,17 @@ function clientRestoreData(data) {
     if (data.credit.deletedAutoCats) {
       data.credit.deletedAutoCats.forEach(function(c){ deletedAutoCats[c] = true; });
     }
+    // מיזוג עם localStorage — גיבוי למקרה שהשמירה ל-Firebase לא הספיקה לפני רענון
+    try {
+      var _lsKey = typeof CM_DATA_KEY !== 'undefined' && typeof cmActiveId !== 'undefined' && cmActiveId
+        ? CM_DATA_KEY + cmActiveId : null;
+      if (_lsKey) {
+        var _lsData = JSON.parse(localStorage.getItem(_lsKey) || '{}');
+        if (_lsData.credit && _lsData.credit.deletedAutoCats) {
+          _lsData.credit.deletedAutoCats.forEach(function(c){ deletedAutoCats[c] = true; });
+        }
+      }
+    } catch(e) {}
     if (creditTransactions.length > 0) {
       _ccCtx = '';
       renderCreditSummary();
