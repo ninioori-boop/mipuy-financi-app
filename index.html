@@ -8260,6 +8260,8 @@ var deletedAutoCats = {}; // { cat: true }
 function recordDeletedAutoCat(cat) {
   deletedAutoCats[cat] = true;
   if (typeof clientAutoSave === 'function') clientAutoSave();
+  // שמור מיד ל-Firebase — מחיקה היא click ולא input, לכן לא נתפסת ע"י fbDebouncedSave
+  if (typeof fbSaveNow === 'function') fbSaveNow();
 }
 
 function toggleCatDetail(btn) {
