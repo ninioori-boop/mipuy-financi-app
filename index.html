@@ -8066,7 +8066,8 @@ async function parseFiles() {
 /* ════════════════════════════════════════
    AI ANALYSIS — Claude (Anthropic)
 ════════════════════════════════════════ */
-const _AK = '\u0073\u006B\u002D\u0061\u006E\u0074\u002D\u0061\u0070\u0069\u0030\u0033\u002D\u004E\u0068\u0066\u0064\u006C\u0049\u0073\u0051\u0071\u0076\u0032\u0069\u0030\u0076\u006F\u006F\u0077\u0075\u004E\u0063\u0070\u0046\u0073\u006B\u004C\u0064\u0046\u0043\u0074\u0073\u0070\u0037\u006A\u0052\u007A\u007A\u0062\u006A\u006B\u006A\u004F\u0065\u0046\u004E\u004F\u006A\u005A\u006C\u0063\u0046\u004A\u006B\u0077\u0035\u004B\u006F\u005F\u0056\u0066\u0059\u006B\u0049\u0052\u002D\u0062\u0066\u004A\u0075\u0039\u0069\u0030\u0054\u006E\u0043\u004B\u0048\u0038\u0039\u0073\u0039\u0061\u0046\u0056\u0059\u0053\u0041\u002D\u004E\u0033\u0033\u0043\u006F\u0041\u0041\u0041';
+// API key is stored securely in Vercel Environment Variables.
+// All Claude API calls go through /api/categorize (serverless proxy).
 
 async function analyzeWithAI() {
   const unmatched = creditTransactions
@@ -8143,19 +8144,13 @@ async function analyzeWithAI() {
             showLoading('מנסה שוב... (' + attempt + '/2)');
             await new Promise(function(r){ setTimeout(r, 1500 * attempt); });
           }
-          res = await fetch('https://api.anthropic.com/v1/messages', {
+          // קריאה דרך serverless proxy — המפתח נשמר ב-Vercel ולא בקוד
+          res = await fetch('/api/analyze', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': _AK,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-allow-browser': 'true'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              model: 'claude-haiku-4-5-20251001',
-              max_tokens: 4096,
               system: systemPrompt,
-              messages: [{ role: 'user', content: 'סווג את העסקאות הבאות:\n' + lines }]
+              message: 'סווג את העסקאות הבאות:\n' + lines
             })
           });
           lastErr = null;
@@ -8173,7 +8168,7 @@ async function analyzeWithAI() {
       }
 
       const data = await res.json();
-      const rawText = data.content && data.content[0] && data.content[0].text || '';
+      const rawText = data.text || '';
 
       // חלץ JSON גם אם Claude עטף אותו בטקסט
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
