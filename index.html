@@ -9456,6 +9456,74 @@ function moRecalc(mid) {
     bExp: bExp,       aExp: aExp,
     aBalance: aBalance
   });
+
+  // Budget overage alerts
+  moCheckAlerts(mid, {
+    bIncome: bIncome, aIncome: aIncome,
+    bFixed: bFixed,   aFixed: aFixed,
+    bVar: bVar,       aVar: aVar,
+    bSub: bSub,       aSub: aSub,
+    bIns: bIns,       aIns: aIns,
+    bExp: bExp,       aExp: aExp,
+    aBalance: aBalance
+  });
+}
+
+function moCheckAlerts(mid, d) {
+  var alertsEl = document.getElementById(mId(mid, 'alerts'));
+  if (!alertsEl) return;
+
+  // Only show alerts when actual data exists
+  var hasActual = d.aIncome > 0 || d.aExp > 0;
+  if (!hasActual) { alertsEl.innerHTML = ''; return; }
+
+  var alerts = [];
+  function mf(n) { return '₪' + Math.round(n||0).toLocaleString('he-IL'); }
+
+  // Overall overage
+  if (d.bExp > 0 && d.aExp > d.bExp) {
+    var over = d.aExp - d.bExp;
+    var pct = Math.round((over / d.bExp) * 100);
+    alerts.push({ level: pct >= 20 ? 'high' : 'med', msg: 'חריגה כוללת מהתקציב: ' + mf(over) + ' (' + pct + '%)' });
+  }
+
+  // Section overages
+  var sections = [
+    { label: 'הוצאות קבועות', b: d.bFixed, a: d.aFixed },
+    { label: 'הוצאות משתנות', b: d.bVar,   a: d.aVar },
+    { label: 'מנויים',        b: d.bSub,   a: d.aSub },
+    { label: 'ביטוחים',       b: d.bIns,   a: d.aIns }
+  ];
+  sections.forEach(function(s) {
+    if (s.b > 0 && s.a > s.b) {
+      var over = s.a - s.b;
+      var pct = Math.round((over / s.b) * 100);
+      if (pct >= 10) {
+        alerts.push({ level: pct >= 25 ? 'high' : 'med', msg: s.label + ': חריגה של ' + mf(over) + ' (' + pct + '%)' });
+      }
+    }
+  });
+
+  // Negative balance alert
+  if (d.aBalance !== null && d.aBalance < 0) {
+    alerts.push({ level: 'high', msg: 'תזרים שלילי: ' + mf(d.aBalance) });
+  }
+
+  // Income below plan
+  if (d.bIncome > 0 && d.aIncome > 0 && d.aIncome < d.bIncome * 0.9) {
+    var diff = d.bIncome - d.aIncome;
+    alerts.push({ level: 'med', msg: 'הכנסה נמוכה מהתכנון ב-' + mf(diff) });
+  }
+
+  if (!alerts.length) { alertsEl.innerHTML = ''; return; }
+
+  alertsEl.innerHTML = alerts.map(function(a) {
+    var bg    = a.level === 'high' ? 'rgba(255,101,132,.12)' : 'rgba(255,180,50,.1)';
+    var bc    = a.level === 'high' ? 'rgba(255,101,132,.4)'  : 'rgba(255,180,50,.35)';
+    var icon  = a.level === 'high' ? '🔴' : '🟡';
+    return '<div style="background:' + bg + ';border:1px solid ' + bc + ';border-radius:8px;padding:8px 12px;font-size:.82rem;color:var(--text);display:flex;align-items:center;gap:8px;">' +
+      '<span>' + icon + '</span><span>' + a.msg + '</span></div>';
+  }).join('');
 }
 
 function moToggleAnalysis(mid) {
