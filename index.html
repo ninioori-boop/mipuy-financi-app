@@ -2352,6 +2352,10 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
         </div>
       </div>
 
+      <div style="margin-top:10px">
+        <button onclick="resetDeletedAutoCats()" style="background:rgba(255,101,132,.12);border:1px solid rgba(255,101,132,.35);border-radius:8px;color:#ff6584;cursor:pointer;font-family:inherit;font-size:.8rem;padding:6px 14px">🔄 שחזר קטגוריות שנמחקו מהמיפוי</button>
+      </div>
+
     </div>
 
     <!-- Results area -->
@@ -8258,6 +8262,12 @@ function recordDeletedAutoCat(cat) {
   if (typeof clientAutoSave === 'function') clientAutoSave();
   // שמור מיד ל-Firebase — מחיקה היא click ולא input, לכן לא נתפסת ע"י fbDebouncedSave
   if (typeof fbSaveNow === 'function') fbSaveNow();
+}
+
+function resetDeletedAutoCats() {
+  deletedAutoCats = {};
+  if (typeof fbSaveNow === 'function') fbSaveNow();
+  if (creditTransactions.length) populateVarExpensesFromCredit();
 }
 
 function toggleCatDetail(btn) {
