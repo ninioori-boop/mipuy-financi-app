@@ -12265,24 +12265,6 @@ function clientRestoreData(data) {
       _ccCtx = '';
       renderCreditSummary();
       populateVarExpensesFromCredit();
-      // Re-apply saved user-edited auto-row amounts over the auto-calculated values
-      if (data.credit && data.credit.autoRows) {
-        var _saved = data.credit.autoRows;
-        ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(lid) {
-          var el = document.getElementById(lid); if (!el) return;
-          el.querySelectorAll('.cat-auto-wrap').forEach(function(w) {
-            if (w.dataset.cat && _saved[w.dataset.cat] != null) {
-              var inp = w.querySelector('input[type="number"]'); if (inp) inp.value = _saved[w.dataset.cat];
-            }
-          });
-        });
-        var annEl = document.getElementById('annual-list');
-        if (annEl) annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
-          if (r.dataset.cat && _saved[r.dataset.cat] != null) {
-            var inp = r.querySelector('input[type="number"]'); if (inp) inp.value = _saved[r.dataset.cat];
-          }
-        });
-      }
     }
   }
 }
