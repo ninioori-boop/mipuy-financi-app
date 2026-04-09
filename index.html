@@ -8037,16 +8037,6 @@ async function parseFiles() {
       uploadedFiles.push({ name: f.name, rowCount: txs.length });
     }
     hideLoading();
-    // Auto-detect unique months only from newly added transactions
-    if (!_ccCtx && _newTxs.length > 0) {
-      var uniqueMonths = {};
-      _newTxs.forEach(function(t) { if (t.date) uniqueMonths[t.date.substring(0,7)] = 1; });
-      var detectedMonths = Object.keys(uniqueMonths).length;
-      if (detectedMonths >= 1) {
-        var mi = document.getElementById('months-input');
-        if (mi) { mi.value = detectedMonths; updateMonthsLabel(); }
-      }
-    }
     renderSmartAnalysis();
     renderCreditSummary();
     document.getElementById(_ccCtx + 'credit-results').style.display = 'block';
@@ -8341,13 +8331,16 @@ function populateVarExpensesFromCredit() {
     var txCount   = txIndices.length;
     var storeAmt, displayMonthly;
     if (isVar) {
+      // משתנות: מחלקים לפי מספר חודשים שהמשתמש הגדיר
       storeAmt       = totalAmt;
-      displayMonthly = totalAmt / months;
+      displayMonthly = Math.round(totalAmt / months);
     } else if (isAnnual) {
-      storeAmt       = Math.round(totalAmt / months * 12); // אנואליזציה: N חודשים → שנה
+      // שנתיות: מחלקים ב-12 לקבלת ממוצע חודשי, שומרים סכום שנתי
+      storeAmt       = Math.round(totalAmt / months * 12);
       displayMonthly = Math.round(storeAmt / 12);
     } else {
-      storeAmt       = Math.round(totalAmt / Math.max(1, txCount)); // ממוצע לפי הופעות
+      // קבועות / ביטוחים / מנויים: סכום חודשי = סה"כ חלקי מספר חודשים
+      storeAmt       = Math.round(totalAmt / months);
       displayMonthly = storeAmt;
     }
 
@@ -11973,7 +11966,7 @@ function clientCollectData() {
       notes:   (document.getElementById('notes-field')||{value:''}).value
     },
     manual: {
-      monthsInput: Math.min(24, parseInt((document.getElementById('months-input')||{value:'3'}).value)||3),
+      monthsInput: 3,
       varMonthsInput: parseInt((document.getElementById('var-months-input')||{value:'3'}).value)||3,
       income:    getRows('income-list'),
       fixed:     getRows('fixed-list'),
@@ -12084,7 +12077,7 @@ function clientRestoreData(data) {
   var m = data.manual;
   if (!m) return;
   var mi = document.getElementById('months-input');
-  if (mi && m.monthsInput) mi.value = Math.min(24, m.monthsInput);
+  // monthsInput intentionally not restored — user sets this per session
   var vmi = document.getElementById('var-months-input');
   if (vmi && m.varMonthsInput) { vmi.value = m.varMonthsInput; varMonthsChange(0); }
 
