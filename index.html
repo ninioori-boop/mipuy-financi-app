@@ -9724,6 +9724,7 @@ function initMonths() {
    IMPORT-TO-BUDGET TAB
 ════════════════════════════════════════ */
 var importPendingFiles = [];
+var importCreditTransactions = [];
 var IMPORT_MONTH_NAMES = {
   jan:'ינואר',feb:'פברואר',mar:'מרץ',apr:'אפריל',may:'מאי',jun:'יוני',
   jul:'יולי',aug:'אוגוסט',sep:'ספטמבר',oct:'אוקטובר',nov:'נובמבר',dec:'דצמבר'
@@ -9778,23 +9779,31 @@ async function importParseFiles() {
   _ccCtx = 'import-';
   showLoading('מנתח קבצים...');
   try {
-    creditTransactions = [];
-    uploadedFiles = [];
+    importCreditTransactions = [];
+    var importUploadedFiles = [];
     for (var i = 0; i < importPendingFiles.length; i++) {
       var f = importPendingFiles[i];
       var rows = await parseExcelFile(f);
       var txs = extractTransactions(rows, f.name);
-      creditTransactions.push.apply(creditTransactions, txs);
-      uploadedFiles.push({ name: f.name, rowCount: txs.length });
+      importCreditTransactions.push.apply(importCreditTransactions, txs);
+      importUploadedFiles.push({ name: f.name, rowCount: txs.length });
     }
+    // Set shared vars for renderSmartAnalysis / renderCreditSummary (they read creditTransactions)
+    var _savedTxs = creditTransactions;
+    var _savedUploaded = uploadedFiles;
+    creditTransactions = importCreditTransactions;
+    uploadedFiles = importUploadedFiles;
     hideLoading();
     renderSmartAnalysis();
     renderCreditSummary();
     document.getElementById('import-credit-results').style.display = 'block';
     importAutoDetectMonth();
     updateImportSendBtn();
-    var unmatchedCount = creditTransactions.filter(function(t){ return t.category === 'שונות'; }).length;
+    var unmatchedCount = importCreditTransactions.filter(function(t){ return t.category === 'שונות'; }).length;
     if (unmatchedCount > 0) analyzeWithAI();
+    // Restore original credit tab transactions
+    creditTransactions = _savedTxs;
+    uploadedFiles = _savedUploaded;
   } catch(e) {
     hideLoading();
     alert('שגיאה בפענוח הקובץ: ' + e.message);
@@ -9803,7 +9812,7 @@ async function importParseFiles() {
 
 function importAutoDetectMonth() {
   var counts = {};
-  creditTransactions.forEach(function(tx) {
+  importCreditTransactions.forEach(function(tx) {
     if (tx.date) { var m = tx.date.substring(0,7); counts[m] = (counts[m]||0)+1; }
   });
   var best = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; })[0];
@@ -9840,7 +9849,7 @@ function importSendToBudget() {
   var monthId = (document.getElementById('import-target-month') || {}).value;
   var year    = parseInt((document.getElementById('import-target-year') || {}).value);
   if (!monthId) { alert('יש לבחור חודש יעד לפני השליחה.'); return; }
-  if (!creditTransactions.length || _ccCtx !== 'import-') {
+  if (!importCreditTransactions.length) {
     alert('אין עסקאות לשליחה — אנא העלה קובץ בטאב זה.');
     return;
   }
@@ -9848,7 +9857,7 @@ function importSendToBudget() {
   var moIdx    = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(monthId);
   var monthStr = year ? (year + '-' + String(moIdx + 1).padStart(2, '0')) : null;
 
-  var txs = creditTransactions.filter(function(tx) {
+  var txs = importCreditTransactions.filter(function(tx) {
     if (tx.isRefund) return false;
     if (!monthStr)   return true;
     return tx.date && tx.date.substring(0, 7) === monthStr;
