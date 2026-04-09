@@ -8291,6 +8291,35 @@ function populateVarExpensesFromCredit() {
     catTxs[t.category].push(i);
   });
 
+  // DEBUG: log routing for every category
+  var _dbg = { var: [], fixed: [], ins: [], sub: [], annual: [], skip: [], unknown: [] };
+  Object.keys(catMap).forEach(function(cat) {
+    if (SKIP_CATEGORIES.indexOf(cat) !== -1) { _dbg.skip.push(cat); return; }
+    if (deletedAutoCats[cat]) { _dbg.skip.push('🗑'+cat); return; }
+    if (VAR_CATEGORIES.indexOf(cat) !== -1)       { _dbg.var.push(cat); return; }
+    if (ANNUAL_CATEGORIES.indexOf(cat) !== -1)     { _dbg.annual.push(cat); return; }
+    if (INSURANCE_CATEGORIES.indexOf(cat) !== -1)  { _dbg.ins.push(cat); return; }
+    if (FIXED_CATEGORIES.indexOf(cat) !== -1)      { _dbg.fixed.push(cat); return; }
+    if (SUB_CATEGORIES.indexOf(cat) !== -1)        { _dbg.sub.push(cat); return; }
+    _dbg.unknown.push(cat);
+  });
+  console.log('[מיפוי]', JSON.stringify(_dbg));
+  var _dbgEl = document.getElementById('mapping-debug-output');
+  if (!_dbgEl) {
+    _dbgEl = document.createElement('div');
+    _dbgEl.id = 'mapping-debug-output';
+    _dbgEl.style.cssText = 'background:#1a1d2e;border:1px solid #444;border-radius:8px;padding:10px 14px;font-size:.75rem;color:#8892b0;margin-bottom:12px;direction:rtl';
+    var firstCard = document.querySelector('#panel-manual .section-card');
+    if (firstCard) firstCard.parentNode.insertBefore(_dbgEl, firstCard);
+  }
+  _dbgEl.innerHTML = '<strong style="color:#ccd6f6">🔍 ניתוב קטגוריות מהדוח:</strong><br>' +
+    '📊 משתנות (' + _dbg.var.length + '): ' + (_dbg.var.join(', ')||'—') + '<br>' +
+    '🏠 קבועות (' + _dbg.fixed.length + '): ' + (_dbg.fixed.join(', ')||'—') + '<br>' +
+    '🛡️ ביטוחים (' + _dbg.ins.length + '): ' + (_dbg.ins.join(', ')||'—') + '<br>' +
+    '📱 מנויים (' + _dbg.sub.length + '): ' + (_dbg.sub.join(', ')||'—') + '<br>' +
+    '🌴 שנתיות (' + _dbg.annual.length + '): ' + (_dbg.annual.join(', ')||'—') + '<br>' +
+    '❓ לא מוכרות (' + _dbg.unknown.length + '): <span style="color:#ff6584">' + (_dbg.unknown.join(', ')||'—') + '</span>';
+
   // Preserve which detail panels were open
   var openCats = {};
   ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(listId) {
