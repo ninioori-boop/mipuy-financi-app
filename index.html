@@ -8022,6 +8022,8 @@ async function parseFiles() {
   if (!pendingFiles.length) return;
   showLoading('מנתח קבצים...');
   try {
+    // Clear deleted-category memory so previously blocked cats reappear
+    deletedAutoCats = {};
     // Only parse files not yet parsed — append to existing transactions instead of resetting
     var _alreadyParsed = uploadedFiles.map(function(f) { return f.name; });
     var _newFiles = pendingFiles.filter(function(f) { return _alreadyParsed.indexOf(f.name) === -1; });
@@ -8248,10 +8250,11 @@ var VAR_CATEGORIES = [
 var ANNUAL_CATEGORIES = ['חופשה וטיול'];
 var FIXED_CATEGORIES = [
   'קופת חולים','משכנתא','שכר דירה',
-  'ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית','מיסים'
+  'ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית','מיסים',
+  'חשמל','גז','מים','ועד בית','ביוב','אינטרנט קווי'
 ];
-var INSURANCE_CATEGORIES = ['ביטוח','ביטוח לאומי'];
-var SUB_CATEGORIES = ['תקשורת','חדר כושר','עמלות בנק ואשראי'];
+var INSURANCE_CATEGORIES = ['ביטוח','ביטוח לאומי','ביטוח רכב','ביטוח חיים','ביטוח בריאות','ביטוח רכוש'];
+var SUB_CATEGORIES = ['תקשורת','חדר כושר','עמלות בנק ואשראי','נטפליקס','ספוטיפיי','אפל','גוגל'];
 var SKIP_CATEGORIES = ['הכנסות','חסכונות','השקעות','העברות ואשראי']; // לא הוצאות
 
 // Deleted auto categories — persisted across sessions
