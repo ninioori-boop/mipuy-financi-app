@@ -11973,7 +11973,7 @@ function clientCollectData() {
       notes:   (document.getElementById('notes-field')||{value:''}).value
     },
     manual: {
-      monthsInput: parseInt((document.getElementById('months-input')||{value:'3'}).value)||3,
+      monthsInput: Math.min(24, parseInt((document.getElementById('months-input')||{value:'3'}).value)||3),
       varMonthsInput: parseInt((document.getElementById('var-months-input')||{value:'3'}).value)||3,
       income:    getRows('income-list'),
       fixed:     getRows('fixed-list'),
@@ -12084,7 +12084,7 @@ function clientRestoreData(data) {
   var m = data.manual;
   if (!m) return;
   var mi = document.getElementById('months-input');
-  if (mi && m.monthsInput) mi.value = m.monthsInput;
+  if (mi && m.monthsInput) mi.value = Math.min(24, m.monthsInput);
   var vmi = document.getElementById('var-months-input');
   if (vmi && m.varMonthsInput) { vmi.value = m.varMonthsInput; varMonthsChange(0); }
 
