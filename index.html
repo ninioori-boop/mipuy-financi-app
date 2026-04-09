@@ -8018,10 +8018,11 @@ async function parseFiles() {
   if (!pendingFiles.length) return;
   showLoading('מנתח קבצים...');
   try {
-    creditTransactions = [];
-    uploadedFiles = [];
-    for (let i = 0; i < pendingFiles.length; i++) {
-      const f = pendingFiles[i];
+    // Only parse files not yet parsed — append to existing transactions instead of resetting
+    var _alreadyParsed = uploadedFiles.map(function(f) { return f.name; });
+    var _newFiles = pendingFiles.filter(function(f) { return _alreadyParsed.indexOf(f.name) === -1; });
+    for (let i = 0; i < _newFiles.length; i++) {
+      const f = _newFiles[i];
       const rows = await parseExcelFile(f);
       const txs = extractTransactions(rows, f.name);
       creditTransactions.push.apply(creditTransactions, txs);
