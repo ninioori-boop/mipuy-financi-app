@@ -8027,20 +8027,22 @@ async function parseFiles() {
     // Only parse files not yet parsed — append to existing transactions instead of resetting
     var _alreadyParsed = uploadedFiles.map(function(f) { return f.name; });
     var _newFiles = pendingFiles.filter(function(f) { return _alreadyParsed.indexOf(f.name) === -1; });
+    var _newTxs = [];
     for (let i = 0; i < _newFiles.length; i++) {
       const f = _newFiles[i];
       const rows = await parseExcelFile(f);
       const txs = extractTransactions(rows, f.name);
       creditTransactions.push.apply(creditTransactions, txs);
+      _newTxs = _newTxs.concat(txs);
       uploadedFiles.push({ name: f.name, rowCount: txs.length });
     }
     hideLoading();
-    // Auto-detect number of unique months and update months-input
-    if (!_ccCtx) {
+    // Auto-detect unique months only from newly added transactions
+    if (!_ccCtx && _newTxs.length > 0) {
       var uniqueMonths = {};
-      creditTransactions.forEach(function(t) { if (t.date) uniqueMonths[t.date.substring(0,7)] = 1; });
+      _newTxs.forEach(function(t) { if (t.date) uniqueMonths[t.date.substring(0,7)] = 1; });
       var detectedMonths = Object.keys(uniqueMonths).length;
-      if (detectedMonths > 1) {
+      if (detectedMonths >= 1) {
         var mi = document.getElementById('months-input');
         if (mi) { mi.value = detectedMonths; updateMonthsLabel(); }
       }
