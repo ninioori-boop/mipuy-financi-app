@@ -9780,19 +9780,15 @@ async function importParseFiles() {
   showLoading('מנתח קבצים...');
   try {
     importCreditTransactions = [];
-    var importUploadedFiles = [];
     for (var i = 0; i < importPendingFiles.length; i++) {
       var f = importPendingFiles[i];
       var rows = await parseExcelFile(f);
       var txs = extractTransactions(rows, f.name);
       importCreditTransactions.push.apply(importCreditTransactions, txs);
-      importUploadedFiles.push({ name: f.name, rowCount: txs.length });
+      uploadedFiles.push({ name: f.name, rowCount: txs.length });
     }
-    // Set shared vars for renderSmartAnalysis / renderCreditSummary (they read creditTransactions)
-    var _savedTxs = creditTransactions;
-    var _savedUploaded = uploadedFiles;
+    // Point creditTransactions to importCreditTransactions for render functions
     creditTransactions = importCreditTransactions;
-    uploadedFiles = importUploadedFiles;
     hideLoading();
     renderSmartAnalysis();
     renderCreditSummary();
@@ -9801,9 +9797,6 @@ async function importParseFiles() {
     updateImportSendBtn();
     var unmatchedCount = importCreditTransactions.filter(function(t){ return t.category === 'שונות'; }).length;
     if (unmatchedCount > 0) analyzeWithAI();
-    // Restore original credit tab transactions
-    creditTransactions = _savedTxs;
-    uploadedFiles = _savedUploaded;
   } catch(e) {
     hideLoading();
     alert('שגיאה בפענוח הקובץ: ' + e.message);
