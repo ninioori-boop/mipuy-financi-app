@@ -8191,7 +8191,7 @@ async function analyzeWithAI() {
     hideLoading();
     renderSmartAnalysis();
     renderCreditSummary();
-    populateVarExpensesFromCredit();
+    if (!_ccCtx) populateVarExpensesFromCredit();
 
     const notice = document.createElement('div');
     notice.style.cssText = 'background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.4);border-radius:10px;padding:12px 16px;font-size:.85rem;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px;';
@@ -8542,7 +8542,7 @@ function renderCreditSummary() {
         '<td>' + buildCatSelect(t.category, realIdx, ctx) + '</td>' +
         '<td class="source-cell">' + escHtml(t.source.replace(/\.[^.]+$/,'')) + '</td>' +
         '<td><div class="tx-actions">' +
-          '<button class="tx-btn edit" title="ערוך סכום" onclick="startEditAmount(' + realIdx + ',\'' + ctx + '\',\'' + ctx + '\')">✏️</button>' +
+          '<button class="tx-btn edit" title="ערוך סכום" onclick="startEditAmount(' + realIdx + ',\'' + ctx + '\',this)">✏️</button>' +
           '<button class="tx-btn search" title="חפש באינטרנט" onclick="searchBusiness(\'' + escHtml(t.desc).replace(/'/g,'\\\'') + '\')">🔍</button>' +
           '<button class="tx-btn del" title="מחק עסקה" onclick="deleteTx(' + realIdx + ',\'' + ctx + '\')">🗑️</button>' +
         '</div></td>';
@@ -8732,9 +8732,9 @@ function searchBusiness(desc) {
   window.open('https://www.google.com/search?q=' + encodeURIComponent(desc), '_blank');
 }
 
-function startEditAmount(idx, ctx) {
+function startEditAmount(idx, ctx, btn) {
   var px = ctx || '';
-  const cell = document.getElementById(px + 'tx-amt-cell-' + idx);
+  var cell = btn ? btn.closest('tr').querySelector('.amount-cell') : document.getElementById(px + 'tx-amt-cell-' + idx);
   if (!cell || cell.querySelector('input')) return; // already editing
   const t = creditTransactions[idx];
   cell.innerHTML =
