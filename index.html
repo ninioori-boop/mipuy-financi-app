@@ -2078,12 +2078,12 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 <!-- TAB BAR -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-manual" onclick="switchTab('manual')">📋 מיפוי ידני</button>
+  <button class="tab-btn" id="tab-credit" onclick="switchTab('credit')">💳 דוחות אשראי</button>
   <button class="tab-btn" id="tab-import" onclick="switchTab('import')">📥 ייבוא לתקציב</button>
   <button class="tab-btn" id="tab-control" onclick="switchTab('control')">📊 בקרת תקציב</button>
   <button class="tab-btn" id="tab-trends" onclick="switchTab('trends')">📊 מגמות</button>
   <button class="tab-btn" id="tab-annual" onclick="switchTab('annual')">📅 תוכנית שנתית</button>
   <button class="tab-btn" id="tab-goals" onclick="switchTab('goals')">🎯 יעדים פיננסיים</button>
-  <button class="tab-btn" id="tab-credit" onclick="switchTab('credit')">💳 דוחות אשראי</button>
   <button class="tab-btn" id="tab-bank" onclick="switchTab('bank')">🏦 דוח עו"ש</button>
   <button class="tab-btn" id="tab-loan" onclick="switchTab('loan')">🔢 מחשבון הלוואות</button>
   <button class="tab-btn" id="tab-compound" onclick="switchTab('compound')">📈 ריבית דריבית</button>
@@ -8300,14 +8300,6 @@ function populateVarExpensesFromCredit() {
     });
   });
 
-  // Clear existing auto-filled rows
-  ['var-list','fixed-list','sub-list','insurance-list','annual-list'].forEach(function(listId) {
-    var list = document.getElementById(listId);
-    if (!list) return;
-    list.querySelectorAll('.cat-auto-wrap').forEach(function(r){ r.remove(); });
-    list.querySelectorAll('.input-row[data-auto]').forEach(function(r){ r.remove(); });
-  });
-
   Object.entries(catMap).forEach(function(entry) {
     var cat = entry[0], totalAmt = entry[1];
     if (totalAmt <= 0) return;
@@ -8343,9 +8335,19 @@ function populateVarExpensesFromCredit() {
     if (isAnnual) {
       var annList = document.getElementById('annual-list');
       if (!annList) return;
+      // Update existing annual row in-place if present
+      var existingAnn = annList.querySelector('.input-row[data-auto][data-cat="' + cat + '"]');
+      if (existingAnn) {
+        var annAmt = existingAnn.querySelector('input[type="number"]');
+        if (annAmt) annAmt.value = storeAmt;
+        var annTag = existingAnn.querySelector('.yearly-tag');
+        if (annTag) annTag.textContent = '₪' + fmt(displayMonthly) + ' / חודש';
+        return;
+      }
       var annRow = document.createElement('div');
       annRow.className = 'input-row annual-row';
       annRow.setAttribute('data-auto', '1');
+      annRow.setAttribute('data-cat', cat);
       annRow.innerHTML =
         '<input type="text" value="' + icon + ' ' + cat + '" readonly style="color:var(--accent);font-weight:600">' +
         '<input type="number" value="' + storeAmt + '" min="0" step="1" oninput="updateAnnualTag(this);updateAnnualTotals()">' +
@@ -8387,6 +8389,27 @@ function populateVarExpensesFromCredit() {
         '<td><select class="cat-select" style="font-size:.75rem;padding:2px 4px" onchange="updateTxCatFromMapping(' + txIdx + ',this.value)"><option value="">—</option>' + opts + '</select></td>' +
         '</tr>';
     }).join('');
+
+    // Update existing auto-row in-place if present (additive: second report doesn't reset)
+    var existingWrap = document.getElementById(listId).querySelector('.cat-auto-wrap[data-cat="' + cat.replace(/"/g,'&quot;') + '"]');
+    if (existingWrap) {
+      var amtInput = existingWrap.querySelector('input[type="number"]');
+      if (amtInput) amtInput.value = Math.round(storeAmt);
+      var detBtn = existingWrap.querySelector('.btn-detail');
+      if (detBtn) {
+        var isOpen = detBtn.textContent.startsWith('▲');
+        detBtn.dataset.count = txCount;
+        detBtn.textContent = (isOpen ? '▲ ' : '▶ ') + txCount + ' פריטים';
+      }
+      var tagEl = existingWrap.querySelector('.var-monthly-tag');
+      if (tagEl && isVar) {
+        tagEl.title = 'סה"כ בדוח: ₪' + Math.round(totalAmt) + ' ÷ ' + months + ' חודשים';
+        tagEl.textContent = '÷' + months + ' = ' + fmt(displayMonthly) + '/חודש';
+      }
+      var tbody = existingWrap.querySelector('.cat-detail-table tbody');
+      if (tbody) tbody.innerHTML = detailRows;
+      return;
+    }
 
     var isDetailOpen = !!openCats[cat];
     var wrap = document.createElement('div');
@@ -9530,8 +9553,8 @@ function moHandleCreditUpload(input) {
 
 // Shared: apply a set of already-parsed transactions to a month's actual columns
 function moApplyCreditData(monthId, txs, sourceLabel) {
-  var FIXED_C = ['שכר דירה','ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית','משכנתא','קופת חולים','העברות ואשראי'];
-  var VAR_C   = ['מזון לבית','אוכל בחוץ ובילויים','פארם','דלק וחניה','ביגוד והנעלה','תחבצ','כבישי אגרה','תספורת וקוסמטיקה','תחביבים','חופשה וטיול','תיקוני רכב','בריאות','בעלי חיים','חינוך וקייטנות','שונות','ביט ללא מעקב','מזומן ללא מעקב','מתנות','עוזרת בית','סיגריות','צעצועים','כלי בית','ריהוט והבית','תרומות'];
+  var FIXED_C = ['שכר דירה','ארנונה','דמי ניהול בניין','החזר הלוואות','הוצאות בית','משכנתא','קופת חולים','מיסים'];
+  var VAR_C   = ['מזון לבית','אוכל בחוץ ובילויים','פארם','דלק וחניה','ביגוד והנעלה','תחבצ','כבישי אגרה','תספורת וקוסמטיקה','תחביבים','חופשה וטיול','תיקוני רכב','בריאות','בעלי חיים','חינוך וקייטנות','שונות','ביט ללא מעקב','מזומן ללא מעקב','מתנות','עוזרת בית','סיגריות','צעצועים','כלי בית','ריהוט והבית','תרומות','ציוד עסקי/משרדי','חומרי בניין'];
   var SUB_C   = ['תקשורת','חדר כושר','עמלות בנק ואשראי'];
   var INS_C   = ['ביטוח','ביטוח לאומי'];
 
