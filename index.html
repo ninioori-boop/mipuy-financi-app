@@ -2239,228 +2239,6 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 
 </div><!-- /main-wrap -->
 
-<!-- ══ TAB 3: BUDGET ══ -->
-<div class="tab-panel" id="panel-budget">
-
-  <!-- Budget Title Bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-    <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:220px">
-      <input class="bud-field" id="bud-title" type="text" placeholder="כותרת התקציב (לדוג׳ תקציב שנתי 2025)" style="font-size:1.1rem;font-weight:700;color:var(--accent)">
-      <input class="bud-field" id="bud-title-date" type="date" style="width:150px;flex-shrink:0">
-    </div>
-    <button class="btn-add" onclick="budDuplicate()" style="white-space:nowrap;padding:8px 16px">📋 שכפל תקציב</button>
-  </div>
-
-  <!-- Client Info -->
-  <div class="section-card" style="margin-bottom:16px">
-    <div class="section-header">
-      <div class="section-title">👤 פרטי לקוח</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <label style="font-size:.77rem;color:var(--muted);font-weight:600">שם הלקוח</label>
-        <input class="bud-field" id="bud-client-name" type="text" placeholder="שם מלא">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <label style="font-size:.77rem;color:var(--muted);font-weight:600">תאריך הכנת התקציב</label>
-        <input class="bud-field" id="bud-date" type="date">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <label style="font-size:.77rem;color:var(--muted);font-weight:600">שם היועץ</label>
-        <input class="bud-field" id="bud-advisor" type="text" placeholder="שם היועץ">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <label style="font-size:.77rem;color:var(--muted);font-weight:600">הערות</label>
-        <input class="bud-field" id="bud-notes" type="text" placeholder="הערות חופשיות">
-      </div>
-    </div>
-  </div>
-
-  <div class="grid2">
-
-    <!-- INCOME -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">💰 הכנסות חודשיות</div>
-        <span class="bud-sec-total" id="bud-tot-income">₪0</span>
-      </div>
-      <div class="bud-col-heads bud-2col"><span>מקור הכנסה</span><span>סכום נטו לחודש</span></div>
-      <div id="bud-income-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-income-list',budIncomeRow)">+ הוסף הכנסה</button>
-    </div>
-
-    <!-- FIXED -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">📌 הוצאות קבועות</div>
-        <span class="bud-sec-total" id="bud-tot-fixed">₪0</span>
-      </div>
-      <div class="bud-col-heads bud-2col"><span>תיאור</span><span>סכום חודשי</span></div>
-      <div id="bud-fixed-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-fixed-list',budFixedRow)">+ הוסף הוצאה קבועה</button>
-    </div>
-
-    <!-- ANNUAL -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">📅 הוצאות שנתיות</div>
-        <span class="bud-sec-total" id="bud-tot-annual">₪0 לחודש</span>
-      </div>
-      <div class="bud-col-heads bud-3col"><span>תיאור</span><span>סכום שנתי</span><span>÷12 לחודש</span></div>
-      <div id="bud-annual-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-annual-list',budAnnualRow)">+ הוסף הוצאה שנתית</button>
-    </div>
-
-    <!-- VARIABLE -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">🛒 הוצאות משתנות</div>
-        <span class="bud-sec-total" id="bud-tot-var">₪0</span>
-      </div>
-      <div class="bud-col-heads bud-2col"><span>קטגוריה</span><span>תקציב חודשי</span></div>
-      <div id="bud-var-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-var-list',budVarRow)">+ הוסף הוצאה משתנה</button>
-    </div>
-
-    <!-- SUBSCRIPTIONS -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">🔄 מנויים</div>
-        <span class="bud-sec-total" id="bud-tot-sub">₪0</span>
-      </div>
-      <div class="bud-col-heads bud-2col"><span>שם מנוי</span><span>סכום חודשי</span></div>
-      <div id="bud-sub-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-sub-list',budSubRow)">+ הוסף מנוי</button>
-    </div>
-
-    <!-- INSURANCE -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">🛡️ ביטוחים</div>
-        <span class="bud-sec-total" id="bud-tot-ins">₪0</span>
-      </div>
-      <div class="bud-col-heads bud-2col"><span>סוג ביטוח</span><span>פרמיה חודשית</span></div>
-      <div id="bud-ins-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-ins-list',budInsRow)">+ הוסף ביטוח</button>
-    </div>
-
-    <!-- INSTALLMENTS -->
-    <div class="section-card" style="grid-column:1/-1">
-      <div class="section-header">
-        <div class="section-title">🛍️ עסקאות בתשלומים</div>
-        <span class="bud-sec-total" id="bud-tot-inst">₪0 /חודש</span>
-      </div>
-      <div class="bud-col-heads bud-inst-cols" style="font-size:.73rem">
-        <span>תיאור</span><span>סך עסקה</span><span>תשלום חודשי</span><span>תשלום נוכחי</span><span>סך תשלומים</span><span>נותרים</span>
-      </div>
-      <div id="bud-inst-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-inst-list',budInstRow)">+ הוסף עסקה בתשלומים</button>
-    </div>
-
-    <!-- DEBTS -->
-    <div class="section-card" style="grid-column:1/-1">
-      <div class="section-header">
-        <div class="section-title">💳 חובות והלוואות</div>
-        <span class="bud-sec-total" id="bud-tot-debt">₪0 /חודש</span>
-      </div>
-      <div class="bud-col-heads bud-debt-cols" style="font-size:.73rem">
-        <span>שם / גוף מלווה</span><span>יתרה מקורית</span><span>יתרה נוכחית</span><span>תשלום חודשי</span><span>נותרו תשלומים</span><span>תאריך סיום</span>
-      </div>
-      <div id="bud-debt-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-debt-list',budDebtRow)">+ הוסף חוב / הלוואה</button>
-    </div>
-
-    <!-- SAVINGS -->
-    <div class="section-card" style="grid-column:1/-1">
-      <div class="section-header">
-        <div class="section-title">🏦 חסכונות ונכסים</div>
-        <span class="bud-sec-total" id="bud-tot-saving">₪0 /חודש</span>
-      </div>
-      <div class="bud-col-heads bud-3col"><span>שם / סוג חיסכון</span><span>הפרשה חודשית</span><span>סך נצבר</span></div>
-      <div id="bud-saving-list"></div>
-      <button class="btn-add" onclick="budAddRow('bud-saving-list',budSavingRow)">+ הוסף חיסכון / נכס</button>
-    </div>
-
-  </div><!-- /grid2 -->
-
-  <!-- Generate -->
-  <div style="text-align:center;padding:10px 0 24px">
-    <button class="btn-generate" onclick="budGenerate()">📊 צור תקציב מלא</button>
-  </div>
-
-  <!-- Budget Dashboard (hidden until generate) -->
-  <div id="bud-dashboard" style="display:none">
-
-    <div class="dash-section-title" style="margin-top:8px;font-size:1.3rem">📊 תקציב פיננסי חודשי</div>
-    <div id="bud-client-line" style="text-align:center;font-size:.88rem;color:var(--muted);margin-bottom:16px"></div>
-
-    <button class="btn-reset" style="margin-bottom:16px" onclick="budBackToForm()">← חזור לטופס</button>
-
-    <!-- Income | Expenses -->
-    <div class="report-wrap">
-      <div>
-        <div class="report-card">
-          <div class="report-card-hdr hdr-income"><span>💰 הכנסות חודשיות</span><span id="bud-r-income-hdr">₪0</span></div>
-          <div id="bud-r-income-rows"></div>
-          <div class="report-grand grand-income"><span class="rr-name">סה"כ הכנסות</span><span class="rr-amt" id="bud-r-income-total">₪0</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="report-card">
-          <div class="report-card-hdr hdr-expense"><span>📤 הוצאות חודשיות</span><span id="bud-r-exp-hdr">₪0</span></div>
-          <div id="bud-r-exp-rows"></div>
-          <div class="report-grand grand-expense"><span class="rr-name">סה"כ הוצאות</span><span class="rr-amt" id="bud-r-exp-total">₪0</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Debt | Saving | Net -->
-    <div class="report-bottom-grid">
-      <div class="report-card">
-        <div class="report-card-hdr hdr-debt"><span>💳 חובות והלוואות</span></div>
-        <div style="padding:14px 16px">
-          <div class="report-small-row"><span>סה"כ יתרות לסגירה</span><span id="bud-r-debt-bal">₪0</span></div>
-          <div class="report-small-row"><span>החזר חודשי</span><span id="bud-r-debt-mo">₪0</span></div>
-          <div class="report-small-row"><span>עסקאות בתשלומים</span><span id="bud-r-inst-mo">₪0</span></div>
-        </div>
-      </div>
-      <div class="report-card">
-        <div class="report-card-hdr hdr-saving"><span>🏦 חסכונות ונכסים</span></div>
-        <div style="padding:14px 16px">
-          <div class="report-small-row"><span>הפרשה חודשית</span><span id="bud-r-sav-mo">₪0</span></div>
-          <div class="report-small-row"><span>סך נצבר</span><span id="bud-r-sav-acc">₪0</span></div>
-        </div>
-      </div>
-      <div class="report-card">
-        <div class="report-card-hdr hdr-net"><span>📈 שווי נקי</span></div>
-        <div style="padding:14px 16px">
-          <div class="report-small-row"><span>סך נכסים</span><span id="bud-r-assets">₪0</span></div>
-          <div class="report-small-row"><span>סך חובות</span><span id="bud-r-liabilities">₪0</span></div>
-          <div class="report-small-row" style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border)">
-            <span style="font-weight:700">שווי נקי</span>
-            <span id="bud-r-net" style="font-weight:900;font-size:1.1rem;color:var(--accent4)">₪0</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cash Flow Banner -->
-    <div id="bud-cf-banner" class="cashflow-banner positive">
-      <div class="cf-main">
-        <div class="cf-label">תזרים חודשי</div>
-        <div class="cf-value" id="bud-cf-value">₪0</div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px">תזרים ללא הפרשות: <strong id="bud-cf-nosav">₪0</strong></div>
-      </div>
-      <div class="cf-side">
-        <div class="cf-side-item cf-income"><div class="cf-label">הכנסות</div><div class="cf-num" id="bud-cf-inc">₪0</div></div>
-        <div class="cf-side-item cf-expenses"><div class="cf-label">הוצאות</div><div class="cf-num" id="bud-cf-exp">₪0</div></div>
-        <div class="cf-side-item cf-saving"><div class="cf-label">הפרשות לחיסכון</div><div class="cf-num" id="bud-cf-sav">₪0</div></div>
-      </div>
-    </div>
-
-  </div><!-- /bud-dashboard -->
-
-</div><!-- /panel-budget -->
 
 <!-- ══ TAB: LOAN CALCULATOR ══ -->
 <div class="tab-panel" id="panel-loan">
@@ -3057,19 +2835,6 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     <div id="import-file-count-bar" style="display:none;margin-top:8px;font-size:.82rem;color:var(--accent);font-weight:600;text-align:center"></div>
     <button class="parse-btn" id="import-parse-btn" onclick="importParseFiles()" style="display:none">נתח דוחות ⚡</button>
 
-    <!-- Learned DB (shared with credit tab) -->
-    <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);border-radius:10px;padding:11px 16px">
-      <span style="font-size:1rem">🧠</span>
-      <div style="flex:1;min-width:120px">
-        <span style="font-size:.82rem;font-weight:700;color:var(--text)">מאגר עסקים אישי</span>
-        <span style="font-size:.78rem;color:var(--muted);margin-right:6px">— <strong id="learned-db-count2">0</strong> עסקים זוהו עד כה</span>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="exportLearnedDB()" style="background:rgba(108,99,255,.18);border:1px solid rgba(108,99,255,.4);border-radius:7px;color:var(--accent);font-size:.78rem;padding:5px 11px;cursor:pointer;font-family:inherit">📤 ייצא</button>
-        <label style="background:rgba(67,233,123,.12);border:1px solid rgba(67,233,123,.35);border-radius:7px;color:var(--accent3);font-size:.78rem;padding:5px 11px;cursor:pointer;font-family:inherit">📥 ייבא<input type="file" accept=".json" style="display:none" onchange="importLearnedDB(this)"></label>
-        <button onclick="resetLearnedDB()" style="background:rgba(255,101,132,.1);border:1px solid rgba(255,101,132,.3);border-radius:7px;color:var(--accent2);font-size:.78rem;padding:5px 11px;cursor:pointer;font-family:inherit">🗑️ אפס</button>
-      </div>
-    </div>
   </div>
 
   <!-- Results area (identical to credit tab with import- prefixed IDs) -->
@@ -9924,9 +9689,6 @@ function importRenderFileList() {
   });
   var btn = document.getElementById('import-parse-btn');
   if (btn) btn.style.display = importPendingFiles.length ? 'block' : 'none';
-  // sync learned-db-count2
-  var el2 = document.getElementById('learned-db-count2');
-  if (el2) el2.textContent = Object.keys(window.learnedDB || {}).length;
   var countBar2 = document.getElementById('import-file-count-bar');
   if (countBar2) {
     if (importPendingFiles.length > 0) {
@@ -10645,8 +10407,6 @@ function updateLearnedDBCounter() {
   var n = Object.keys(window.learnedDB).length;
   var el = document.getElementById('learned-db-count');
   if (el) el.textContent = n;
-  var el2 = document.getElementById('learned-db-count2');
-  if (el2) el2.textContent = n;
 }
 
 function exportLearnedDB() {
