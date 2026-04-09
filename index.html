@@ -9050,10 +9050,6 @@ function createMonthPanel(monthId, monthName) {
     '<div id="' + p('summary') + '" class="section-card" style="margin-top:4px">' +
       '<div class="section-header">' +
         '<div class="section-title">📊 סיכום תזרים — ' + monthName + '</div>' +
-        '<button id="' + p('analysis-btn') + '" onclick="moToggleAnalysis(\'' + monthId + '\')" ' +
-          'style="background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.4);border-radius:8px;' +
-          'color:var(--accent);padding:5px 14px;cursor:pointer;font-family:inherit;font-size:.82rem;' +
-          'font-weight:700;white-space:nowrap;display:none">📊 הצג ניתוח</button>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:4px 0 8px">' +
         moKpi(p('k-income'),  'הכנסות',           'var(--accent3)') +
@@ -9062,17 +9058,7 @@ function createMonthPanel(monthId, monthName) {
         moKpi(p('k-balance'), 'תזרים נטו',         'var(--accent4)') +
       '</div>' +
     '</div>' +
-
-    // Analysis section (hidden until data entered)
-    '<div class="section-card mo-analysis-section" id="' + p('analysis') + '" style="display:none;margin-top:4px">' +
-      '<div class="section-header"><div class="section-title">📊 ניתוח חודשי</div></div>' +
-      '<div class="stats-bar" id="' + p('stats') + '" style="margin:0 0 16px"></div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">' +
-        '<div style="position:relative;height:280px"><canvas id="' + p('bar-chart') + '"></canvas></div>' +
-        '<div style="position:relative;height:280px"><canvas id="' + p('donut-chart') + '"></canvas></div>' +
-      '</div>' +
-      '<div id="' + p('alerts') + '" style="margin-top:16px"></div>' +
-    '</div>' +
+    '<div id="' + p('alerts') + '" style="margin-top:8px"></div>' +
 
   '</div>'; // /panel
   return html;
@@ -9278,17 +9264,6 @@ function moRecalc(mid) {
     cfEl.style.background  = displayBal >= 0 ? 'rgba(67,233,123,.08)' : 'rgba(255,101,132,.08)';
   }
 
-  moRenderAnalysis(mid, {
-    bIncome: bIncome, aIncome: aIncome,
-    bFixed: bFixed,   aFixed: aFixed,
-    bVar: bVar,       aVar: aVar,
-    bSub: bSub,       aSub: aSub,
-    bIns: bIns,       aIns: aIns,
-    tInst: tInst,     tDebt: tDebt,  tSav: tSav,
-    bExp: bExp,       aExp: aExp,
-    aBalance: aBalance
-  });
-
   // Budget overage alerts
   moCheckAlerts(mid, {
     bIncome: bIncome, aIncome: aIncome,
@@ -9358,132 +9333,6 @@ function moCheckAlerts(mid, d) {
   }).join('');
 }
 
-function moToggleAnalysis(mid) {
-  var section = document.getElementById(mId(mid, 'analysis'));
-  var btn     = document.getElementById(mId(mid, 'analysis-btn'));
-  if (!section) return;
-  var opening = section.style.display === 'none';
-  section.style.display = opening ? 'block' : 'none';
-  if (btn) btn.textContent = opening ? '📊 הסתר ניתוח' : '📊 הצג ניתוח';
-  if (opening) moRecalc(mid);
-}
-
-function moRenderAnalysis(mid, d) {
-  var p = mId.bind(null, mid);
-  var hasPlan   = d.bIncome > 0 || d.bExp > 0;
-  var hasActual = d.aIncome > 0 || d.aExp > 0;
-
-  var btn = document.getElementById(p('analysis-btn'));
-  if (btn) btn.style.display = hasPlan || hasActual ? 'inline-block' : 'none';
-
-  var section = document.getElementById(p('analysis'));
-  if (!section || section.style.display === 'none') return;
-
-  // Stats bar
-  var utilPct  = d.bExp > 0 ? Math.round(d.aExp / d.bExp * 100) : 0;
-  var balVal   = d.aBalance !== null ? d.aBalance : d.bIncome - d.bExp;
-  var balColor = balVal >= 0 ? 'rgba(67,233,123,.4)' : 'rgba(255,101,132,.4)';
-  var statsEl  = document.getElementById(p('stats'));
-  if (statsEl) statsEl.innerHTML =
-    '<div class="stat-chip">הכנסה בפועל: <strong>' + fmt(d.aIncome || d.bIncome) + '</strong></div>' +
-    '<div class="stat-chip">הוצאות בפועל: <strong>' + fmt(d.aExp || d.bExp) + '</strong></div>' +
-    '<div class="stat-chip" style="border-color:' + balColor + '">יתרה: <strong>' + fmt(balVal) + '</strong></div>' +
-    (d.bExp > 0 ? '<div class="stat-chip" style="border-color:' + (utilPct > 100 ? 'rgba(255,101,132,.4)' : 'rgba(108,99,255,.4)') + '">ניצול תקציב: <strong>' + utilPct + '%</strong></div>' : '');
-
-  // Bar chart: Plan vs Actual per category
-  var catLabels  = ['📌 קבועות','🛒 משתנות','🔄 מנויים','🛡️ ביטוחים','🛍️ תשלומים','💳 חובות','🏦 חיסכון'];
-  var planData   = [d.bFixed, d.bVar, d.bSub, d.bIns, d.tInst, d.tDebt, d.tSav];
-  var actualData = [d.aFixed, d.aVar, d.aSub, d.aIns, d.tInst, d.tDebt, d.tSav];
-  var barId = p('bar-chart');
-  destroyChart(barId);
-  var barCtx = document.getElementById(barId);
-  if (barCtx) {
-    charts[barId] = new Chart(barCtx.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: catLabels,
-        datasets: [
-          { label: 'תכנון', data: planData,
-            backgroundColor: 'rgba(108,99,255,.5)', borderColor: 'rgba(108,99,255,.9)',
-            borderWidth: 1, borderRadius: 5, borderSkipped: false },
-          { label: 'ביצוע', data: actualData,
-            backgroundColor: actualData.map(function(a,i){ return a > planData[i] ? 'rgba(255,101,132,.7)' : 'rgba(67,233,123,.7)'; }),
-            borderColor:     actualData.map(function(a,i){ return a > planData[i] ? 'rgba(255,101,132,1)'  : 'rgba(67,233,123,1)';  }),
-            borderWidth: 1, borderRadius: 5, borderSkipped: false }
-        ]
-      },
-      options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: '#8892b0', font: { size: 11 }, boxWidth: 12 } },
-          tooltip: { callbacks: { label: function(ctx){ return ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw); } } }
-        },
-        scales: {
-          x: { ticks: { color: '#8892b0', callback: function(v){ return '₪' + v.toLocaleString(); } }, grid: { color: '#2a2d3e' } },
-          y: { ticks: { color: '#e8eaf6', font: { size: 11 } }, grid: { display: false } }
-        }
-      }
-    });
-  }
-
-  // Doughnut chart: expense breakdown
-  var srcData  = hasActual ? actualData : planData;
-  var dLabels  = []; var dData = [];
-  var catNames = ['קבועות','משתנות','מנויים','ביטוחים','תשלומים','חובות','חיסכון'];
-  catNames.forEach(function(name, i){ if (srcData[i] > 0){ dLabels.push(name); dData.push(srcData[i]); } });
-  var donutId = p('donut-chart');
-  destroyChart(donutId);
-  var donutCtx = document.getElementById(donutId);
-  if (donutCtx && dData.length > 0) {
-    charts[donutId] = new Chart(donutCtx.getContext('2d'), {
-      type: 'doughnut',
-      data: { labels: dLabels, datasets: [{ data: dData,
-        backgroundColor: CHART_COLORS.slice(0, dData.length), borderWidth: 2, borderColor: '#1a1d27' }] },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '60%',
-        plugins: {
-          legend: { position: 'right', labels: { color: '#8892b0', font: { size: 11 }, boxWidth: 12, padding: 8 } },
-          tooltip: { callbacks: { label: function(ctx){
-            var total = dData.reduce(function(s,v){ return s+v; }, 0);
-            return ' ' + ctx.label + ': ' + fmt(ctx.raw) + ' (' + (total ? Math.round(ctx.raw/total*100) : 0) + '%)';
-          }}}
-        }
-      }
-    });
-  }
-
-  // Over-budget alerts
-  var alertsEl = document.getElementById(p('alerts'));
-  if (!alertsEl) return;
-  var checkCats = [
-    { label: 'הוצאות קבועות', plan: d.bFixed, actual: d.aFixed },
-    { label: 'הוצאות משתנות', plan: d.bVar,   actual: d.aVar   },
-    { label: 'מנויים',         plan: d.bSub,   actual: d.aSub   },
-    { label: 'ביטוחים',        plan: d.bIns,   actual: d.aIns   }
-  ];
-  var overBudget = checkCats.filter(function(c){ return c.plan > 0 && c.actual > c.plan; });
-  if (overBudget.length > 0) {
-    alertsEl.innerHTML =
-      '<div style="background:rgba(255,101,132,.06);border:1px solid rgba(255,101,132,.25);border-radius:10px;padding:12px 16px">' +
-        '<div style="font-size:.85rem;font-weight:700;color:var(--accent2);margin-bottom:8px">⚠️ חריגות תקציב (' + overBudget.length + ')</div>' +
-        '<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px">' +
-        overBudget.map(function(c){
-          var ov = c.actual - c.plan;
-          return '<li style="display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--text)">' +
-            '<span class="bsc-diff over" style="flex-shrink:0">חריגה</span>' +
-            '<span>' + c.label + ': חריגה של ' + fmt(ov) + ' (' + Math.round(ov/c.plan*100) + '% מעל תקציב)</span></li>';
-        }).join('') + '</ul></div>';
-  } else if (hasActual) {
-    alertsEl.innerHTML = '<div style="background:rgba(67,233,123,.06);border:1px solid rgba(67,233,123,.25);border-radius:10px;padding:10px 16px;font-size:.83rem;color:var(--accent3);font-weight:600">✅ כל הקטגוריות בתוך גבולות התקציב</div>';
-  } else {
-    alertsEl.innerHTML = '';
-  }
-}
-
-/* ════════════════════════════════════════
-   MONTHLY TAB — UPLOAD & PARSE CREDIT REPORT
-════════════════════════════════════════ */
-var _moCreditTarget = null; // which monthId is awaiting upload
 
 function moUploadCredit(monthId) {
   _moCreditTarget = monthId;
