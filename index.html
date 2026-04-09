@@ -8336,7 +8336,8 @@ function populateVarExpensesFromCredit() {
       var annList = document.getElementById('annual-list');
       if (!annList) return;
       // Update existing annual row in-place if present
-      var existingAnn = annList.querySelector('.input-row[data-auto][data-cat="' + cat + '"]');
+      var existingAnn = null;
+      annList.querySelectorAll('.input-row[data-auto]').forEach(function(w){ if (w.dataset.cat === cat) existingAnn = w; });
       if (existingAnn) {
         var annAmt = existingAnn.querySelector('input[type="number"]');
         if (annAmt) annAmt.value = storeAmt;
@@ -8391,7 +8392,8 @@ function populateVarExpensesFromCredit() {
     }).join('');
 
     // Update existing auto-row in-place if present (additive: second report doesn't reset)
-    var existingWrap = document.getElementById(listId).querySelector('.cat-auto-wrap[data-cat="' + cat.replace(/"/g,'&quot;') + '"]');
+    var existingWrap = null;
+    document.getElementById(listId).querySelectorAll('.cat-auto-wrap').forEach(function(w){ if (w.dataset.cat === cat) existingWrap = w; });
     if (existingWrap) {
       var amtInput = existingWrap.querySelector('input[type="number"]');
       if (amtInput) amtInput.value = Math.round(storeAmt);
