@@ -1850,18 +1850,156 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
 .an-sec-total.red   { color: var(--accent2); }
 .an-sec-total.blue  { color: var(--accent); }
 
+/* ══ MOBILE RESPONSIVE ══ */
 @media (max-width: 768px) {
+  /* Tab bar: horizontal scroll instead of wrapping */
+  .tab-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 8px;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { padding: 10px 12px; font-size: .8rem; flex-shrink: 0; }
+
+  /* Main layout */
+  .main-wrap { padding: 16px 10px 100px; }
+  .section-card { padding: 16px 12px; }
+
+  /* Grids → 1 col */
+  .grid2 { grid-template-columns: 1fr; }
   .an-kpi-row { grid-template-columns: 1fr 1fr; }
-  .an-compare-heads, .an-compare-row { grid-template-columns: 1fr 90px 90px; }
+  .ctrl-kpi-row { grid-template-columns: 1fr 1fr; }
+  .charts-row { grid-template-columns: 1fr; }
+  #panel-trends .grid-2col { grid-template-columns: 1fr !important; }
+
+  /* Annual compare table */
+  .an-compare-heads, .an-compare-row { grid-template-columns: 1fr 85px 85px; }
   .an-compare-row .an-compare-diff { display: none; }
   .an-mo-table { font-size: .68rem; }
+
+  /* Monthly tab rows */
+  .bud-inst-cols, .bud-debt-cols { grid-template-columns: 1fr !important; }
+  .bud-col-heads.bud-inst-cols,
+  .bud-col-heads.bud-debt-cols { display: none; }
+  .bud-actual-heads { grid-template-columns: 1fr 90px 90px 30px !important; }
+
+  /* Transaction table: hide source column */
+  .trans-table .source-cell,
+  .trans-table th:nth-child(4) { display: none; }
+
+  /* Goals tab tables: scroll */
+  .gp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .gp-table { min-width: 560px; }
+  .goals-summary-grid { flex-wrap: wrap; }
+
+  /* Input rows on manual tab */
+  .input-row { flex-wrap: wrap; }
+
+  /* KPI values smaller */
+  .kpi-value { font-size: 1.1rem; }
+  .an-kpi-val { font-size: 1.2rem; }
+
+  /* Control tab tables */
+  .ctrl-table-wrap, #ctrl-income-group, #ctrl-fixed-group,
+  #ctrl-var-group, #ctrl-sub-group, #ctrl-ins-group { overflow-x: auto; }
+
+  /* Trends KPI → 2 col */
+  #panel-trends .an-kpi-row { grid-template-columns: 1fr 1fr; }
 }
-@media (max-width: 700px) {
-  #panel-trends .grid-2col { grid-template-columns: 1fr !important; }
+
+@media (max-width: 480px) {
+  .an-kpi-row { grid-template-columns: 1fr 1fr; }
+  .ctrl-kpi-row { grid-template-columns: 1fr 1fr; }
+  .tab-btn { padding: 9px 10px; font-size: .75rem; }
+  .section-card { padding: 12px 10px; }
+  .hero h1 { font-size: 1.5rem; }
+  .hero p { font-size: .9rem; }
+}
+
+/* ══ ONBOARDING MODAL ══ */
+.onboard-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.72);
+  z-index: 1200; display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.onboard-modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 32px 28px; max-width: 540px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5);
+  text-align: center;
+}
+.onboard-logo { font-size: 3rem; margin-bottom: 8px; }
+.onboard-title { font-size: 1.5rem; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+.onboard-sub { font-size: .95rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+.onboard-steps {
+  display: flex; gap: 12px; margin-bottom: 28px; text-align: right;
+  flex-direction: column;
+}
+.onboard-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px;
+}
+.onboard-step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(108,99,255,.2); border: 1px solid rgba(108,99,255,.4);
+  color: var(--accent); font-weight: 800; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.onboard-step-text { font-size: .88rem; line-height: 1.5; }
+.onboard-step-text strong { color: var(--text); display: block; margin-bottom: 2px; font-size: .9rem; }
+.onboard-step-text span { color: var(--muted); }
+.onboard-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, #8b7cf6 100%);
+  border: none; border-radius: 12px; color: #fff;
+  font-family: inherit; font-size: 1rem; font-weight: 700;
+  padding: 14px 32px; cursor: pointer; width: 100%;
+  transition: opacity .2s, transform .1s;
+}
+.onboard-btn:hover { opacity: .9; transform: translateY(-1px); }
+.onboard-skip {
+  margin-top: 12px; font-size: .8rem; color: var(--muted);
+  cursor: pointer; text-decoration: underline; display: inline-block;
 }
 </style>
 </head>
 <body>
+
+<!-- ONBOARDING MODAL -->
+<div class="onboard-overlay" id="onboard-overlay" style="display:none">
+  <div class="onboard-modal">
+    <div class="onboard-logo">💰</div>
+    <div class="onboard-title">ברוכים הבאים למערכת!</div>
+    <div class="onboard-sub">ניהול כלכלי חכם בכמה צעדים פשוטים.<br>המערכת עובדת עם קבצי Excel מחברת האשראי שלך.</div>
+    <div class="onboard-steps">
+      <div class="onboard-step">
+        <div class="onboard-step-num">1</div>
+        <div class="onboard-step-text">
+          <strong>📋 מיפוי ידני — בנה את התקציב שלך</strong>
+          <span>הזן הכנסות, הוצאות קבועות, חסכונות וחובות. זה הבסיס של כל התכנון.</span>
+        </div>
+      </div>
+      <div class="onboard-step">
+        <div class="onboard-step-num">2</div>
+        <div class="onboard-step-text">
+          <strong>📅 בסוף כל חודש — ייבא דוח</strong>
+          <span>הורד את דוח האשראי מהבנק, העלה לטאב "ייבוא לתקציב" — ה-AI יסווג הכל אוטומטית.</span>
+        </div>
+      </div>
+      <div class="onboard-step">
+        <div class="onboard-step-num">3</div>
+        <div class="onboard-step-text">
+          <strong>📊 עקוב אחרי המגמות</strong>
+          <span>בטאב "מגמות" תראה גרפים של הוצאות לאורך זמן ותדע איפה אתה עומד.</span>
+        </div>
+      </div>
+    </div>
+    <button class="onboard-btn" onclick="onboardClose('manual')">התחל עם מיפוי ידני ←</button>
+    <div class="onboard-skip" onclick="onboardClose(null)">כבר מכיר את המערכת, דלג</div>
+  </div>
+</div>
 
 <!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loading">
@@ -2676,8 +2814,30 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     <!-- Summary -->
     <div class="goals-summary-grid">
       <div class="goals-summary-item">
-        <div class="goals-summary-label">סה"כ חיסכון חודשי</div>
+        <div class="goals-summary-label">חיסכון חודשי נדרש</div>
         <div class="goals-summary-value" id="gp-sumMonthly">0 ₪</div>
+      </div>
+      <div class="goals-summary-item">
+        <div class="goals-summary-label">מטרות פעילות</div>
+        <div class="goals-summary-value" id="gp-sum-goals">0 מטרות</div>
+      </div>
+      <div class="goals-summary-item">
+        <div class="goals-summary-label">סכום נדרש כולל</div>
+        <div class="goals-summary-value" id="gp-sum-req">0 ₪</div>
+      </div>
+      <div class="goals-summary-item">
+        <div class="goals-summary-label">נצבר עד כה</div>
+        <div class="goals-summary-value" id="gp-sum-cur">0 ₪</div>
+      </div>
+    </div>
+    <!-- Overall progress bar -->
+    <div style="margin:-4px 0 18px;padding:0 4px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:.75rem;color:var(--muted);font-weight:600">התקדמות כוללת לכל המטרות</span>
+        <span style="font-size:.78rem;font-weight:800;color:var(--accent)" id="gp-sum-pct">0%</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);border-radius:99px;height:10px;overflow:hidden">
+        <div id="gp-sum-bar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:99px;transition:width .5s"></div>
       </div>
     </div>
 
@@ -11255,12 +11415,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function gpRenderAll() { GP_CATS.forEach(function(c){ gpRenderCat(c); }); }
 
+  function gpGoalProgress(g) {
+    var cur = g.currentAmount || 0;
+    var req = g.requiredAmount || 0;
+    var mon = g.monthlySaving || 0;
+    if (!req) return '';
+    var pct = Math.min(100, Math.round(cur / req * 100));
+    var gap = Math.max(0, req - cur);
+    // Forecast months to reach goal
+    var forecast = '';
+    if (mon > 0 && gap > 0) {
+      var months = Math.ceil(gap / mon);
+      var dt = new Date();
+      dt.setMonth(dt.getMonth() + months);
+      var moNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+      forecast = 'בקצב הנוכחי: ' + moNames[dt.getMonth()] + ' ' + dt.getFullYear();
+    } else if (gap === 0) {
+      forecast = '✅ הושג!';
+    }
+    var color = pct >= 100 ? 'var(--accent3)' : pct >= 60 ? 'var(--accent4)' : 'var(--accent)';
+    return '<tr class="gp-progress-row"><td colspan="8" style="padding:2px 8px 10px">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<div style="flex:1;background:rgba(255,255,255,.07);border-radius:99px;height:7px;overflow:hidden">' +
+          '<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:99px;transition:width .4s"></div>' +
+        '</div>' +
+        '<span style="font-size:.75rem;font-weight:700;color:'+color+';white-space:nowrap">'+pct+'%</span>' +
+        (forecast ? '<span style="font-size:.73rem;color:var(--muted);white-space:nowrap">'+forecast+'</span>' : '') +
+      '</div>' +
+    '</td></tr>';
+  }
+
   function gpRenderCat(cat) {
     if (!gpCurrentId || !gpPlans[gpCurrentId]) return;
     var tbody = document.getElementById('gp-body-'+cat);
     if (!tbody) return;
     var items = gpPlans[gpCurrentId].goals[cat] || [];
     tbody.innerHTML = items.map(function(g,i){
+      var hasData = (g.requiredAmount || 0) > 0;
       return '<tr>'+
         '<td class="gp-col-num">'+(i+1)+'</td>'+
         '<td class="gp-col-desc"><input type="text" value="'+gpEscAttr(g.description)+'" placeholder="תיאור המטרה" oninput="gpOnGoalChange(\''+cat+'\','+i+',\'description\',this.value)"></td>'+
@@ -11270,7 +11461,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<td class="gp-col-prod"><input type="text" value="'+gpEscAttr(g.product)+'" placeholder="קרן כספית / מדד..." oninput="gpOnGoalChange(\''+cat+'\','+i+',\'product\',this.value)"></td>'+
         '<td class="gp-col-date"><input type="date" value="'+(g.targetDate||'')+'" oninput="gpOnGoalChange(\''+cat+'\','+i+',\'targetDate\',this.value)"></td>'+
         '<td class="gp-col-btns"><button class="gp-btn-danger" onclick="gpRemoveGoal(\''+cat+'\','+i+')" title="מחק שורה">✕</button></td>'+
-      '</tr>';
+      '</tr>' + (hasData ? gpGoalProgress(g) : '');
     }).join('');
     gpUpdateFoot(cat);
   }
@@ -11292,12 +11483,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function gpRecalc() {
     if (!gpCurrentId || !gpPlans[gpCurrentId]) return;
-    var total = 0;
+    var totalMon = 0, totalReq = 0, totalCur = 0, goalCount = 0;
     GP_CATS.forEach(function(c){
-      (gpPlans[gpCurrentId].goals[c]||[]).forEach(function(g){ total+=(g.monthlySaving||0); });
+      (gpPlans[gpCurrentId].goals[c]||[]).forEach(function(g){
+        totalMon += (g.monthlySaving||0);
+        totalReq += (g.requiredAmount||0);
+        totalCur += (g.currentAmount||0);
+        if (g.description || g.requiredAmount) goalCount++;
+      });
     });
     var el = document.getElementById('gp-sumMonthly');
-    if (el) el.textContent = gpFmt(total);
+    if (el) el.textContent = gpFmt(totalMon);
+
+    // Update summary cards
+    var elGoals = document.getElementById('gp-sum-goals');
+    if (elGoals) elGoals.textContent = goalCount + ' מטרות';
+    var elReq = document.getElementById('gp-sum-req');
+    if (elReq) elReq.textContent = gpFmt(totalReq);
+    var elCur = document.getElementById('gp-sum-cur');
+    if (elCur) elCur.textContent = gpFmt(totalCur);
+    var elPct = document.getElementById('gp-sum-pct');
+    var pct = totalReq > 0 ? Math.round(totalCur / totalReq * 100) : 0;
+    if (elPct) elPct.textContent = pct + '%';
+    var bar = document.getElementById('gp-sum-bar');
+    if (bar) bar.style.width = Math.min(100, pct) + '%';
   }
 
   gpLoad();
@@ -12962,6 +13171,32 @@ function buildTrendsTab() {
     }
   }
 }
+
+/* ════════════════════════════════════════
+   ONBOARDING
+════════════════════════════════════════ */
+function onboardCheck() {
+  // Only show if no client data exists and not dismissed before
+  var dismissed = localStorage.getItem('finapp_onboard_done');
+  if (dismissed) return;
+  var idx = cmGetIndex ? cmGetIndex() : {};
+  var hasData = Object.keys(idx).length > 0;
+  if (hasData) return;
+  var overlay = document.getElementById('onboard-overlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+function onboardClose(tab) {
+  var overlay = document.getElementById('onboard-overlay');
+  if (overlay) overlay.style.display = 'none';
+  localStorage.setItem('finapp_onboard_done', '1');
+  if (tab) switchTab(tab);
+}
+
+// Run after clientInit
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(onboardCheck, 600);
+});
 </script>
 
 <!-- Firebase Auth layer — must load after main app script -->
