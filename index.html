@@ -2061,7 +2061,7 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
   <div class="phase-arrow">›</div>
   <div class="phase-step" id="phase-2" onclick="goToPhase(2)">
     <span class="phase-num">2</span>
-    <span class="phase-label">בניית תקציב<br><small>תקציב חודשי</small></span>
+    <span class="phase-label">ייבוא ביצוע<br><small>דוח חודשי מהאשראי</small></span>
   </div>
   <div class="phase-arrow">›</div>
   <div class="phase-step" id="phase-3" onclick="goToPhase(3)">
@@ -2071,22 +2071,22 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
   <div class="phase-arrow">›</div>
   <div class="phase-step" id="phase-4" onclick="goToPhase(4)">
     <span class="phase-num">4</span>
-    <span class="phase-label">תוכנית ויעדים<br><small>יעדים פיננסיים</small></span>
+    <span class="phase-label">מגמות ויעדים<br><small>ניתוח לאורך זמן</small></span>
   </div>
 </div>
 
 <!-- TAB BAR -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-manual" onclick="switchTab('manual')">📋 מיפוי ידני</button>
+  <button class="tab-btn" id="tab-import" onclick="switchTab('import')">📥 ייבוא לתקציב</button>
+  <button class="tab-btn" id="tab-control" onclick="switchTab('control')">📊 בקרת תקציב</button>
+  <button class="tab-btn" id="tab-trends" onclick="switchTab('trends')">📊 מגמות</button>
+  <button class="tab-btn" id="tab-annual" onclick="switchTab('annual')">📅 תוכנית שנתית</button>
+  <button class="tab-btn" id="tab-goals" onclick="switchTab('goals')">🎯 יעדים פיננסיים</button>
   <button class="tab-btn" id="tab-credit" onclick="switchTab('credit')">💳 דוחות אשראי</button>
   <button class="tab-btn" id="tab-bank" onclick="switchTab('bank')">🏦 דוח עו"ש</button>
   <button class="tab-btn" id="tab-loan" onclick="switchTab('loan')">🔢 מחשבון הלוואות</button>
   <button class="tab-btn" id="tab-compound" onclick="switchTab('compound')">📈 ריבית דריבית</button>
-  <button class="tab-btn" id="tab-control" onclick="switchTab('control')">📊 בקרת תקציב</button>
-  <button class="tab-btn" id="tab-goals" onclick="switchTab('goals')">🎯 יעדים פיננסיים</button>
-  <button class="tab-btn" id="tab-import" onclick="switchTab('import')">📥 ייבוא לתקציב</button>
-  <button class="tab-btn" id="tab-annual" onclick="switchTab('annual')">📅 תוכנית שנתית</button>
-  <button class="tab-btn" id="tab-trends" onclick="switchTab('trends')">📊 מגמות</button>
   <div id="month-tab-btns"></div>
 </div>
 
@@ -2764,6 +2764,11 @@ body.client-view-mode .advisor-mgmt-only { display: none !important; }
     <div class="ctrl-kpi kpi-actual"><div class="ctrl-kpi-label">הוצאות בפועל</div><div class="ctrl-kpi-val" id="ctrl-kpi-actual">—</div></div>
     <div class="ctrl-kpi" id="ctrl-kpi-diff-card"><div class="ctrl-kpi-label">חריגה / חיסכון</div><div class="ctrl-kpi-val" id="ctrl-kpi-diff">—</div></div>
     <div class="ctrl-kpi kpi-pct"><div class="ctrl-kpi-label">ניצול תקציב</div><div class="ctrl-kpi-val" id="ctrl-kpi-pct">—</div></div>
+  </div>
+
+  <div class="section-card" id="ctrl-chart-wrap" style="display:none;margin-bottom:20px">
+    <div style="font-weight:700;font-size:.93rem;margin-bottom:14px">📊 תקציב מול ביצוע — סיכום</div>
+    <div style="position:relative;height:260px"><canvas id="ctrl-summary-chart"></canvas></div>
   </div>
 
   <div id="ctrl-income-group"></div>
@@ -11522,7 +11527,7 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ════════════════════════════════════════
    PHASE BAR
 ════════════════════════════════════════ */
-var PHASE_TABS = { 1: 'manual', 2: 'mo-jan', 3: 'control', 4: 'goals' };
+var PHASE_TABS = { 1: 'manual', 2: 'import', 3: 'control', 4: 'trends' };
 function goToPhase(n) {
   document.querySelectorAll('.phase-step').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById('phase-' + n);
@@ -11531,9 +11536,9 @@ function goToPhase(n) {
 }
 function setActivePhaseFromTab(tab) {
   var phase = 1;
-  if (tab === 'control') phase = 3;
-  else if (tab === 'goals') phase = 4;
-  else if (tab && tab.startsWith('mo-')) phase = 2;
+  if (tab === 'import') phase = 2;
+  else if (tab === 'control') phase = 3;
+  else if (tab === 'trends' || tab === 'goals' || tab === 'annual') phase = 4;
   document.querySelectorAll('.phase-step').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById('phase-' + phase);
   if (el) el.classList.add('active');
@@ -11650,6 +11655,48 @@ function buildControlTab() {
   if (diffCard) {
     diffCard.className = 'ctrl-kpi ' + (diff >= 0 ? 'kpi-ok' : 'kpi-over');
     diffCard.querySelector('.ctrl-kpi-label').textContent = diff >= 0 ? 'חיסכון' : 'חריגה';
+  }
+
+  // Summary chart
+  var ctrlWrap = document.getElementById('ctrl-chart-wrap');
+  if (ctrlWrap) {
+    var catLabels = ['הכנסות','קבועות','משתנות','מנויים','ביטוחים','תשלומים','חובות','חיסכון'];
+    var planData  = [planIncome, sumPlan(fixedRows), sumPlan(varRows), sumPlan(subRows),
+                     sumPlan(insRows), sumPlan(instRows), sumPlan(debtRows), sumPlan(savRows)];
+    var actData   = [actIncome, sumActual(fixedRows), sumActual(varRows), sumActual(subRows),
+                     sumActual(insRows), sumActual(instRows), sumActual(debtRows), sumActual(savRows)];
+    var hasAny = actData.some(function(v){ return v > 0; }) || planData.some(function(v){ return v > 0; });
+    ctrlWrap.style.display = hasAny ? 'block' : 'none';
+    if (hasAny) {
+      if (window._ctrlChart) { window._ctrlChart.destroy(); window._ctrlChart = null; }
+      var ctrlCtx = document.getElementById('ctrl-summary-chart');
+      if (ctrlCtx) {
+        window._ctrlChart = new Chart(ctrlCtx, {
+          type: 'bar',
+          data: {
+            labels: catLabels,
+            datasets: [
+              { label: 'תכנון', data: planData, backgroundColor: 'rgba(108,99,255,.55)', borderRadius: 4 },
+              { label: 'ביצוע', data: actData,
+                backgroundColor: actData.map(function(a,i){
+                  return a > planData[i] ? 'rgba(255,101,132,.75)' : 'rgba(67,233,123,.75)';
+                }), borderRadius: 4 }
+            ]
+          },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#8892b0', font: { size: 11 }, boxWidth: 12 } },
+              tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': ₪' + Math.round(c.raw).toLocaleString('he-IL'); } } }
+            },
+            scales: {
+              x: { ticks: { color: '#8892b0', callback: function(v){ return '₪' + v.toLocaleString(); } }, grid: { color: '#2a2d3e' } },
+              y: { ticks: { color: '#e8eaf6', font: { size: 11 } }, grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
   }
 
   renderControlGroup('ctrl-income-group', '💰 הכנסות',          incomeRows, true);
