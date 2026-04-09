@@ -8435,6 +8435,16 @@ function populateVarExpensesFromCredit() {
     document.getElementById(listId).appendChild(wrap);
   });
 
+  // Remove stale auto-rows for categories no longer in catMap
+  ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(listId) {
+    document.getElementById(listId).querySelectorAll('.cat-auto-wrap').forEach(function(w) {
+      if (!catMap[w.dataset.cat] || catMap[w.dataset.cat] <= 0) w.remove();
+    });
+  });
+  document.getElementById('annual-list').querySelectorAll('.input-row[data-auto]').forEach(function(r) {
+    if (!catMap[r.dataset.cat] || catMap[r.dataset.cat] <= 0) r.remove();
+  });
+
   // Trigger all section totals + live summary
   updateSectionTotal('fixed-list', 'total-fixed', 1);
   updateSectionTotal('sub-list', 'total-subs', 1);
@@ -11955,10 +11965,20 @@ function clientCollectData() {
       assets:    getSavingRows()
     },
     monthly: {},
-    credit: {
-      transactions: creditTransactions || [],
-      deletedAutoCats: Object.keys(deletedAutoCats)
-    }
+    credit: (function() {
+      var autoRows = {};
+      ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(lid) {
+        var el = document.getElementById(lid); if (!el) return;
+        el.querySelectorAll('.cat-auto-wrap').forEach(function(w) {
+          if (w.dataset.cat) { var inp = w.querySelector('input[type="number"]'); if (inp) autoRows[w.dataset.cat] = parseFloat(inp.value)||0; }
+        });
+      });
+      var annEl = document.getElementById('annual-list');
+      if (annEl) annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
+        if (r.dataset.cat) { var inp = r.querySelector('input[type="number"]'); if (inp) autoRows[r.dataset.cat] = parseFloat(inp.value)||0; }
+      });
+      return { transactions: creditTransactions||[], deletedAutoCats: Object.keys(deletedAutoCats), autoRows: autoRows };
+    })()
   };
 
   MONTHS_LIST.forEach(function(mo) {
@@ -12225,6 +12245,24 @@ function clientRestoreData(data) {
       _ccCtx = '';
       renderCreditSummary();
       populateVarExpensesFromCredit();
+      // Re-apply saved user-edited auto-row amounts over the auto-calculated values
+      if (data.credit && data.credit.autoRows) {
+        var _saved = data.credit.autoRows;
+        ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(lid) {
+          var el = document.getElementById(lid); if (!el) return;
+          el.querySelectorAll('.cat-auto-wrap').forEach(function(w) {
+            if (w.dataset.cat && _saved[w.dataset.cat] != null) {
+              var inp = w.querySelector('input[type="number"]'); if (inp) inp.value = _saved[w.dataset.cat];
+            }
+          });
+        });
+        var annEl = document.getElementById('annual-list');
+        if (annEl) annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
+          if (r.dataset.cat && _saved[r.dataset.cat] != null) {
+            var inp = r.querySelector('input[type="number"]'); if (inp) inp.value = _saved[r.dataset.cat];
+          }
+        });
+      }
     }
   }
 }
