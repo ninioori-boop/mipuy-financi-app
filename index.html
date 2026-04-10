@@ -7911,6 +7911,7 @@ function detectSmartPatterns(txs) {
 }
 
 function renderSmartAnalysis() {
+  var creditTransactions = (_ccCtx === 'import-') ? importCreditTransactions : window.creditTransactions;
   const container = document.getElementById(_ccCtx + 'smart-analysis');
   const patterns  = detectSmartPatterns(creditTransactions);
   const total     = patterns.standingOrders.length + patterns.installments.length +
@@ -8061,6 +8062,7 @@ async function parseFiles() {
 // All Claude API calls go through /api/categorize (serverless proxy).
 
 async function analyzeWithAI() {
+  var creditTransactions = (_ccCtx === 'import-') ? importCreditTransactions : window.creditTransactions;
   const unmatched = creditTransactions
     .map(function(t, i) { return { idx: i, t: t }; })
     .filter(function(item) { return item.t.category === 'שונות' && !item.t.isRefund; });
@@ -8487,6 +8489,7 @@ function showAutoFillNotice(months) {
    CREDIT SUMMARY — ACCORDION
 ════════════════════════════════════════ */
 function renderCreditSummary() {
+  var creditTransactions = (_ccCtx === 'import-') ? importCreditTransactions : window.creditTransactions;
   const ctx = _ccCtx;
   const total = creditTransactions.reduce(function(s,t){ return s + (t.isRefund ? -t.amount : t.amount); }, 0);
 
@@ -9787,8 +9790,6 @@ async function importParseFiles() {
       importCreditTransactions.push.apply(importCreditTransactions, txs);
       uploadedFiles.push({ name: f.name, rowCount: txs.length });
     }
-    // Point creditTransactions to importCreditTransactions for render functions
-    creditTransactions = importCreditTransactions;
     hideLoading();
     renderSmartAnalysis();
     renderCreditSummary();
@@ -9872,7 +9873,6 @@ function importSendToBudget() {
   // Switch tab FIRST so syncManualToMonth populates plan values, then apply credit actuals on top
   switchTab('mo-' + monthId);
   moApplyCreditData(monthId, txs, lbl);
-  if (typeof clientSave === 'function' && cmActiveId) clientSave();
 
   var btn = document.getElementById('import-send-btn');
   var lblEl = document.getElementById('import-send-label');
