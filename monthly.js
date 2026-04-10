@@ -463,6 +463,9 @@ function moApplyCreditData(monthId, txs, sourceLabel) {
   fillSection(p('ins'),      INS_C);
   moRecalc(monthId);
 
+  // Save to localStorage immediately so data survives page refresh
+  if (typeof clientAutoSave === 'function') clientAutoSave();
+
   var total = filtered.reduce(function(s,t){return s+t.amount;},0);
   moShowBanner(monthId,
     'יובאו ' + filtered.length + ' עסקאות מ' + sourceLabel + ' — סה"כ ₪' + Math.round(total).toLocaleString('he-IL'),
