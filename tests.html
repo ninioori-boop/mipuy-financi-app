@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<title>בדיקות — mipuy-financi-app</title>
+<style>
+  body { font-family: monospace; background: #0f0f13; color: #e2e8f0; padding: 24px; }
+  h1 { color: #a78bfa; margin-bottom: 4px; }
+  .subtitle { color: #64748b; font-size: .85rem; margin-bottom: 24px; }
+  .suite { margin-bottom: 28px; }
+  .suite-title { font-size: 1rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
+  .test { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; font-size: .88rem; }
+  .pass { color: #4ade80; }
+  .fail { color: #f87171; }
+  .icon { flex-shrink: 0; font-size: 1rem; }
+  .detail { color: #94a3b8; font-size: .78rem; margin-top: 2px; }
+  .error-msg { color: #fbbf24; font-size: .78rem; }
+  #summary { margin-top: 24px; font-size: 1.1rem; font-weight: 700; padding: 14px 20px; border-radius: 10px; }
+  .all-pass { background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.3); color: #4ade80; }
+  .has-fail  { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: #f87171; }
+  button { background: rgba(167,139,250,.15); border: 1px solid rgba(167,139,250,.3); color: #a78bfa;
+           padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: monospace; margin-bottom: 20px; }
+  button:hover { background: rgba(167,139,250,.25); }
+</style>
+</head>
+<body>
+<h1>🧪 בדיקות אוטומטיות</h1>
+<p class="subtitle">פותח את הקובץ הזה בדפדפן לפני כל push לגיטהאב</p>
+<button onclick="runAll()">▶ הרץ בדיקות</button>
+<div id="results"></div>
+<div id="summary"></div>
+
+<!-- Load all app scripts in correct order -->
+<script src="globals.js"></script>
+<script src="parsing.js"></script>
+<!-- Stub DOM-dependent modules so they don't crash -->
+<script>
+// Minimal stubs for modules that access DOM on load
+window.learnedDB = {};
+// Prevent init() from running and touching DOM
+var _realInit;
+</script>
+
+<script>
+/* ══════════════════════════════════════════
+   TEST FRAMEWORK
+══════════════════════════════════════════ */
+var passed = 0, failed = 0;
+var output = [];
+
+function suite(name) {
+  output.push({ type: 'suite', name: name });
+}
+
+function test(desc, fn) {
+  try {
+    fn();
+    output.push({ type: 'pass', desc: desc });
+    passed++;
+  } catch(e) {
+    output.push({ type: 'fail', desc: desc, err: e.message });
+    failed++;
+  }
+}
+
+function eq(actual, expected, msg) {
+  if (actual !== expected) {
+    throw new Error((msg ? msg + ': ' : '') + 'קיבלנו "' + actual + '", ציפינו "' + expected + '"');
+  }
+}
+
+function ok(val, msg) {
+  if (!val) throw new Error(msg || 'הערך false/falsy');
+}
+
+function notOk(val, msg) {
+  if (val) throw new Error(msg || 'הערך true/truthy — ציפינו falsy');
+}
+
+/* ══════════════════════════════════════════
+   TEST SUITES
+══════════════════════════════════════════ */
+
+function defineTests() {
+
+  /* ── parseAmount ── */
+  suite('parseAmount — פירוש סכומים');
+  test('מספר פשוט', function() { eq(parseAmount(150), 150); });
+  test('מחרוזת מספר', function() { eq(parseAmount('150'), 150); });
+  test('עם פסיקים', function() { eq(parseAmount('1,234.50'), 1234.5); });
+  test('עם סימן ₪', function() { eq(parseAmount('₪350'), 350); });
+  test('שלילי בסוגריים', function() { eq(parseAmount('(120)'), -120); });
+  test('null → NaN', function() { ok(isNaN(parseAmount(null))); });
+  test('ריק → NaN', function() { ok(isNaN(parseAmount(''))); });
+  test('טקסט → NaN', function() { ok(isNaN(parseAmount('abc'))); });
+
+  /* ── normalizeForLookup ── */
+  suite('normalizeForLookup — נרמול שמות');
+  test('מסיר בע"מ', function() {
+    var r = normalizeForLookup('שופרסל בע"מ');
+    notOk(r.includes('בע'), 'לא הוסר בע"מ');
+  });
+  test('מסיר LTD', function() {
+    var r = normalizeForLookup('Super Store LTD');
+    notOk(r.toLowerCase().includes('ltd'), 'לא הוסר LTD');
+  });
+  test('מסיר שם עיר', function() {
+    var r = normalizeForLookup('מקדונלדס תל אביב');
+    notOk(r.includes('תל אביב'), 'לא הוסרה העיר');
+  });
+  test('שומר שם העסק', function() {
+    var r = normalizeForLookup('שופרסל בע"מ');
+    ok(r.includes('שופרסל'), 'שם העסק נמחק');
+  });
+
+  /* ── categorize ── */
+  suite('categorize — קטגוריזציה');
+  test('שופרסל → מזון לבית', function() { eq(categorize('שופרסל'), 'מזון לבית'); });
+  test('רמי לוי → מזון לבית', function() { eq(categorize('רמי לוי'), 'מזון לבית'); });
+  test('פז דלק → דלק וחניה', function() { eq(categorize('פז דלק'), 'דלק וחניה'); });
+  test('סלקום → תקשורת', function() { eq(categorize('סלקום'), 'תקשורת'); });
+  test('כביש 6 → כבישי אגרה', function() { eq(categorize('כביש 6'), 'כבישי אגרה'); });
+  test('מכבי → קופת חולים', function() { eq(categorize('מכבי שירותי בריאות'), 'קופת חולים'); });
+  test('ביטוח לאומי → ביטוח לאומי', function() { eq(categorize('ביטוח לאומי'), 'ביטוח לאומי'); });
+  test('wolt → אוכל בחוץ ובילויים', function() { eq(categorize('wolt'), 'אוכל בחוץ ובילויים'); });
+  test('סופר פארם → פארם', function() { eq(categorize('סופר פארם'), 'פארם'); });
+  test('HOT → תקשורת', function() {
+    var r = categorize('HOT mobile');
+    eq(r, 'תקשורת');
+  });
+  test('ערך לא מזוהה → שונות', function() {
+    var r = categorize('xyzאבגד1234');
+    eq(r, 'שונות');
+  });
+  test('תוצאה תמיד ב-ALL_CATEGORIES', function() {
+    var samples = ['שופרסל','פז','wolt','ביטוח לאומי','xyzunknown'];
+    samples.forEach(function(s) {
+      var cat = categorize(s);
+      ok(ALL_CATEGORIES.indexOf(cat) !== -1, '"' + s + '" → "' + cat + '" לא ב-ALL_CATEGORIES');
+    });
+  });
+
+  /* ── detectColumns ── */
+  suite('detectColumns — זיהוי עמודות');
+  test('מזהה עמודת תיאור', function() {
+    var cols = detectColumns(['תאריך רכישה', 'שם בית עסק', 'סכום חיוב']);
+    eq(cols.descCol, 1);
+  });
+  test('מזהה עמודת סכום חיוב', function() {
+    var cols = detectColumns(['תאריך', 'שם בית עסק', 'סכום חיוב']);
+    eq(cols.amountCol, 2);
+  });
+  test('מזהה תאריך', function() {
+    var cols = detectColumns(['תאריך רכישה', 'שם בית עסק', 'סכום חיוב']);
+    eq(cols.dateCol, 0);
+  });
+  test('header לא תקין → descCol=-1', function() {
+    var cols = detectColumns(['foo', 'bar', 'baz']);
+    eq(cols.descCol, -1);
+  });
+
+  /* ── GLOBAL INVARIANTS ── */
+  suite('אינווריאנטים — כללים קריטיים');
+  test('creditTransactions הוא var (window נגיש)', function() {
+    ok(window.creditTransactions !== undefined, 'window.creditTransactions = undefined — שנה let→var בglobals.js');
+  });
+  test('creditTransactions הוא מערך', function() {
+    ok(Array.isArray(window.creditTransactions), 'creditTransactions אינו מערך');
+  });
+  test('_ccCtx ברירת מחדל היא ""', function() {
+    eq(window._ccCtx, '', '_ccCtx לא "" בטעינה');
+  });
+  test('ALL_CATEGORIES מכיל קטגוריות חיוניות', function() {
+    var required = ['מזון לבית','ביטוח לאומי','מיסים','תקשורת','דלק וחניה','שונות'];
+    required.forEach(function(c) {
+      ok(ALL_CATEGORIES.indexOf(c) !== -1, '"' + c + '" חסר ב-ALL_CATEGORIES');
+    });
+  });
+  test('VAR_CATEGORIES ⊆ ALL_CATEGORIES', function() {
+    var VAR = ['מזון לבית','אוכל בחוץ ובילויים','פארם','דלק וחניה'];
+    VAR.forEach(function(c) {
+      ok(ALL_CATEGORIES.indexOf(c) !== -1, '"' + c + '" ב-VAR_CATEGORIES אך לא ב-ALL_CATEGORIES');
+    });
+  });
+}
+
+/* ══════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════ */
+function runAll() {
+  passed = 0; failed = 0; output = [];
+  defineTests();
+
+  var html = '';
+  output.forEach(function(item) {
+    if (item.type === 'suite') {
+      html += '<div class="suite"><div class="suite-title">' + item.name + '</div>';
+    } else if (item.type === 'pass') {
+      html += '<div class="test pass"><span class="icon">✅</span><span>' + item.desc + '</span></div>';
+    } else {
+      html += '<div class="test fail"><span class="icon">❌</span><div><div>' + item.desc + '</div>' +
+              '<div class="error-msg">' + item.err + '</div></div></div>';
+    }
+  });
+  html += '</div>';
+
+  document.getElementById('results').innerHTML = html;
+
+  var total = passed + failed;
+  var sumEl = document.getElementById('summary');
+  if (failed === 0) {
+    sumEl.className = 'all-pass';
+    sumEl.innerHTML = '✅ כל ' + total + ' הבדיקות עברו — אפשר לעשות push!';
+  } else {
+    sumEl.className = 'has-fail';
+    sumEl.innerHTML = '❌ ' + failed + ' בדיקות נכשלו מתוך ' + total + ' — אל תעשה push עד שזה מתוקן!';
+  }
+}
+
+// Auto-run on load
+window.addEventListener('load', runAll);
+</script>
+</body>
+</html>
