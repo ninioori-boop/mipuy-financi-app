@@ -9869,8 +9869,10 @@ function importSendToBudget() {
   }
 
   var lbl = (IMPORT_MONTH_NAMES[monthId]||monthId) + (year ? ' ' + year : '');
-  moApplyCreditData(monthId, txs, lbl);
+  // Switch tab FIRST so syncManualToMonth populates plan values, then apply credit actuals on top
   switchTab('mo-' + monthId);
+  moApplyCreditData(monthId, txs, lbl);
+  if (typeof clientSave === 'function' && cmActiveId) clientSave();
 
   var btn = document.getElementById('import-send-btn');
   var lblEl = document.getElementById('import-send-label');
@@ -9930,7 +9932,20 @@ function syncManualToMonth(mid) {
   function populateSimple(section, items) {
     var list = document.getElementById(mId(mid, section));
     if (!list) return;
+    // Preserve existing actual values before wiping (keyed by row name)
+    var savedActuals = {};
+    var savedAutoRows = []; // mo-auto-rows to re-add after sync
+    list.querySelectorAll('.bud-row-2').forEach(function(row) {
+      var inp = row.querySelectorAll('input');
+      var name = (inp[0] || {}).value.trim();
+      var actual = (inp[2] || {}).value;
+      if (name && actual !== '') savedActuals[name] = actual;
+      if (row.classList.contains('mo-auto-row') && name && actual !== '') {
+        savedAutoRows.push({ name: name, actual: actual });
+      }
+    });
     list.innerHTML = '';
+    var manualNames = items.map(function(i){ return i.name; });
     items.forEach(function(item) {
       var d = document.createElement('div');
       d.innerHTML = moSimpleRow('');
@@ -9938,7 +9953,21 @@ function syncManualToMonth(mid) {
       var inputs = row.querySelectorAll('input');
       if (inputs[0]) inputs[0].value = item.name;
       if (inputs[1]) inputs[1].value = item.amt || '';
+      if (inputs[2] && savedActuals[item.name] != null) inputs[2].value = savedActuals[item.name];
       list.appendChild(row);
+    });
+    // Re-add auto-rows whose category was not in the manual list
+    savedAutoRows.forEach(function(r) {
+      if (manualNames.indexOf(r.name) === -1) {
+        var d = document.createElement('div');
+        d.innerHTML = '<div class="bud-row-2 mo-auto-row">' +
+          '<input class="bud-name" type="text" value="' + r.name + '" oninput="moLive(this)">' +
+          '<input class="bud-amt" type="number" placeholder="תכנון" min="0" oninput="moLive(this)">' +
+          '<input class="bud-actual" type="number" value="' + r.actual + '" min="0" oninput="moLive(this)">' +
+          '<button class="bud-del" onclick="budDel(this);moLiveFromDel(this)">✕</button>' +
+          '</div>';
+        list.appendChild(d.firstChild);
+      }
     });
     if (items.length === 0) {
       var d = document.createElement('div'); d.innerHTML = moSimpleRow(''); list.appendChild(d.firstChild);
