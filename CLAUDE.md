@@ -2,12 +2,28 @@
 
 ## מבנה הפרויקט
 
+### קבצי ה-App (סדר טעינה ב-index.html)
+| קובץ | שורות | תפקיד |
+|---|---|---|
+| `globals.js` | 3618 | BUSINESS_DB + כל הגלובלים + מערכי קטגוריות |
+| `mapping.js` | 684 | טאב מיפוי ידני — init, addRow, row management, tab switching |
+| `parsing.js` | 229 | פענוח קבצים — parseExcelFile, categorize, normalizeForLookup |
+| `credit.js` | 997 | טאב דוחות אשראי — parseFiles, AI analysis, populateVarExpensesFromCredit |
+| `utils.js` | 355 | charts, PDF, reset, utilities + קריאה ל-init() |
+| `monthly.js` | 555 | טאבי תקציב חודשי — initMonths, moRecalc, moApplyCreditData |
+| `import-budget.js` | 355 | טאב ייבוא לתקציב — importParseFiles, importSendToBudget |
+| `annual.js` | 400 | טאב תכנון שנתי — annualRender, anPullActuals |
+| `control.js` | 1496 | learnedDB + budget tab + goals + phase bar + control tab + subs |
+| `client.js` | 663 | ניהול לקוחות — clientSave, clientRestoreData, clientCollectData |
+| `bank.js` | 491 | טאב דוח עו"ש |
+| `trends.js` | 205 | טאב מגמות + onboarding |
+
+### קבצים נוספים
 | קובץ | תפקיד |
 |---|---|
-| `index.html` | מבנה HTML של הדף |
-| `style.css` | כל ה-CSS |
-| `app.js` | כל לוגיקת ה-JS (~11,000 שורות) |
-| `auth.js` | Firebase Authentication (נטען אחרי app.js) |
+| `index.html` | מבנה HTML של הדף (~1,350 שורות) |
+| `style.css` | כל ה-CSS (~1,946 שורות) |
+| `auth.js` | Firebase Authentication (נטען **אחרי** כל קבצי ה-app) |
 | `db.js` | Firestore wrappers |
 | `api/analyze.js` | Serverless proxy → Claude API |
 | `api/categorize.js` | Serverless proxy → Claude API (batch) |

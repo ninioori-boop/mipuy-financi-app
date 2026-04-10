@@ -1337,9 +1337,21 @@
 
 <!-- generate button removed — summary updates live -->
 
-<script src="app.js"></script>
+<!-- App modules — load order matters (globals first, client last) -->
+<script src="globals.js"></script>
+<script src="mapping.js"></script>
+<script src="parsing.js"></script>
+<script src="credit.js"></script>
+<script src="utils.js"></script>
+<script src="monthly.js"></script>
+<script src="import-budget.js"></script>
+<script src="annual.js"></script>
+<script src="control.js"></script>
+<script src="client.js"></script>
+<script src="bank.js"></script>
+<script src="trends.js"></script>
 
-<!-- Firebase Auth layer — must load after main app script -->
+<!-- Firebase Auth layer — must load after main app scripts -->
 <script src="auth.js"></script>
 </body>
 </html>
