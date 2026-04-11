@@ -388,4 +388,24 @@ window.addEventListener('load', function() {
     };
     populateVarExpensesFromCredit._fbPatched = true;
   }
+
+  // Override clientSave — also triggers Firebase save
+  if (typeof clientSave === 'function' && !clientSave._fbPatched) {
+    var _origClientSave = clientSave;
+    clientSave = function() {
+      _origClientSave.apply(this, arguments);
+      if (!_fbRestoring) fbDebouncedSave();
+    };
+    clientSave._fbPatched = true;
+  }
+
+  // Override clientAutoSave — also triggers Firebase save
+  if (typeof clientAutoSave === 'function' && !clientAutoSave._fbPatched) {
+    var _origClientAutoSave = clientAutoSave;
+    clientAutoSave = function() {
+      _origClientAutoSave.apply(this, arguments);
+      if (!_fbRestoring) fbDebouncedSave();
+    };
+    clientAutoSave._fbPatched = true;
+  }
 });
