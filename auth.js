@@ -312,9 +312,39 @@ function fbSaveNow() {
     _fbSavePending = true;
     return;
   }
-  var data = clientCollectData();
+  // 1. collect — catch throws from clientCollectData itself
+  var data;
+  try { data = clientCollectData(); }
+  catch(e) { fbUpdateSaveStatus('⚠️ שגיאה באיסוף נתונים: ' + e.message); return; }
+
+  // 2. JSON round-trip strips undefined/functions that Firestore rejects with a sync throw
+  var dataClean;
+  try { dataClean = JSON.parse(JSON.stringify(data)); }
+  catch(e) { fbUpdateSaveStatus('⚠️ שגיאה בהכנת הנתונים: ' + e.message); return; }
+
+  // 3. size guard — Firestore limit is 1MB per document
+  var jsonStr = JSON.stringify(dataClean);
+  if (jsonStr.length > 900000) {
+    fbUpdateSaveStatus('⚠️ הנתונים גדולים מדי — נא למחוק עסקאות ישנות');
+    console.warn('fbSaveNow: data too large', jsonStr.length, 'bytes');
+    return;
+  }
+
   fbUpdateSaveStatus('שומר…');
-  saveUserData(_fbUid, data).then(function() {
+
+  // 4. timeout wrapper — Firestore promise can hang indefinitely if network stalls
+  var savePromise;
+  try { savePromise = saveUserData(_fbUid, dataClean); }
+  catch(err) {
+    console.error('שגיאה בשמירה (sync):', err);
+    _fbSavePending = true;
+    fbUpdateSaveStatus('⚠️ לא נשמר — ' + (err.message || err.code || 'שגיאה'));
+    return;
+  }
+  var timeoutPromise = new Promise(function(_, reject) {
+    setTimeout(function() { reject(new Error('timeout')); }, 15000);
+  });
+  Promise.race([savePromise, timeoutPromise]).then(function() {
     _fbSavePending = false;
     var now = new Date();
     var time = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
@@ -322,7 +352,8 @@ function fbSaveNow() {
   }).catch(function(err) {
     console.error('שגיאה בשמירה:', err);
     _fbSavePending = true;
-    fbUpdateSaveStatus('⚠️ לא נשמר — ינסה שוב');
+    var msg = err.message === 'timeout' ? 'timeout — בדוק חיבור' : (err.message || err.code || 'שגיאה');
+    fbUpdateSaveStatus('⚠️ לא נשמר — ' + msg);
   });
 }
 
