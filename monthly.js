@@ -464,8 +464,8 @@ function moApplyCreditData(monthId, txs, sourceLabel) {
   fillSection(p('ins'),      INS_C);
   moRecalc(monthId);
 
-  // Save to localStorage immediately so data survives page refresh
-  if (typeof clientAutoSave === 'function') clientAutoSave();
+  // Save immediately (not debounced) so data survives page refresh
+  if (typeof clientSave === 'function') clientSave();
 
   var total = filtered.reduce(function(s,t){return s+t.amount;},0);
   moShowBanner(monthId,
