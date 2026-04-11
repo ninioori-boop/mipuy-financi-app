@@ -63,7 +63,8 @@ function clientCollectData() {
         md[sec].push({
           name:   (inp[0]||{}).value||'',
           plan:   (inp[1]||{}).value||'',
-          actual: (inp[2]||{}).value||''
+          actual: (inp[2]||{}).value||'',
+          auto:   row.classList.contains('mo-auto-row') || undefined
         });
       });
     });
@@ -229,10 +230,19 @@ function clientRestoreData(data) {
         if (!el || !md[sec]) return;
         el.innerHTML = '';
         md[sec].forEach(function(item) {
-          el.insertAdjacentHTML('beforeend', moSimpleRow(item.name||''));
+          var rowHtml = item.auto
+            ? '<div class="bud-row-2 mo-auto-row">' +
+                '<input class="bud-name" type="text" value="" oninput="moLive(this)">' +
+                '<input class="bud-amt" type="number" placeholder="תכנון" min="0" oninput="moLive(this)">' +
+                '<input class="bud-actual" type="number" placeholder="ביצוע" min="0" oninput="moLive(this)">' +
+                '<button class="bud-del" onclick="budDel(this);moLiveFromDel(this)">✕</button>' +
+              '</div>'
+            : moSimpleRow(item.name||'');
+          el.insertAdjacentHTML('beforeend', rowHtml);
           var rows = el.querySelectorAll('.bud-row-2');
           var last = rows[rows.length-1];
           var inp = last.querySelectorAll('input');
+          if (inp[0]) inp[0].value = item.name||'';
           if (inp[1]) inp[1].value = item.plan||'';
           if (inp[2]) inp[2].value = item.actual||'';
         });

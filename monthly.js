@@ -380,6 +380,7 @@ function moCheckAlerts(mid, d) {
 }
 
 
+var _moCreditTarget = null;
 function moUploadCredit(monthId) {
   _moCreditTarget = monthId;
   var inp = document.getElementById('mo-credit-file-input');
