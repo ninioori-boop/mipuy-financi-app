@@ -909,6 +909,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function gpSave() { localStorage.setItem(GP_KEY, JSON.stringify(gpPlans)); }
 
+  // Expose for Firebase save/restore via clientCollectData / clientRestoreData
+  window.gpGetPlans = function() { return JSON.parse(JSON.stringify(gpPlans)); };
+  window.gpSetPlans = function(p) {
+    gpPlans = p || {};
+    localStorage.setItem(GP_KEY, JSON.stringify(gpPlans));
+    gpRenderList();
+  };
+
   window.gpCreateNewPlan = function() {
     var id = gpGenId();
     var today = new Date().toISOString().split('T')[0];

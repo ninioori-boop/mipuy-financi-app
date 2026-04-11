@@ -57,7 +57,9 @@ function clientCollectData() {
         if (r.dataset.cat) { var inp = r.querySelector('input[type="number"]'); if (inp) autoRows[r.dataset.cat] = parseFloat(inp.value)||0; }
       });
       return { transactions: creditTransactions||[], deletedAutoCats: Object.keys(deletedAutoCats), autoRows: autoRows };
-    })()
+    })(),
+    learnedDB: window.learnedDB || {},
+    gpPlans: (typeof window.gpGetPlans === 'function') ? window.gpGetPlans() : null
   };
 
   MONTHS_LIST.forEach(function(mo) {
@@ -352,6 +354,19 @@ function clientRestoreData(data) {
       debtEl.innerHTML = '';
       an.debt.forEach(function(item) { anAddDebtRow(item.name, item.yr, item.balance); });
     }
+    // Sync localStorage so anLoadPlan() finds correct data when tab is opened
+    if (typeof anSavePlan === 'function') anSavePlan();
+  }
+
+  // learnedDB — learned category overrides
+  if (data.learnedDB && typeof data.learnedDB === 'object') {
+    window.learnedDB = data.learnedDB;
+    try { localStorage.setItem('finapp_learnedDB', JSON.stringify(window.learnedDB)); } catch(e) {}
+  }
+
+  // gpPlans — financial goal plans
+  if (data.gpPlans && typeof window.gpSetPlans === 'function') {
+    window.gpSetPlans(data.gpPlans);
   }
 }
 

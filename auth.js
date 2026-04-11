@@ -408,4 +408,24 @@ window.addEventListener('load', function() {
     };
     clientAutoSave._fbPatched = true;
   }
+
+  // Override anSavePlan — annual tab row deletions are clicks (not input events), patch to reach Firebase
+  if (typeof anSavePlan === 'function' && !anSavePlan._fbPatched) {
+    var _origAnSavePlan = anSavePlan;
+    anSavePlan = function() {
+      _origAnSavePlan.apply(this, arguments);
+      if (!_fbRestoring) fbDebouncedSave();
+    };
+    anSavePlan._fbPatched = true;
+  }
+
+  // Override saveToLearnedDB — category learns write directly to localStorage, not via input events
+  if (typeof saveToLearnedDB === 'function' && !saveToLearnedDB._fbPatched) {
+    var _origSaveToLearnedDB = saveToLearnedDB;
+    saveToLearnedDB = function() {
+      _origSaveToLearnedDB.apply(this, arguments);
+      if (!_fbRestoring) fbDebouncedSave();
+    };
+    saveToLearnedDB._fbPatched = true;
+  }
 });
