@@ -33,6 +33,17 @@ function clientCollectData() {
       assets:    getSavingRows()
     },
     monthly: {},
+    annual: (function() {
+      if (typeof anReadSection !== 'function') return null;
+      return {
+        income: anReadSection('an-income'),
+        fixed:  anReadSection('an-fixed'),
+        var:    anReadSection('an-var'),
+        sub:    anReadSection('an-sub'),
+        debt:   (typeof anReadDebtSection === 'function') ? anReadDebtSection() : [],
+        sav:    anReadSection('an-sav')
+      };
+    })(),
     credit: (function() {
       var autoRows = {};
       ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(lid) {
@@ -323,6 +334,23 @@ function clientRestoreData(data) {
       _ccCtx = '';
       renderCreditSummary();
       populateVarExpensesFromCredit();
+    }
+  }
+
+  // Annual tab
+  if (data.annual && typeof anAddRow === 'function') {
+    var an = data.annual;
+    ['income','fixed','var','sub','sav'].forEach(function(key) {
+      var listId = 'an-' + key;
+      var el = document.getElementById(listId);
+      if (!el || !an[key]) return;
+      el.innerHTML = '';
+      an[key].forEach(function(item) { anAddRow(listId, key, item.name, item.yr); });
+    });
+    var debtEl = document.getElementById('an-debt');
+    if (debtEl && an.debt && typeof anAddDebtRow === 'function') {
+      debtEl.innerHTML = '';
+      an.debt.forEach(function(item) { anAddDebtRow(item.name, item.yr, item.balance); });
     }
   }
 }
