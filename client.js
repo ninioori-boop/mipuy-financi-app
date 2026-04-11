@@ -593,6 +593,14 @@ function clientInit() {
       var raw = localStorage.getItem(CM_DATA_KEY + activeId);
       if (raw) { try { clientRestoreData(JSON.parse(raw)); } catch(e) { console.warn('clientInit error', e); } }
     }
+  } else if (!activeId) {
+    // No client yet — auto-create a default one so data always gets saved
+    var autoId = cmGenId();
+    var autoIdx = cmGetIndex();
+    autoIdx[autoId] = { name: 'ברירת מחדל', advisor: '', phone: '', createdAt: Date.now(), updatedAt: Date.now() };
+    cmSaveIndex(autoIdx);
+    localStorage.setItem(CM_ACTIVE_KEY, autoId);
+    cmActiveId = autoId;
   }
   clientRenderBar();
 
