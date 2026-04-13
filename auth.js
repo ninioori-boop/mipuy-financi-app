@@ -118,9 +118,7 @@ function fbSignUp() {
 
 function fbGoogleSignIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    fbShowError(fbErrMsg(err.code));
-  });
+  auth.signInWithRedirect(provider);
 }
 
 function fbSignOut() {

@@ -1,4 +1,42 @@
-# CLAUDE.md — מדריך עבודה עם mipuy-financi-app
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
+
+# mipuy-financi-app
+
+## על הפרויקט
+
+**מטרת האפליקציה:** לעזור ליועצים פיננסיים ולמשתמשים אישיים לעבור שלושה שלבים:
+1. **אפיון פיננסי** — ייבוא נתונים מדוחות אשראי וניתוחם כדי לקבל תמונה מלאה של ההתנהלות הכלכלית הנוכחית של הלקוח
+2. **בניית תקציב** — בניית מסגרת תקציבית חודשית מול ביצוע בפועל
+3. **תכנון לטווח ארוך** — בניית תוכנית כלכלית רב-שנתית
+
+האפליקציה מקצרת משמעותית את זמן האפיון הפיננסי ומציגה ליועץ וללקוח את כל הנתונים במקום אחד.
+
+**טאבים ראשיים:**
+- **דוחות אשראי** — העלאת Excel, קטלוג אוטומטי, ניתוח AI עם Claude
+- **מיפוי ידני** — חלוקה לקטגוריות: משתנות / קבועות / ביטוחים / מנויים
+- **תקציב חודשי** — תכנון מול ביצוע לכל חודש
+- **ייבוא לתקציב** — ייבוא ביצוע מ-Excel ישירות לטאב חודשי
+- **תכנון שנתי** — סיכום שנתי
+- **דוח עו"ש / מגמות** — ניתוח נוסף
+
+**סטאק:**
+- Vanilla JS ללא framework, ספריות דרך CDN (Firebase, Chart.js, jsPDF, SheetJS)
+- Firebase Authentication + Firestore לשמירת נתוני לקוחות
+- Vercel Serverless Functions כ-proxy ל-Claude API
+
+---
+
+## ריצה ובדיקות
+
+- **אין build** — Vanilla JS בלבד, ספריות דרך CDN, אין npm/bundler.
+- **בדיקות אוטומטיות**: פתח `tests.html` בדפדפן (פתיחה ישירה מהקובץ, ללא שרת). הבדיקות רצות אוטומטית בטעינה ובודקות: `parseAmount`, `normalizeForLookup`, `categorize`, `detectColumns`, ואינווריאנטים גלובליים.
+- **פריסה**: Vercel. קבצי `api/*.js` הם Serverless Functions (Node.js, maxDuration=30s). יש להגדיר `ANTHROPIC_API_KEY` ב-Environment Variables של Vercel.
+
+---
 
 ## מבנה הפרויקט
 
@@ -40,6 +78,26 @@
 | `deletedAutoCats` | קטגוריות שהמשתמש מחק ידנית מהמיפוי — מתאפס בכל העלאה חדשה | `parseFiles`, `clientRestoreData` |
 | `cmActiveId` | ID הלקוח הפעיל ב-localStorage | `clientInit`, `clientLoad`, `clientCreate` |
 | `uploadedFiles` | רשימת קבצים שכבר עובדו (למניעת עיבוד כפול) | `parseFiles`, `importParseFiles` |
+
+---
+
+## זרימת נתונים בין טאבים
+
+```
+טאב אשראי (credit.js)
+  └─ parseFiles() → creditTransactions[]
+  └─ populateVarExpensesFromCredit() → ממלא שורות מיפוי ידני (mapping.js)
+
+טאב ייבוא לתקציב (import-budget.js)
+  └─ importParseFiles() → importCreditTransactions[]   ← עצמאי לחלוטין
+  └─ importSendToBudget():
+       1. switchTab(mid) → syncManualToMonth() [מאכלס תכנון]
+       2. moApplyCreditData() [מוסיף ביצוע]
+
+טאב חודשי (monthly.js)
+  └─ moRecalc() → מחשב סיכומים
+  └─ נתונים עוברים ל-annual.js דרך anPullActuals()
+```
 
 ---
 
