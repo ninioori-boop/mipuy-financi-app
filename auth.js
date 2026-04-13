@@ -116,21 +116,17 @@ function fbSignUp() {
     });
 }
 
+var _googleSignInInProgress = false;
 function fbGoogleSignIn() {
-  Object.keys(localStorage).forEach(function(k) {
-    if (k.startsWith('firebase:pendingRedirect') || k.startsWith('firebase:redirectUser')) {
-      localStorage.removeItem(k);
-    }
-  });
-  Object.keys(sessionStorage).forEach(function(k) {
-    if (k.startsWith('firebase:')) sessionStorage.removeItem(k);
-  });
+  if (_googleSignInInProgress) return;
+  _googleSignInInProgress = true;
   var provider = new firebase.auth.GoogleAuthProvider();
-  fbShowError('🔍 מנסה להתחבר...');
-  auth.signInWithPopup(provider).then(function(result) {
-    fbShowError('✅ הצלחה: ' + result.user.email);
-  }).catch(function(err) {
-    fbShowError('❌ שגיאה: ' + err.code + ' — ' + err.message);
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
+  }).finally(function() {
+    _googleSignInInProgress = false;
   });
 }
 
