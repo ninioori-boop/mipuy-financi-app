@@ -168,6 +168,15 @@ function fbErrMsg(code) {
   return map[code] || ('שגיאה: ' + code);
 }
 
+/* ── טיפול בחזרה מ-Google redirect ────────────────────────────── */
+auth.getRedirectResult().then(function(result) {
+  // result.user קיים אם המשתמש חזר מ-redirect — onAuthStateChanged יטפל בו
+}).catch(function(err) {
+  if (err && err.code && err.code !== 'auth/cancelled-popup-request') {
+    fbShowError(fbErrMsg(err.code));
+  }
+});
+
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
 var _fbSaveTimer = null;
