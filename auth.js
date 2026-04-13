@@ -116,17 +116,12 @@ function fbSignUp() {
     });
 }
 
-var _googleSignInInProgress = false;
 function fbGoogleSignIn() {
-  if (_googleSignInInProgress) return;
-  _googleSignInInProgress = true;
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(err) {
     if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
       fbShowError(fbErrMsg(err.code));
     }
-  }).finally(function() {
-    _googleSignInInProgress = false;
   });
 }
 
@@ -176,16 +171,6 @@ function fbErrMsg(code) {
   };
   return map[code] || ('שגיאה: ' + code);
 }
-
-/* ── נקה כל state של Firebase בטעינת הדף ──────────────────────── */
-(function() {
-  Object.keys(localStorage).forEach(function(k) {
-    if (k.startsWith('firebase:')) localStorage.removeItem(k);
-  });
-  Object.keys(sessionStorage).forEach(function(k) {
-    if (k.startsWith('firebase:')) sessionStorage.removeItem(k);
-  });
-})();
 
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
