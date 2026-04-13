@@ -118,7 +118,14 @@ function fbSignUp() {
 
 function fbGoogleSignIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+      // fallback to redirect if popup is blocked
+      auth.signInWithRedirect(provider);
+    } else {
+      fbShowError(fbErrMsg(err.code));
+    }
+  });
 }
 
 function fbSignOut() {
