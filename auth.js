@@ -14,9 +14,9 @@
     '  <input id="fb-email" type="email" placeholder="אימייל" autocomplete="email" dir="ltr">',
     '  <input id="fb-password" type="password" placeholder="סיסמה (לפחות 6 תווים)" autocomplete="current-password" dir="ltr">',
     '  <button id="fb-signin-btn" onclick="fbSignIn()">התחבר</button>',
-    '  <label id="fb-consent-label" style="display:flex;align-items:flex-start;gap:8px;font-size:.78rem;color:#7a80a0;cursor:pointer;margin:4px 0 8px;">',
-    '    <input type="checkbox" id="fb-consent-cb" style="margin-top:2px;accent-color:#6080d0;flex-shrink:0;">',
-    '    <span>קראתי ואני מסכים/ה ל<a href="terms.html" target="_blank" style="color:#6080d0;">תנאי השימוש</a> ול<a href="privacy.html" target="_blank" style="color:#6080d0;">מדיניות הפרטיות</a></span>',
+    '  <label id="fb-consent-label" style="display:flex;align-items:flex-start;gap:8px;font-size:.78rem;color:#7a80a0;cursor:pointer;margin:4px 0 8px;direction:rtl;text-align:right;">',
+    '    <span style="flex:1;">קראתי ואני מסכים/ה ל<a href="terms.html" target="_blank" style="color:#6080d0;">תנאי השימוש</a> ול<a href="privacy.html" target="_blank" style="color:#6080d0;">מדיניות הפרטיות</a></span>',
+    '    <input type="checkbox" id="fb-consent-cb" style="margin-top:2px;accent-color:#6080d0;flex-shrink:0;width:auto;">',
     '  </label>',
     '  <button id="fb-signup-btn" onclick="fbSignUp()">הרשמה — משתמש חדש</button>',
     '  <div id="fb-divider"><span>או</span></div>',
@@ -69,6 +69,8 @@
     '  color:#4a5270;font-size:.8rem;margin:6px 0 10px;',
     '}',
     '#fb-divider::before,#fb-divider::after { content:"";flex:1;height:1px;background:#2a2d3e; }',
+    '#fb-consent-label { text-align:right;width:100%;box-sizing:border-box; }',
+    '#fb-consent-cb { width:auto !important;min-width:unset; }',
   ].join('\n');
   document.head.appendChild(style);
 })();
