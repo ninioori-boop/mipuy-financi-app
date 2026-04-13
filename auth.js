@@ -168,6 +168,11 @@ function fbErrMsg(code) {
   return map[code] || ('שגיאה: ' + code);
 }
 
+/* ── טיפול בתוצאת redirect מ-Google ───────────────────────────── */
+auth.getRedirectResult().catch(function(err) {
+  if (err && err.code) fbShowError(fbErrMsg(err.code));
+});
+
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
 var _fbSaveTimer = null;
