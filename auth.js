@@ -96,6 +96,8 @@ function fbSignIn() {
   var email = (document.getElementById('fb-email') || {}).value || '';
   var pass  = (document.getElementById('fb-password') || {}).value || '';
   var btn   = document.getElementById('fb-signin-btn');
+  var consent = document.getElementById('fb-consent-cb');
+  if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   if (!email || !pass) { fbShowError('נא למלא אימייל וסיסמה'); return; }
   fbClearError();
   fbSetLoading(btn, true);
@@ -124,6 +126,8 @@ function fbSignUp() {
 }
 
 function fbGoogleSignIn() {
+  var consent = document.getElementById('fb-consent-cb');
+  if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(err) {
     if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
