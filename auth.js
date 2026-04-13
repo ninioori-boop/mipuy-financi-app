@@ -14,8 +14,11 @@
     '  <input id="fb-email" type="email" placeholder="אימייל" autocomplete="email" dir="ltr">',
     '  <input id="fb-password" type="password" placeholder="סיסמה (לפחות 6 תווים)" autocomplete="current-password" dir="ltr">',
     '  <button id="fb-signin-btn" onclick="fbSignIn()">התחבר</button>',
+    '  <label id="fb-consent-label" style="display:flex;align-items:flex-start;gap:8px;font-size:.78rem;color:#7a80a0;cursor:pointer;margin:4px 0 8px;">',
+    '    <input type="checkbox" id="fb-consent-cb" style="margin-top:2px;accent-color:#6080d0;flex-shrink:0;">',
+    '    <span>קראתי ואני מסכים/ה ל<a href="terms.html" target="_blank" style="color:#6080d0;">תנאי השימוש</a> ול<a href="privacy.html" target="_blank" style="color:#6080d0;">מדיניות הפרטיות</a></span>',
+    '  </label>',
     '  <button id="fb-signup-btn" onclick="fbSignUp()">הרשמה — משתמש חדש</button>',
-    '  <p style="font-size:.74rem;color:#5a6080;text-align:center;margin-top:4px;">בהרשמה אתה מסכים ל<a href="terms.html" target="_blank" style="color:#6080d0;">תנאי השימוש</a> ו<a href="privacy.html" target="_blank" style="color:#6080d0;">מדיניות הפרטיות</a></p>',
     '  <div id="fb-divider"><span>או</span></div>',
     '  <button id="fb-google-btn" onclick="fbGoogleSignIn()">',
     '    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:18px;vertical-align:middle;margin-left:8px">',
@@ -105,6 +108,8 @@ function fbSignUp() {
   var email = (document.getElementById('fb-email') || {}).value || '';
   var pass  = (document.getElementById('fb-password') || {}).value || '';
   var btn   = document.getElementById('fb-signup-btn');
+  var consent = document.getElementById('fb-consent-cb');
+  if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   if (!email || !pass) { fbShowError('נא למלא אימייל וסיסמה'); return; }
   if (pass.length < 6) { fbShowError('הסיסמה חייבת להכיל לפחות 6 תווים'); return; }
   fbClearError();
