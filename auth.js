@@ -116,18 +116,9 @@ function fbSignUp() {
     });
 }
 
-var _googleSignInInProgress = false;
 function fbGoogleSignIn() {
-  if (_googleSignInInProgress) return;
-  _googleSignInInProgress = true;
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-      fbShowError(fbErrMsg(err.code));
-    }
-  }).finally(function() {
-    _googleSignInInProgress = false;
-  });
+  auth.signInWithRedirect(provider);
 }
 
 function fbSignOut() {
