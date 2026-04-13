@@ -119,10 +119,7 @@ function fbSignUp() {
 function fbGoogleSignIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(err) {
-    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
-      // fallback to redirect if popup is blocked
-      auth.signInWithRedirect(provider);
-    } else {
+    if (err.code !== 'auth/cancelled-popup-request') {
       fbShowError(fbErrMsg(err.code));
     }
   });
