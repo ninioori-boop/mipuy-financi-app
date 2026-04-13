@@ -117,12 +117,10 @@ function fbSignUp() {
 }
 
 function fbGoogleSignIn() {
-  // נקה state ישן של Firebase שנשאר מניסיונות קודמים
-  Object.keys(sessionStorage).forEach(function(key) {
-    if (key.startsWith('firebase:')) sessionStorage.removeItem(key);
-  });
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
+  auth.signInWithPopup(provider).catch(function(err) {
+    fbShowError(fbErrMsg(err.code));
+  });
 }
 
 function fbSignOut() {
@@ -171,12 +169,6 @@ function fbErrMsg(code) {
   };
   return map[code] || ('שגיאה: ' + code);
 }
-
-auth.getRedirectResult().then(function(result) {
-  if (result && result.user) console.log('redirect login ok:', result.user.email);
-}).catch(function(err) {
-  if (err && err.code) fbShowError(fbErrMsg(err.code));
-});
 
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
