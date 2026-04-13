@@ -118,11 +118,7 @@ function fbSignUp() {
 
 function fbGoogleSignIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-      fbShowError(fbErrMsg(err.code));
-    }
-  });
+  auth.signInWithRedirect(provider);
 }
 
 function fbSignOut() {
@@ -171,6 +167,12 @@ function fbErrMsg(code) {
   };
   return map[code] || ('שגיאה: ' + code);
 }
+
+auth.getRedirectResult().then(function(result) {
+  if (result && result.user) console.log('redirect login ok:', result.user.email);
+}).catch(function(err) {
+  if (err && err.code) fbShowError(fbErrMsg(err.code));
+});
 
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
