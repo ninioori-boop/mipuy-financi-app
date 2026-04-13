@@ -116,9 +116,18 @@ function fbSignUp() {
     });
 }
 
+var _googleSignInInProgress = false;
 function fbGoogleSignIn() {
+  if (_googleSignInInProgress) return;
+  _googleSignInInProgress = true;
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
+  }).finally(function() {
+    _googleSignInInProgress = false;
+  });
 }
 
 function fbSignOut() {
@@ -167,11 +176,6 @@ function fbErrMsg(code) {
   };
   return map[code] || ('שגיאה: ' + code);
 }
-
-/* ── טיפול בתוצאת redirect מ-Google ───────────────────────────── */
-auth.getRedirectResult().catch(function(err) {
-  if (err && err.code) fbShowError(fbErrMsg(err.code));
-});
 
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
