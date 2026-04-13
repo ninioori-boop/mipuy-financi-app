@@ -177,12 +177,10 @@ function fbErrMsg(code) {
   return map[code] || ('שגיאה: ' + code);
 }
 
-/* ── נקה redirect state ישן בטעינת הדף ────────────────────────── */
+/* ── נקה כל state של Firebase בטעינת הדף ──────────────────────── */
 (function() {
   Object.keys(localStorage).forEach(function(k) {
-    if (k.indexOf('firebase:pendingRedirect') !== -1 || k.indexOf('firebase:redirectUser') !== -1) {
-      localStorage.removeItem(k);
-    }
+    if (k.startsWith('firebase:')) localStorage.removeItem(k);
   });
   Object.keys(sessionStorage).forEach(function(k) {
     if (k.startsWith('firebase:')) sessionStorage.removeItem(k);
