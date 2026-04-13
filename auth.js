@@ -117,6 +117,10 @@ function fbSignUp() {
 }
 
 function fbGoogleSignIn() {
+  // נקה state ישן של Firebase שנשאר מניסיונות קודמים
+  Object.keys(sessionStorage).forEach(function(key) {
+    if (key.startsWith('firebase:')) sessionStorage.removeItem(key);
+  });
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithRedirect(provider);
 }
