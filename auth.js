@@ -177,6 +177,18 @@ function fbErrMsg(code) {
   return map[code] || ('שגיאה: ' + code);
 }
 
+/* ── נקה redirect state ישן בטעינת הדף ────────────────────────── */
+(function() {
+  Object.keys(localStorage).forEach(function(k) {
+    if (k.indexOf('firebase:pendingRedirect') !== -1 || k.indexOf('firebase:redirectUser') !== -1) {
+      localStorage.removeItem(k);
+    }
+  });
+  Object.keys(sessionStorage).forEach(function(k) {
+    if (k.startsWith('firebase:')) sessionStorage.removeItem(k);
+  });
+})();
+
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
 var _fbSaveTimer = null;
