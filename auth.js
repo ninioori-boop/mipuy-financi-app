@@ -126,8 +126,11 @@ function fbGoogleSignIn() {
     if (k.startsWith('firebase:')) sessionStorage.removeItem(k);
   });
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    fbShowError(fbErrMsg(err.code));
+  fbShowError('🔍 מנסה להתחבר...');
+  auth.signInWithPopup(provider).then(function(result) {
+    fbShowError('✅ הצלחה: ' + result.user.email);
+  }).catch(function(err) {
+    fbShowError('❌ שגיאה: ' + err.code + ' — ' + err.message);
   });
 }
 
