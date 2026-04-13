@@ -117,6 +117,14 @@ function fbSignUp() {
 }
 
 function fbGoogleSignIn() {
+  Object.keys(localStorage).forEach(function(k) {
+    if (k.startsWith('firebase:pendingRedirect') || k.startsWith('firebase:redirectUser')) {
+      localStorage.removeItem(k);
+    }
+  });
+  Object.keys(sessionStorage).forEach(function(k) {
+    if (k.startsWith('firebase:')) sessionStorage.removeItem(k);
+  });
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(err) {
     fbShowError(fbErrMsg(err.code));
