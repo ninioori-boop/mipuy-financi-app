@@ -2,7 +2,7 @@
 // The API key is stored in Vercel Environment Variables, never in client code.
 
 const rateLimitMap = new Map();
-const RATE_LIMIT = 10;     // max requests per window per IP
+const RATE_LIMIT = 20;     // max requests per window per IP
 const WINDOW_MS  = 60000;  // 1 minute
 
 function isRateLimited(ip) {
