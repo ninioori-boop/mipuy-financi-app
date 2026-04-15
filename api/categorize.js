@@ -1,10 +1,32 @@
 // Vercel serverless function — proxy to Claude API
 // The API key is stored in Vercel Environment Variables, never in client code.
 
+const rateLimitMap = new Map();
+const RATE_LIMIT = 10;     // max requests per window per IP
+const WINDOW_MS  = 60000;  // 1 minute
+
+function isRateLimited(ip) {
+  const now   = Date.now();
+  const entry = rateLimitMap.get(ip) || { count: 0, start: now };
+  if (now - entry.start > WINDOW_MS) {
+    rateLimitMap.set(ip, { count: 1, start: now });
+    return false;
+  }
+  if (entry.count >= RATE_LIMIT) return true;
+  entry.count++;
+  rateLimitMap.set(ip, entry);
+  return false;
+}
+
 export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'יותר מדי בקשות, נסה שוב עוד דקה' });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
