@@ -130,9 +130,7 @@ function fbGoogleSignIn() {
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(err) {
-    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-      fbShowError(fbErrMsg(err.code));
-    }
+    fbShowError('שגיאה: ' + (err.code || err.message));
   });
 }
 
@@ -184,12 +182,6 @@ function fbErrMsg(code) {
 }
 
 /* ── Handle redirect result from Google sign-in ────────────────── */
-auth.getRedirectResult().catch(function(err) {
-  if (err.code && err.code !== 'auth/cancelled-popup-request') {
-    fbShowError(fbErrMsg(err.code));
-  }
-});
-
 /* ── Auth state listener ───────────────────────────────────────── */
 var _fbUid = null;
 var _fbSaveTimer = null;
