@@ -1,7 +1,7 @@
 // Firebase configuration
 var firebaseConfig = {
   apiKey: "AIzaSyAo-hB-m-6HX_Rlz9SnQ8uPu5A_AZsMymk",
-  authDomain: "orimipuy.com",
+  authDomain: "finance-machine-a36e9.firebaseapp.com",
   projectId: "finance-machine-a36e9",
   storageBucket: "finance-machine-a36e9.firebasestorage.app",
   messagingSenderId: "816545871242",
