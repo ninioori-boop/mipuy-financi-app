@@ -130,7 +130,9 @@ function fbGoogleSignIn() {
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(err) {
-    fbShowError('שגיאה: ' + (err.code || err.message));
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
   });
 }
 
@@ -197,6 +199,7 @@ auth.onAuthStateChanged(function(user) {
   }
 
   _fbUid = user.uid;
+  if (typeof Sentry !== 'undefined') Sentry.setUser({ id: user.uid, email: user.email });
   if (overlay) overlay.style.display = 'none';
 
   fbUpdateBar(user);
