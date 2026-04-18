@@ -320,9 +320,13 @@ async function analyzeWithAI() {
             await new Promise(function(r){ setTimeout(r, 1500 * attempt); });
           }
           // קריאה דרך serverless proxy — המפתח נשמר ב-Vercel ולא בקוד
+          const _idToken = await firebase.auth().currentUser.getIdToken();
           res = await fetch('/api/analyze', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + _idToken
+            },
             body: JSON.stringify({
               system: systemPrompt,
               message: 'סווג את העסקאות הבאות:\n' + lines

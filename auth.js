@@ -148,10 +148,11 @@ function fbDeleteAccount() {
 
   fbUpdateSaveStatus('מוחק...');
 
-  // מחיקת נתוני המשתמש מ-Firestore
-  db.collection('users').doc(user.uid).delete()
-    .catch(function() {}) // אם אין מסמך — לא נכשל
-    .then(function() {
+  // מחיקת נתוני המשתמש מ-Firestore (users + maps)
+  Promise.all([
+    db.collection('users').doc(user.uid).delete().catch(function(){}),
+    db.collection('maps').doc(user.uid).delete().catch(function(){})
+  ]).then(function() {
       // מחיקת החשבון עצמו
       return user.delete();
     })

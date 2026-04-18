@@ -2,9 +2,26 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // כל משתמש מחובר מורשה לקרוא ולכתוב רק את המסמך שלו
+    // כל משתמש קורא/כותב רק את המסמך שלו
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // מפות פיננסיות — הלקוח עצמו או היועץ שלו
+    match /maps/{clientId} {
+      allow read, write: if request.auth != null &&
+        (request.auth.uid == clientId ||
+         request.auth.uid == resource.data.advisorUid);
+      allow create: if request.auth != null && request.auth.uid == clientId;
+    }
+
+    // הזמנות — כל משתמש מחובר יכול לקרוא (לממש קוד) וליצור
+    // עדכון מותר ליועץ שיצר, או כשהקוד עדיין לא נוצל (claimInvite)
+    match /invites/{code} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null &&
+        (request.auth.uid == resource.data.advisorUid || !resource.data.used);
     }
 
     // כל שאר האוספים — חסומים לחלוטין
