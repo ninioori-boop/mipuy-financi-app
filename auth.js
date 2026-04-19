@@ -75,8 +75,7 @@
   document.head.appendChild(style);
 })();
 
-/* Use SESSION persistence so popup window's IndexedDB doesn't interfere */
-auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+var _fbSignedInLock = false;
 
 /* ── Auth helpers ──────────────────────────────────────────────── */
 function fbShowError(msg) {
@@ -141,7 +140,12 @@ function fbGoogleSignIn() {
 
 function fbSignOut() {
   if (!confirm('להתנתק מהמערכת?')) return;
-  auth.signOut();
+  _fbSignedInLock = false;
+  auth.signOut().then(function() {
+    var overlay = document.getElementById('fb-auth-overlay');
+    if (overlay) overlay.style.display = 'flex';
+    _fbUid = null;
+  });
 }
 
 function fbDeleteAccount() {
@@ -197,21 +201,20 @@ var _fbSaveTimer = null;
 var _fbRestoring = false;
 
 
-var _fbIgnoreNullUntil = 0;
-
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
 
   if (!user) {
-    if (Date.now() < _fbIgnoreNullUntil) return;
+    // After first successful sign-in, ignore spurious null states
+    // (caused by popup/BroadcastChannel interference on orimipuy.com).
+    // Only explicit fbSignOut() resets _fbSignedInLock.
+    if (_fbSignedInLock) return;
     _fbUid = null;
     if (overlay) overlay.style.display = 'flex';
     return;
   }
 
-  // User signed in — protect against transient null from popup closing for 5s
-  _fbIgnoreNullUntil = Date.now() + 5000;
-
+  _fbSignedInLock = true;
   _fbUid = user.uid;
   if (typeof Sentry !== 'undefined') Sentry.setUser({ id: user.uid, email: user.email });
   if (overlay) overlay.style.display = 'none';
