@@ -129,9 +129,7 @@ function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    if (err && err.code) fbShowError(fbErrMsg(err.code));
-  });
+  auth.signInWithRedirect(provider);
 }
 
 function fbSignOut() {
@@ -191,12 +189,10 @@ var _fbSaveTimer = null;
 var _fbRestoring = false;
 
 auth.getRedirectResult().then(function(result) {
-  if (result && result.user) {
-    // onAuthStateChanged יטפל בהסתרת הoverlay
-  }
+  // onAuthStateChanged יטפל בהצגת המשתמש
 }).catch(function(err) {
-  if (err && err.code) {
-    fbShowError(fbErrMsg(err.code));
+  if (err) {
+    fbShowError(fbErrMsg(err.code) || err.message || 'שגיאה בכניסה עם Google');
   }
 });
 
