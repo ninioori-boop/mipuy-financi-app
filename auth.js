@@ -129,15 +129,9 @@ function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(function(result) {
-      var ov = document.getElementById('fb-auth-overlay');
-      var d = ov ? ov.style.display : 'not-found';
-      fbShowError('THEN email=' + result.user.email + ' overlay=' + d);
-    })
-    .catch(function(err) {
-      fbShowError('CATCH: ' + err.code);
-    });
+  auth.signInWithRedirect(provider).catch(function(err) {
+    fbShowError(fbErrMsg(err.code));
+  });
 }
 
 function fbSignOut() {
@@ -198,9 +192,14 @@ var _fbSaveTimer = null;
 var _fbRestoring = false;
 
 
+auth.getRedirectResult().catch(function(err) {
+  if (err.code && err.code !== 'auth/no-current-user') {
+    fbShowError(fbErrMsg(err.code));
+  }
+});
+
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
-  fbShowError('AUTH: ' + (user ? 'user=' + user.email : 'NULL'));
 
   if (!user) {
     _fbUid = null;
