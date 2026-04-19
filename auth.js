@@ -125,6 +125,8 @@ function fbSignUp() {
     });
 }
 
+var _gisTokenClient = null;
+
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
@@ -132,24 +134,23 @@ function fbGoogleSignIn() {
     fbShowError('שגיאה בטעינת Google — רענן את הדף ונסה שוב');
     return;
   }
-  google.accounts.id.initialize({
-    client_id: '816545871242-8172p0jbuqggq454sjf10ldgnvoqonho.apps.googleusercontent.com',
-    callback: function(response) {
-      var credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
-      auth.signInWithCredential(credential).catch(function(err) {
-        fbShowError(fbErrMsg(err.code));
-      });
-    },
-    ux_mode: 'popup'
-  });
-  google.accounts.id.prompt(function(notification) {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      google.accounts.id.renderButton(
-        document.getElementById('fb-google-btn'),
-        { theme: 'outline', size: 'large', text: 'signin_with', locale: 'he' }
-      );
-    }
-  });
+  if (!_gisTokenClient) {
+    _gisTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: '816545871242-8172p0jbuqggq454sjf10ldgnvoqonho.apps.googleusercontent.com',
+      scope: 'openid email profile',
+      callback: function(tokenResponse) {
+        if (tokenResponse.error) {
+          fbShowError('שגיאה בכניסה עם Google');
+          return;
+        }
+        var credential = firebase.auth.GoogleAuthProvider.credential(null, tokenResponse.access_token);
+        auth.signInWithCredential(credential).catch(function(err) {
+          fbShowError(fbErrMsg(err.code));
+        });
+      }
+    });
+  }
+  _gisTokenClient.requestAccessToken({ prompt: 'select_account' });
 }
 
 function fbSignOut() {
