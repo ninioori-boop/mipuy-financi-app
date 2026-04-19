@@ -128,9 +128,12 @@ function fbSignUp() {
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
-  localStorage.setItem('_googleAuthPending', '1');
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
+  });
 }
 
 function fbSignOut() {
@@ -189,19 +192,6 @@ var _fbUid = null;
 var _fbSaveTimer = null;
 var _fbRestoring = false;
 
-auth.getRedirectResult().then(function(result) {
-  var wasPending = localStorage.getItem('_googleAuthPending');
-  localStorage.removeItem('_googleAuthPending');
-  if (result && result.user) {
-    // onAuthStateChanged יטפל
-  } else if (wasPending) {
-    fbShowError('Google חזר לאתר אבל הכניסה לא הושלמה — שגיאה: אין משתמש');
-  }
-}).catch(function(err) {
-  localStorage.removeItem('_googleAuthPending');
-  var msg = err ? (fbErrMsg(err.code) || err.message || ('קוד: ' + err.code)) : 'שגיאה לא ידועה';
-  fbShowError('שגיאת Google: ' + msg);
-});
 
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
