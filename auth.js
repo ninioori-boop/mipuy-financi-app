@@ -177,6 +177,8 @@ function fbErrMsg(code) {
     'auth/too-many-requests':  'יותר מדי ניסיונות — נסה שוב מאוחר יותר',
     'auth/network-request-failed': 'בעיית רשת — בדוק חיבור לאינטרנט',
     'auth/popup-closed-by-user': 'חלון ההתחברות נסגר',
+    'auth/popup-blocked': 'הדפדפן חסם את חלון הכניסה — אפשר חלונות קופצים לאתר זה בהגדרות הדפדפן',
+    'auth/cancelled-popup-request': 'בקשת כניסה בוטלה — נסה שוב',
     'auth/invalid-credential': 'פרטי התחברות שגויים',
   };
   return map[code] || ('שגיאה: ' + code);
