@@ -129,11 +129,13 @@ function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-      fbShowError(fbErrMsg(err.code));
-    }
-  });
+  auth.signInWithPopup(provider)
+    .then(function(result) {
+      fbShowError('DEBUG הצלחה: ' + (result.user ? result.user.email : 'אין משתמש'));
+    })
+    .catch(function(err) {
+      fbShowError('DEBUG שגיאה: ' + err.code + ' — ' + err.message.substring(0, 80));
+    });
 }
 
 function fbSignOut() {
