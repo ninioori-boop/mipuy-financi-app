@@ -128,10 +128,26 @@ function fbSignUp() {
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
-  var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(err) {
-    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-      fbShowError(fbErrMsg(err.code));
+  if (typeof google === 'undefined' || !google.accounts) {
+    fbShowError('שגיאה בטעינת Google — רענן את הדף ונסה שוב');
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: '816545871242-8172p0jbuqggq454sjf10ldgnvoqonho.apps.googleusercontent.com',
+    callback: function(response) {
+      var credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+      auth.signInWithCredential(credential).catch(function(err) {
+        fbShowError(fbErrMsg(err.code));
+      });
+    },
+    ux_mode: 'popup'
+  });
+  google.accounts.id.prompt(function(notification) {
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      google.accounts.id.renderButton(
+        document.getElementById('fb-google-btn'),
+        { theme: 'outline', size: 'large', text: 'signin_with', locale: 'he' }
+      );
     }
   });
 }
@@ -182,6 +198,7 @@ function fbErrMsg(code) {
     'auth/popup-blocked': 'הדפדפן חסם את חלון הכניסה — אפשר חלונות קופצים לאתר זה בהגדרות הדפדפן',
     'auth/cancelled-popup-request': 'בקשת כניסה בוטלה — נסה שוב',
     'auth/invalid-credential': 'פרטי התחברות שגויים',
+    'auth/operation-not-allowed': 'כניסה עם Google אינה מופעלת — פנה למנהל המערכת',
   };
   return map[code] || ('שגיאה: ' + code);
 }
