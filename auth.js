@@ -218,7 +218,7 @@ var _fbRestoring = false;
 
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
-  _fbDbg('AUTH user=' + (user && user.email) + ' lock=' + _fbSignedInLock);
+  _fbDbg('AUTH user=' + (user && user.email) + ' lock=' + _fbSignedInLock + ' overlayExists=' + !!overlay);
 
   if (!user) {
     if (_fbSignedInLock) { _fbDbg('AUTH null ignored by lock'); return; }
@@ -230,10 +230,20 @@ auth.onAuthStateChanged(function(user) {
 
   _fbSignedInLock = true;
   _fbUid = user.uid;
-  if (typeof Sentry !== 'undefined') Sentry.setUser({ id: user.uid, email: user.email });
-  if (overlay) overlay.style.display = 'none';
+  try { if (typeof Sentry !== 'undefined') Sentry.setUser({ id: user.uid, email: user.email }); }
+  catch(e) { _fbDbg('Sentry ERR ' + e.message); }
 
-  fbUpdateBar(user);
+  // hide overlay robustly — also remove it from DOM so nothing can re-show it
+  overlay = document.getElementById('fb-auth-overlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+    _fbDbg('overlay hidden');
+  } else {
+    _fbDbg('overlay MISSING on AUTH user');
+  }
+
+  try { fbUpdateBar(user); _fbDbg('fbUpdateBar ok'); }
+  catch(e) { _fbDbg('fbUpdateBar ERR ' + e.message); }
 
   _fbDbg('AUTH user ok, calling loadUserData');
   loadUserData(user.uid).then(function(data) {
