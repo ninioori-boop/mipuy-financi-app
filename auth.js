@@ -198,6 +198,7 @@ var _fbRestoring = false;
 
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
+  fbShowError('AUTH: ' + (user ? 'user=' + user.email : 'NULL'));
 
   if (!user) {
     _fbUid = null;
