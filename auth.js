@@ -128,6 +128,7 @@ function fbSignUp() {
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
+  localStorage.setItem('_googleAuthPending', '1');
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithRedirect(provider);
 }
@@ -189,11 +190,17 @@ var _fbSaveTimer = null;
 var _fbRestoring = false;
 
 auth.getRedirectResult().then(function(result) {
-  // onAuthStateChanged יטפל בהצגת המשתמש
-}).catch(function(err) {
-  if (err) {
-    fbShowError(fbErrMsg(err.code) || err.message || 'שגיאה בכניסה עם Google');
+  var wasPending = localStorage.getItem('_googleAuthPending');
+  localStorage.removeItem('_googleAuthPending');
+  if (result && result.user) {
+    // onAuthStateChanged יטפל
+  } else if (wasPending) {
+    fbShowError('Google חזר לאתר אבל הכניסה לא הושלמה — שגיאה: אין משתמש');
   }
+}).catch(function(err) {
+  localStorage.removeItem('_googleAuthPending');
+  var msg = err ? (fbErrMsg(err.code) || err.message || ('קוד: ' + err.code)) : 'שגיאה לא ידועה';
+  fbShowError('שגיאת Google: ' + msg);
 });
 
 auth.onAuthStateChanged(function(user) {
