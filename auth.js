@@ -131,10 +131,12 @@ function fbGoogleSignIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
     .then(function(result) {
-      fbShowError('DEBUG הצלחה: ' + (result.user ? result.user.email : 'אין משתמש'));
+      var ov = document.getElementById('fb-auth-overlay');
+      var d = ov ? ov.style.display : 'not-found';
+      fbShowError('THEN email=' + result.user.email + ' overlay=' + d);
     })
     .catch(function(err) {
-      fbShowError('DEBUG שגיאה: ' + err.code + ' — ' + err.message.substring(0, 80));
+      fbShowError('CATCH: ' + err.code);
     });
 }
 
