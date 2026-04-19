@@ -94,7 +94,8 @@ function detectSmartPatterns(txs) {
 
 function renderSmartAnalysis() {
   var creditTransactions = (_ccCtx === 'import-') ? importCreditTransactions : window.creditTransactions;
-  const container = document.getElementById(_ccCtx + 'smart-analysis');
+  var px = _ccCtx || '';
+  const container = document.getElementById(px + 'smart-analysis');
   const patterns  = detectSmartPatterns(creditTransactions);
   const total     = patterns.standingOrders.length + patterns.installments.length +
                     patterns.refunds.length + patterns.recurring.length;
@@ -104,7 +105,7 @@ function renderSmartAnalysis() {
 
   var sections = [
     {
-      id:    'sa-standing',
+      id:    px + 'sa-standing',
       icon:  '📌',
       title: 'הוראות קבע',
       badge: patterns.standingOrders.length,
@@ -114,7 +115,7 @@ function renderSmartAnalysis() {
       })
     },
     {
-      id:    'sa-install',
+      id:    px + 'sa-install',
       icon:  '📅',
       title: 'תשלומים',
       badge: patterns.installments.length,
@@ -134,7 +135,7 @@ function renderSmartAnalysis() {
       })
     },
     {
-      id:    'sa-recurring',
+      id:    px + 'sa-recurring',
       icon:  '🔄',
       title: 'חוזרים / מנויים אפשריים',
       badge: patterns.recurring.length,
@@ -144,7 +145,7 @@ function renderSmartAnalysis() {
       })
     },
     {
-      id:    'sa-refunds',
+      id:    px + 'sa-refunds',
       icon:  '↩️',
       title: 'החזרים / זיכויים',
       badge: patterns.refunds.length,
@@ -892,7 +893,8 @@ function catPickerOpen(ctx, txIdx, e) {
 
 function catPickerFilter(ctx, txIdx, q) {
   var px = (ctx || '');
-  var selected = creditTransactions[txIdx] ? creditTransactions[txIdx].category : '';
+  var txs = (px === 'import-') ? importCreditTransactions : window.creditTransactions;
+  var selected = txs[txIdx] ? txs[txIdx].category : '';
   var list = document.getElementById(px + 'cpl-' + txIdx);
   if (list) list.innerHTML = catPickerOpts(selected, txIdx, q, px);
 }
@@ -941,18 +943,20 @@ document.addEventListener('click', function() {
 });
 
 function updateTxCat(idx, newCat, ctx) {
-  if (idx < 0 || idx >= creditTransactions.length) return;
-  creditTransactions[idx].category = newCat;
-  saveToLearnedDB(creditTransactions[idx].desc, newCat);
   _ccCtx = ctx || '';
+  var txs = (_ccCtx === 'import-') ? importCreditTransactions : window.creditTransactions;
+  if (idx < 0 || idx >= txs.length) return;
+  txs[idx].category = newCat;
+  saveToLearnedDB(txs[idx].desc, newCat);
   renderCreditSummary();
   if (!_ccCtx) populateVarExpensesFromCredit();
 }
 
 function deleteTx(idx, ctx) {
-  if (idx < 0 || idx >= creditTransactions.length) return;
-  creditTransactions.splice(idx, 1);
   _ccCtx = ctx || '';
+  var txs = (_ccCtx === 'import-') ? importCreditTransactions : window.creditTransactions;
+  if (idx < 0 || idx >= txs.length) return;
+  txs.splice(idx, 1);
   renderCreditSummary();
   if (!_ccCtx) populateVarExpensesFromCredit();
 }
@@ -963,9 +967,10 @@ function searchBusiness(desc) {
 
 function startEditAmount(idx, ctx, btn) {
   var px = ctx || '';
+  var txs = (px === 'import-') ? importCreditTransactions : window.creditTransactions;
   var cell = btn ? btn.closest('tr').querySelector('.amount-cell') : document.getElementById(px + 'tx-amt-cell-' + idx);
   if (!cell || cell.querySelector('input')) return; // already editing
-  const t = creditTransactions[idx];
+  const t = txs[idx];
   cell.innerHTML =
     '<div style="display:flex;gap:4px;align-items:center;direction:ltr">' +
     '<input class="tx-amount-input" id="' + px + 'tx-amt-input-' + idx + '" type="number" step="0.01" value="' + t.amount + '">' +
@@ -982,11 +987,12 @@ function startEditAmount(idx, ctx, btn) {
 
 function confirmEditAmount(idx, ctx) {
   var px = ctx || '';
+  var txs = (px === 'import-') ? importCreditTransactions : window.creditTransactions;
   const input = document.getElementById(px + 'tx-amt-input-' + idx);
   if (!input) return;
   const val = parseFloat(input.value);
   if (isNaN(val) || val < 0) { cancelEditAmount(idx, px); return; }
-  creditTransactions[idx].amount = val;
+  txs[idx].amount = val;
   _ccCtx = px;
   renderCreditSummary();
   if (!_ccCtx) populateVarExpensesFromCredit();
@@ -994,8 +1000,9 @@ function confirmEditAmount(idx, ctx) {
 
 function cancelEditAmount(idx, ctx) {
   var px = ctx || '';
+  var txs = (px === 'import-') ? importCreditTransactions : window.creditTransactions;
   const cell = document.getElementById(px + 'tx-amt-cell-' + idx);
-  if (cell) cell.innerHTML = fmt(creditTransactions[idx].amount);
+  if (cell) cell.innerHTML = fmt(txs[idx].amount);
 }
 
 
