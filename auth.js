@@ -125,32 +125,15 @@ function fbSignUp() {
     });
 }
 
-var _gisTokenClient = null;
-
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
-  if (typeof google === 'undefined' || !google.accounts) {
-    fbShowError('שגיאה בטעינת Google — רענן את הדף ונסה שוב');
-    return;
-  }
-  if (!_gisTokenClient) {
-    _gisTokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: '816545871242-8172p0jbuqggq454sjf10ldgnvoqonho.apps.googleusercontent.com',
-      scope: 'openid email profile',
-      callback: function(tokenResponse) {
-        if (tokenResponse.error) {
-          fbShowError('שגיאה בכניסה עם Google');
-          return;
-        }
-        var credential = firebase.auth.GoogleAuthProvider.credential(null, tokenResponse.access_token);
-        auth.signInWithCredential(credential).catch(function(err) {
-          fbShowError(fbErrMsg(err.code));
-        });
-      }
-    });
-  }
-  _gisTokenClient.requestAccessToken({ prompt: 'select_account' });
+  var provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
+  });
 }
 
 function fbSignOut() {
