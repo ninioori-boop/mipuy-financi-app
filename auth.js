@@ -125,23 +125,15 @@ function fbSignUp() {
     });
 }
 
-var _fbPopupSigningIn = false;
-
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
-  _fbPopupSigningIn = true;
-  auth.signInWithPopup(provider)
-    .then(function(result) {
-      _fbPopupSigningIn = false;
-    })
-    .catch(function(err) {
-      _fbPopupSigningIn = false;
-      if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-        fbShowError(fbErrMsg(err.code));
-      }
-    });
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
+  });
 }
 
 function fbSignOut() {
@@ -202,16 +194,20 @@ var _fbSaveTimer = null;
 var _fbRestoring = false;
 
 
+var _fbIgnoreNullUntil = 0;
+
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
 
   if (!user) {
-    // Ignore transient null fired by popup window closing after successful sign-in
-    if (_fbPopupSigningIn) return;
+    if (Date.now() < _fbIgnoreNullUntil) return;
     _fbUid = null;
     if (overlay) overlay.style.display = 'flex';
     return;
   }
+
+  // User signed in — protect against transient null from popup closing for 5s
+  _fbIgnoreNullUntil = Date.now() + 5000;
 
   _fbUid = user.uid;
   if (typeof Sentry !== 'undefined') Sentry.setUser({ id: user.uid, email: user.email });
