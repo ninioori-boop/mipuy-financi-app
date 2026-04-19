@@ -127,30 +127,15 @@ function fbSignUp() {
     });
 }
 
-function _fbDbg(msg) {
-  var d = document.getElementById('_fb_dbg');
-  if (!d) {
-    d = document.createElement('div');
-    d.id = '_fb_dbg';
-    d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#000;color:#0f0;font:12px monospace;padding:6px;white-space:pre-wrap;max-height:50vh;overflow:auto;direction:ltr;text-align:left';
-    document.body.appendChild(d);
-  }
-  d.textContent += '[' + new Date().toISOString().slice(11,19) + '] ' + msg + '\n';
-}
-
 function fbGoogleSignIn() {
   var consent = document.getElementById('fb-consent-cb');
   if (!consent || !consent.checked) { fbShowError('יש לאשר את תנאי השימוש ומדיניות הפרטיות'); return; }
-  _fbDbg('CLICK signIn');
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(function(res) { _fbDbg('POPUP OK user=' + (res.user && res.user.email)); })
-    .catch(function(err) {
-      _fbDbg('POPUP ERR code=' + err.code + ' msg=' + err.message);
-      if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-        fbShowError(fbErrMsg(err.code));
-      }
-    });
+  auth.signInWithPopup(provider).catch(function(err) {
+    if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+      fbShowError(fbErrMsg(err.code));
+    }
+  });
 }
 
 function fbSignOut() {
@@ -218,36 +203,22 @@ var _fbRestoring = false;
 
 auth.onAuthStateChanged(function(user) {
   var overlay = document.getElementById('fb-auth-overlay');
-  _fbDbg('AUTH user=' + (user && user.email) + ' lock=' + _fbSignedInLock + ' overlayExists=' + !!overlay);
 
   if (!user) {
-    if (_fbSignedInLock) { _fbDbg('AUTH null ignored by lock'); return; }
+    if (_fbSignedInLock) return;
     _fbUid = null;
     if (overlay) overlay.style.display = 'flex';
-    _fbDbg('AUTH null -> overlay flex');
     return;
   }
 
   _fbSignedInLock = true;
   _fbUid = user.uid;
-  try { if (typeof Sentry !== 'undefined') Sentry.setUser({ id: user.uid, email: user.email }); }
-  catch(e) { _fbDbg('Sentry ERR ' + e.message); }
+  try { if (typeof Sentry !== 'undefined' && typeof Sentry.setUser === 'function') Sentry.setUser({ id: user.uid, email: user.email }); } catch(e) {}
+  if (overlay) overlay.style.display = 'none';
 
-  // hide overlay robustly — also remove it from DOM so nothing can re-show it
-  overlay = document.getElementById('fb-auth-overlay');
-  if (overlay) {
-    overlay.style.display = 'none';
-    _fbDbg('overlay hidden');
-  } else {
-    _fbDbg('overlay MISSING on AUTH user');
-  }
+  try { fbUpdateBar(user); } catch(e) { console.error('fbUpdateBar error:', e); }
 
-  try { fbUpdateBar(user); _fbDbg('fbUpdateBar ok'); }
-  catch(e) { _fbDbg('fbUpdateBar ERR ' + e.message); }
-
-  _fbDbg('AUTH user ok, calling loadUserData');
   loadUserData(user.uid).then(function(data) {
-    _fbDbg('loadUserData OK hasData=' + !!data);
     if (data && typeof clientRestoreData === 'function') {
       _fbRestoring = true;
       clearTimeout(_fbAutoSaveTimer);
@@ -255,9 +226,7 @@ auth.onAuthStateChanged(function(user) {
       _fbRestoring = false;
     }
     fbUpdateSaveStatus('✓ נטען');
-    setTimeout(function(){ _fbDbg('FINAL overlay=' + (document.getElementById('fb-auth-overlay')||{}).style && document.getElementById('fb-auth-overlay').style.display); }, 500);
   }).catch(function(err) {
-    _fbDbg('loadUserData ERR code=' + err.code + ' msg=' + err.message);
     console.error('שגיאה בטעינת נתונים:', err);
     var isOffline = !navigator.onLine || err.code === 'unavailable';
     var msg = isOffline
