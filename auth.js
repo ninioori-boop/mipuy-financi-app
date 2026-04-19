@@ -75,6 +75,9 @@
   document.head.appendChild(style);
 })();
 
+/* Use SESSION persistence so popup window's IndexedDB doesn't interfere */
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+
 /* ── Auth helpers ──────────────────────────────────────────────── */
 function fbShowError(msg) {
   var el = document.getElementById('fb-auth-error');
