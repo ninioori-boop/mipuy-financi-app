@@ -56,7 +56,7 @@ function clientCollectData() {
       if (annEl) annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
         if (r.dataset.cat) { var inp = r.querySelector('input[type="number"]'); if (inp) autoRows[r.dataset.cat] = parseFloat(inp.value)||0; }
       });
-      return { transactions: [], deletedAutoCats: Object.keys(deletedAutoCats), autoRows: autoRows };
+      return { transactions: [], deletedAutoCats: [], autoRows: autoRows };
     })(),
     learnedDB: window.learnedDB || {},
     gpPlans: (typeof window.gpGetPlans === 'function') ? window.gpGetPlans() : null
@@ -315,21 +315,10 @@ function clientRestoreData(data) {
 
   // Credit — mapping persists independently of transactions.
   // creditTransactions is session-only (stays []); mapping rows rebuilt from autoRows.
+  // deletedAutoCats is also session-only — so that a new session's uploads can populate
+  // categories freely; re-deletion is always an option via × on each row.
   if (data.credit) {
     deletedAutoCats = {};
-    if (data.credit.deletedAutoCats) {
-      data.credit.deletedAutoCats.forEach(function(c){ deletedAutoCats[c] = true; });
-    }
-    try {
-      var _lsKey = typeof CM_DATA_KEY !== 'undefined' && typeof cmActiveId !== 'undefined' && cmActiveId
-        ? CM_DATA_KEY + cmActiveId : null;
-      if (_lsKey) {
-        var _lsData = JSON.parse(localStorage.getItem(_lsKey) || '{}');
-        if (_lsData.credit && _lsData.credit.deletedAutoCats) {
-          _lsData.credit.deletedAutoCats.forEach(function(c){ deletedAutoCats[c] = true; });
-        }
-      }
-    } catch(e) {}
     if (data.credit.autoRows && typeof rebuildMappingFromAutoRows === 'function') {
       rebuildMappingFromAutoRows(data.credit.autoRows);
     }
