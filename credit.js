@@ -206,8 +206,6 @@ async function parseFiles() {
   if (!pendingFiles.length) return;
   showLoading('מנתח קבצים...');
   try {
-    // Clear deleted-category memory so previously blocked cats reappear
-    deletedAutoCats = {};
     // Only parse files not yet parsed — append to existing transactions instead of resetting
     var _alreadyParsed = uploadedFiles.map(function(f) { return f.name; });
     var _newFiles = pendingFiles.filter(function(f) { return _alreadyParsed.indexOf(f.name) === -1; });
