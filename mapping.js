@@ -605,7 +605,7 @@ function getAnnualRows(listId) {
   const list = document.getElementById(listId);
   const result = [];
   list.querySelectorAll('.annual-row').forEach(function(row) {
-    if (row.hasAttribute('data-auto')) return; // auto rows restored by populateVarExpensesFromCredit
+    if (row.hasAttribute('data-auto')) return; // auto rows restored by rebuildMappingFromAutoRows
     const inputs = row.querySelectorAll('input');
     const name = inputs[0].value.trim();
     const yearly = parseFloat(inputs[1].value) || 0;

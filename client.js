@@ -168,7 +168,7 @@ function clientRestoreData(data) {
   restoreSimple('sub-list',       m.subs);
   restoreSimple('insurance-list', m.insurance);
 
-  // Annual — restore manual rows only (data-auto rows restored by populateVarExpensesFromCredit)
+  // Annual — restore manual rows only (data-auto rows restored by rebuildMappingFromAutoRows)
   var annEl = document.getElementById('annual-list');
   if (annEl && m.annual) {
     annEl.innerHTML = '';
