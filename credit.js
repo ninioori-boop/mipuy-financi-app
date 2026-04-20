@@ -657,7 +657,8 @@ function populateVarExpensesFromCredit() {
 }
 
 // Rebuild mapping rows from saved autoRows — used on session restore when creditTransactions is empty.
-// Rows built here are simpler (no transaction detail panel) since there are no transactions to show.
+// Rows include an empty detail panel + btn-detail so a later upload in the same session can
+// populate transactions into the existing row (via populateVarExpensesFromCredit's update path).
 function rebuildMappingFromAutoRows(autoRows) {
   if (!autoRows) return;
   var monthsInput = document.getElementById('months-input');
@@ -719,7 +720,14 @@ function rebuildMappingFromAutoRows(autoRows) {
         '<input type="text" value="' + icon + ' ' + cat + '" readonly style="color:var(--accent);font-weight:600">' +
         '<input type="number" value="' + Math.round(amount) + '" min="0" step="1" oninput="' + oninputAttr + '">' +
         monthlyTag +
+        '<button class="btn-detail" data-count="0" onclick="toggleCatDetail(this)">▶ 0 פריטים</button>' +
         '<button class="btn-del" onclick="' + ondelAttr + '">×</button>' +
+      '</div>' +
+      '<div class="cat-detail-panel" style="display:none">' +
+        '<table class="cat-detail-table">' +
+          '<thead><tr><th>תיאור</th><th>סכום</th><th>קטגוריה</th></tr></thead>' +
+          '<tbody></tbody>' +
+        '</table>' +
       '</div>';
     document.getElementById(listId).appendChild(wrap);
   });
