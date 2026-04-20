@@ -56,7 +56,7 @@ function clientCollectData() {
       if (annEl) annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
         if (r.dataset.cat) { var inp = r.querySelector('input[type="number"]'); if (inp) autoRows[r.dataset.cat] = parseFloat(inp.value)||0; }
       });
-      return { transactions: creditTransactions||[], deletedAutoCats: Object.keys(deletedAutoCats), autoRows: autoRows };
+      return { transactions: [], deletedAutoCats: Object.keys(deletedAutoCats), autoRows: autoRows };
     })(),
     learnedDB: window.learnedDB || {},
     gpPlans: (typeof window.gpGetPlans === 'function') ? window.gpGetPlans() : null
@@ -313,15 +313,13 @@ function clientRestoreData(data) {
     });
   }
 
-  // Credit
-  if (data.credit && data.credit.transactions) {
-    creditTransactions = data.credit.transactions;
-    // Restore which categories the user manually deleted
+  // Credit — mapping persists independently of transactions.
+  // creditTransactions is session-only (stays []); mapping rows rebuilt from autoRows.
+  if (data.credit) {
     deletedAutoCats = {};
     if (data.credit.deletedAutoCats) {
       data.credit.deletedAutoCats.forEach(function(c){ deletedAutoCats[c] = true; });
     }
-    // מיזוג עם localStorage — גיבוי למקרה שהשמירה ל-Firebase לא הספיקה לפני רענון
     try {
       var _lsKey = typeof CM_DATA_KEY !== 'undefined' && typeof cmActiveId !== 'undefined' && cmActiveId
         ? CM_DATA_KEY + cmActiveId : null;
@@ -332,46 +330,8 @@ function clientRestoreData(data) {
         }
       }
     } catch(e) {}
-    if (creditTransactions.length > 0) {
-      _ccCtx = '';
-      renderCreditSummary();
-      populateVarExpensesFromCredit();
-      // Re-apply user overrides — populateVarExpensesFromCredit recalculates from transactions,
-      // but the user may have manually changed a category total (e.g. 11440 → 9600).
-      // Those overrides are saved in data.credit.autoRows and must be applied on top.
-      if (data.credit.autoRows) {
-        var savedAutoRows = data.credit.autoRows;
-        ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(lid) {
-          var el = document.getElementById(lid); if (!el) return;
-          el.querySelectorAll('.cat-auto-wrap').forEach(function(w) {
-            var cat = w.dataset.cat;
-            if (cat == null || savedAutoRows[cat] == null) return;
-            var inp = w.querySelector('input[type="number"]');
-            if (!inp) return;
-            inp.value = savedAutoRows[cat];
-            if (typeof updateVarTag === 'function') updateVarTag(inp);
-          });
-        });
-        // Annual auto-rows
-        var annEl = document.getElementById('annual-list');
-        if (annEl) {
-          annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
-            var cat = r.dataset.cat;
-            if (cat == null || savedAutoRows[cat] == null) return;
-            var inp = r.querySelector('input[type="number"]');
-            if (!inp) return;
-            inp.value = savedAutoRows[cat];
-            if (typeof updateAnnualTag === 'function') updateAnnualTag(inp);
-          });
-        }
-        // Refresh all totals after overrides
-        if (typeof updateVarTotals === 'function') updateVarTotals();
-        if (typeof updateSectionTotal === 'function') {
-          updateSectionTotal('fixed-list', 'total-fixed', 1);
-          updateSectionTotal('sub-list', 'total-subs', 1);
-          updateSectionTotal('insurance-list', 'total-ins', 1);
-        }
-      }
+    if (data.credit.autoRows && typeof rebuildMappingFromAutoRows === 'function') {
+      rebuildMappingFromAutoRows(data.credit.autoRows);
     }
   }
 

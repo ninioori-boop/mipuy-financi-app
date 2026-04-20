@@ -206,9 +206,13 @@ async function parseFiles() {
   if (!pendingFiles.length) return;
   showLoading('מנתח קבצים...');
   try {
-    // Only parse files not yet parsed — append to existing transactions instead of resetting
     var _alreadyParsed = uploadedFiles.map(function(f) { return f.name; });
     var _newFiles = pendingFiles.filter(function(f) { return _alreadyParsed.indexOf(f.name) === -1; });
+    if (!_newFiles.length) { hideLoading(); return; }
+    // Each upload starts fresh — credit tab shows only the current batch.
+    // Mapping rows persist via autoRows; new amounts are added to existing rows (see populateVarExpensesFromCredit).
+    creditTransactions = [];
+    uploadedFiles = [];
     var _newTxs = [];
     for (let i = 0; i < _newFiles.length; i++) {
       const f = _newFiles[i];
@@ -540,9 +544,11 @@ function populateVarExpensesFromCredit() {
       annList.querySelectorAll('.input-row[data-auto]').forEach(function(w){ if (w.dataset.cat === cat) existingAnn = w; });
       if (existingAnn) {
         var annAmt = existingAnn.querySelector('input[type="number"]');
-        if (annAmt) annAmt.value = storeAmt;
-        var annTag = existingAnn.querySelector('.yearly-tag');
-        if (annTag) annTag.textContent = '₪' + fmt(displayMonthly) + ' / חודש';
+        if (annAmt) {
+          annAmt.value = Math.round((parseFloat(annAmt.value)||0) + storeAmt);
+          var annTag = existingAnn.querySelector('.yearly-tag');
+          if (annTag) annTag.textContent = '₪' + fmt(Math.round(parseFloat(annAmt.value)/12)) + ' / חודש';
+        }
         return;
       }
       var annRow = document.createElement('div');
@@ -591,12 +597,12 @@ function populateVarExpensesFromCredit() {
         '</tr>';
     }).join('');
 
-    // Update existing auto-row in-place if present (additive: second report doesn't reset)
+    // Update existing auto-row additively — new upload ADDS to existing amount
     var existingWrap = null;
     document.getElementById(listId).querySelectorAll('.cat-auto-wrap').forEach(function(w){ if (w.dataset.cat === cat) existingWrap = w; });
     if (existingWrap) {
       var amtInput = existingWrap.querySelector('input[type="number"]');
-      if (amtInput) amtInput.value = Math.round(storeAmt);
+      if (amtInput) amtInput.value = Math.round((parseFloat(amtInput.value)||0) + storeAmt);
       var detBtn = existingWrap.querySelector('.btn-detail');
       if (detBtn) {
         var isOpen = detBtn.textContent.startsWith('▲');
@@ -604,9 +610,10 @@ function populateVarExpensesFromCredit() {
         detBtn.textContent = (isOpen ? '▲ ' : '▶ ') + txCount + ' פריטים';
       }
       var tagEl = existingWrap.querySelector('.var-monthly-tag');
-      if (tagEl && isVar) {
-        tagEl.title = 'סה"כ בדוח: ₪' + Math.round(totalAmt) + ' ÷ ' + months + ' חודשים';
-        tagEl.textContent = '÷' + months + ' = ' + fmt(displayMonthly) + '/חודש';
+      if (tagEl && isVar && amtInput) {
+        var newStored = parseFloat(amtInput.value)||0;
+        tagEl.title = 'סכום מצטבר ÷ ' + months + ' חודשים';
+        tagEl.textContent = '₪' + fmt(Math.round(newStored/months)) + '/חודש';
       }
       var tbody = existingWrap.querySelector('.cat-detail-table tbody');
       if (tbody) tbody.innerHTML = detailRows;
@@ -635,15 +642,8 @@ function populateVarExpensesFromCredit() {
     document.getElementById(listId).appendChild(wrap);
   });
 
-  // Remove stale auto-rows for categories no longer in catMap
-  ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(listId) {
-    document.getElementById(listId).querySelectorAll('.cat-auto-wrap').forEach(function(w) {
-      if (!catMap[w.dataset.cat] || catMap[w.dataset.cat] <= 0) w.remove();
-    });
-  });
-  document.getElementById('annual-list').querySelectorAll('.input-row[data-auto]').forEach(function(r) {
-    if (!catMap[r.dataset.cat] || catMap[r.dataset.cat] <= 0) r.remove();
-  });
+  // Mapping rows are never auto-removed — only by user × click (→ recordDeletedAutoCat).
+  // This preserves rows from prior uploads/sessions that aren't in the current catMap.
 
   // Trigger all section totals + live summary
   updateSectionTotal('fixed-list', 'total-fixed', 1);
@@ -654,6 +654,83 @@ function populateVarExpensesFromCredit() {
 
   // Show notification
   showAutoFillNotice(months);
+}
+
+// Rebuild mapping rows from saved autoRows — used on session restore when creditTransactions is empty.
+// Rows built here are simpler (no transaction detail panel) since there are no transactions to show.
+function rebuildMappingFromAutoRows(autoRows) {
+  if (!autoRows) return;
+  var monthsInput = document.getElementById('months-input');
+  var months = Math.max(1, parseInt(monthsInput && monthsInput.value, 10) || 3);
+  Object.keys(autoRows).forEach(function(cat) {
+    if (deletedAutoCats[cat]) return;
+    var amount = parseFloat(autoRows[cat]) || 0;
+    if (amount <= 0) return;
+    if (SKIP_CATEGORIES.indexOf(cat) !== -1) return;
+
+    var isVar    = VAR_CATEGORIES.indexOf(cat) !== -1;
+    var isAnnual = ANNUAL_CATEGORIES.indexOf(cat) !== -1;
+    var isIns    = INSURANCE_CATEGORIES.indexOf(cat) !== -1;
+    var listId   = isVar ? 'var-list'
+                 : isAnnual ? 'annual-list'
+                 : isIns ? 'insurance-list'
+                 : FIXED_CATEGORIES.indexOf(cat) !== -1 ? 'fixed-list'
+                 : SUB_CATEGORIES.indexOf(cat) !== -1 ? 'sub-list'
+                 : null;
+    if (!listId) return;
+    if (!document.getElementById(listId)) return;
+
+    var icon = CATEGORY_ICONS[cat] || '📦';
+    var catEsc = cat.replace(/'/g,"\\'");
+
+    if (isAnnual) {
+      var row = document.createElement('div');
+      row.className = 'input-row annual-row';
+      row.setAttribute('data-auto', '1');
+      row.setAttribute('data-cat', cat);
+      row.innerHTML =
+        '<input type="text" value="' + icon + ' ' + cat + '" readonly style="color:var(--accent);font-weight:600">' +
+        '<input type="number" value="' + Math.round(amount) + '" min="0" step="1" oninput="updateAnnualTag(this);updateAnnualTotals()">' +
+        '<span class="yearly-tag">₪' + fmt(Math.round(amount/12)) + ' / חודש</span>' +
+        "<button class=\"btn-del\" onclick=\"recordDeletedAutoCat('" + catEsc + "');this.closest('.annual-row').remove();updateAnnualTotals()\">×</button>";
+      document.getElementById('annual-list').appendChild(row);
+      return;
+    }
+
+    var oninputAttr = isVar ? 'updateVarTag(this);updateVarTotals()'
+                    : listId === 'fixed-list' ? "updateSectionTotal('fixed-list','total-fixed',1)"
+                    : listId === 'insurance-list' ? "updateSectionTotal('insurance-list','total-ins',1)"
+                    : "updateSectionTotal('sub-list','total-subs',1)";
+    var delRecord = "recordDeletedAutoCat('" + catEsc + "');";
+    var ondelAttr = isVar ? delRecord + "this.closest('.cat-auto-wrap').remove();updateVarTotals()"
+                  : listId === 'fixed-list' ? delRecord + "this.closest('.cat-auto-wrap').remove();updateSectionTotal('fixed-list','total-fixed',1)"
+                  : listId === 'insurance-list' ? delRecord + "this.closest('.cat-auto-wrap').remove();updateSectionTotal('insurance-list','total-ins',1)"
+                  : delRecord + "this.closest('.cat-auto-wrap').remove();updateSectionTotal('sub-list','total-subs',1)";
+
+    var monthlyTag = isVar
+      ? '<span class="var-monthly-tag" title="סכום מצטבר ÷ ' + months + ' חודשים">₪' + fmt(Math.round(amount/months)) + '/חודש</span>'
+      : '';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'cat-auto-wrap';
+    wrap.dataset.cat = cat;
+    wrap.innerHTML =
+      '<div class="input-row' + (isVar ? ' var-row' : '') + '" data-auto="1" style="border-radius:8px">' +
+        '<input type="text" value="' + icon + ' ' + cat + '" readonly style="color:var(--accent);font-weight:600">' +
+        '<input type="number" value="' + Math.round(amount) + '" min="0" step="1" oninput="' + oninputAttr + '">' +
+        monthlyTag +
+        '<button class="btn-del" onclick="' + ondelAttr + '">×</button>' +
+      '</div>';
+    document.getElementById(listId).appendChild(wrap);
+  });
+
+  if (typeof updateVarTotals === 'function') updateVarTotals();
+  if (typeof updateSectionTotal === 'function') {
+    updateSectionTotal('fixed-list', 'total-fixed', 1);
+    updateSectionTotal('sub-list', 'total-subs', 1);
+    updateSectionTotal('insurance-list', 'total-ins', 1);
+  }
+  if (typeof updateAnnualTotals === 'function') updateAnnualTotals();
 }
 
 function showAutoFillNotice(months) {
