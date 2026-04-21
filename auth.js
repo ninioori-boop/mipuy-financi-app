@@ -119,7 +119,7 @@ function fbForgotPassword() {
   fbClearError();
   auth.sendPasswordResetEmail(email)
     .then(function() {
-      alert('נשלח מייל לאיפוס סיסמה לכתובת ' + email + '.\nבדוק את תיבת הדואר (כולל ספאם) ולחץ על הקישור כדי לבחור סיסמה חדשה.');
+      alert('נשלח מייל לאיפוס סיסמה לכתובת ' + email + '.\nבדוק את תיבת הדואר (כולל ספאם) ולחץ על הקישור כדי לבחור סיסמה חדשה.\n\nשים לב: הקישור הוא חד-פעמי ופג תוקף לאחר זמן קצר — השתמש בו מיד.');
     })
     .catch(function(err) {
       fbShowError(fbErrMsg(err.code));
