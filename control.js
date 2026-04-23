@@ -11,6 +11,9 @@ function saveToLearnedDB(rawDesc, category) {
   var key = normalizeForLookup(rawDesc);
   if (!key) key = rawDesc.toLowerCase().trim();
   if (!key) return;
+  // Strip trailing transaction IDs (4+ digit numbers) so the key generalizes across months
+  key = key.replace(/\s+\d{4,}\s*$/, '').trim();
+  if (!key) return;
   window.learnedDB[key] = category;
   try { localStorage.setItem('finapp_learnedDB', JSON.stringify(window.learnedDB)); } catch(e) {}
   updateLearnedDBCounter();
