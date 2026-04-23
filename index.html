@@ -156,6 +156,7 @@
   <button class="tab-btn" id="tab-bank" onclick="switchTab('bank')">🏦 דוח עו"ש</button>
   <button class="tab-btn" id="tab-loan" onclick="switchTab('loan')">🔢 מחשבון הלוואות</button>
   <button class="tab-btn" id="tab-compound" onclick="switchTab('compound')">📈 ריבית דריבית</button>
+  <button class="tab-btn" id="tab-guide" onclick="switchTab('guide')">❓ מדריך</button>
   <div id="month-tab-btns"></div>
 </div>
 
@@ -809,6 +810,87 @@
 </div><!-- /ci-layout -->
 </div><!-- /ci-container -->
 </div><!-- /panel-compound -->
+
+<!-- ══ TAB: GUIDE ══ -->
+<div class="tab-panel" id="panel-guide">
+<div class="main-wrap" style="max-width:780px;padding-bottom:80px">
+  <h2 style="font-size:1.4rem;color:#e8eaf6;margin-bottom:6px">❓ מדריך למערכת</h2>
+  <p style="color:#5a6080;font-size:.85rem;margin-bottom:32px">הסבר קצר על כל פיצ'ר במערכת</p>
+
+  <div class="guide-card">
+    <div class="guide-icon">📋</div>
+    <div>
+      <div class="guide-title">מיפוי ידני</div>
+      <div class="guide-desc">הלב של המערכת — כאן מגדירים את כל ההוצאות וההכנסות החודשיות. מחולק לקטגוריות: הכנסות, הוצאות משתנות, הוצאות קבועות, ביטוחים, מנויים ותשלומים שנתיים. כל שורה ניתן להוסיף ידנית או לייבא אוטומטית מדוח האשראי.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">💳</div>
+    <div>
+      <div class="guide-title">דוחות אשראי</div>
+      <div class="guide-desc">מעלים כאן קובץ Excel של דוח כרטיס האשראי. המערכת מזהה את העסקאות, מסווגת אותן אוטומטית לפי קטגוריה, ומעדכנת את שורות המיפוי הידני בסכומים הנכונים. אפשר גם לשלוח לניתוח AI שיסכם את ההתנהלות הפיננסית.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">📥</div>
+    <div>
+      <div class="guide-title">ייבוא לתקציב</div>
+      <div class="guide-desc">בסוף כל חודש מעלים את דוח האשראי לטאב זה ולוחצים "שלח לתקציב" — הביצוע בפועל עובר אוטומטית לעמודת הביצוע בטאב החודש המתאים. כך אפשר לראות בדיוק כמה תכננו וכמה הוצאנו בפועל.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">📅</div>
+    <div>
+      <div class="guide-title">תקציב חודשי</div>
+      <div class="guide-desc">לכל חודש יש טאב נפרד עם שתי עמודות: תכנון וביצוע. עמודת התכנון מתמלאת מהמיפוי הידני, ועמודת הביצוע מתמלאת מייבוא הדוחות. ההפרש בין השניים מראה אם חרגנו מהתקציב או נשארנו בגבולות.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">📊</div>
+    <div>
+      <div class="guide-title">בקרת תקציב</div>
+      <div class="guide-desc">סיכום חזותי של תכנון מול ביצוע לכל חודש — גרף עמודות שמראה את כל הקטגוריות בו זמנית. עוזר לזהות במהירות אילו קטגוריות חרגו ואילו נשארו בגבולות.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">📈</div>
+    <div>
+      <div class="guide-title">מגמות</div>
+      <div class="guide-desc">גרפים של ההוצאות לאורך מספר חודשים. מראה האם ההוצאות עולות, יורדות או יציבות לאורך זמן, ומאפשר לזהות דפוסים בהתנהלות הפיננסית.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">🗓️</div>
+    <div>
+      <div class="guide-title">תוכנית שנתית</div>
+      <div class="guide-desc">מציג סיכום שנתי של כל ההוצאות וההכנסות — תכנון מול ביצוע לכל 12 החודשים בטבלה אחת. עוזר לראות את התמונה הגדולה ולהבין איפה עומדים לקראת סוף שנה.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">🔢</div>
+    <div>
+      <div class="guide-title">מחשבון הלוואות</div>
+      <div class="guide-desc">מחשב החזר חודשי, סה"כ ריבית ולוח סילוקין מפורט לכל הלוואה. מזינים סכום, ריבית שנתית ומספר תשלומים — המחשבון מציג את כל הפרטים.</div>
+    </div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-icon">📈</div>
+    <div>
+      <div class="guide-title">ריבית דריבית</div>
+      <div class="guide-desc">מחשבון חיסכון לטווח ארוך — מזינים סכום התחלתי, הפקדה חודשית, ריבית שנתית ומספר שנים, והמחשבון מציג כמה הכסף יצמח לאורך הזמן עם גרף ויזואלי.</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /panel-guide -->
 
 <!-- ══ TAB: CONTROL (Budget vs Actual) ══ -->
 <div class="tab-panel" id="panel-control">
