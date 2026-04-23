@@ -23,6 +23,19 @@
 </head>
 <body>
 
+<!-- MOBILE WARNING -->
+<div id="mobile-warning" style="display:none;position:fixed;inset:0;z-index:99999;background:#0d0f1a;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:32px">
+  <div style="font-size:3rem;margin-bottom:16px">💻</div>
+  <div style="font-size:1.3rem;color:#e8eaf6;font-weight:700;margin-bottom:12px">האפליקציה מיועדת למחשב בלבד</div>
+  <div style="font-size:0.95rem;color:#9aa0c0;line-height:1.7">לחוויה מיטבית, פתח את האפליקציה<br>מדפדפן מחשב נייד או שולחני.</div>
+</div>
+<script>
+  if (window.innerWidth < 768) {
+    var mw = document.getElementById('mobile-warning');
+    mw.style.display = 'flex';
+  }
+</script>
+
 <!-- ONBOARDING MODAL -->
 <div class="onboard-overlay" id="onboard-overlay" style="display:none">
   <div class="onboard-modal">
