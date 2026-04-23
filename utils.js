@@ -434,6 +434,8 @@ function hideLoading() {
     row.style.pointerEvents = 'none';
     row.style.transition = 'opacity 0.15s';
     row.dataset.pendingDelete = '1';
+    // Save immediately so Firestore excludes this row even if user refreshes during undo window
+    if (typeof fbSaveNow === 'function') fbSaveNow();
 
     showUndoToast(label,
       function() {
