@@ -355,7 +355,11 @@ async function analyzeWithAI() {
       // חלץ JSON גם אם Claude עטף אותו בטקסט
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('תגובה לא תקינה מ-Claude');
-      const parsed = JSON.parse(jsonMatch[0]);
+      // נקה trailing commas שמופיעים לפעמים בתגובות Claude
+      const jsonClean = jsonMatch[0].replace(/,\s*([}\]])/g, '$1');
+      let parsed;
+      try { parsed = JSON.parse(jsonClean); }
+      catch(parseErr) { throw new Error('JSON לא תקין מ-Claude: ' + parseErr.message); }
       const aiExpenses = parsed.expenses || [];
 
       aiExpenses.forEach(function(exp, i) {
