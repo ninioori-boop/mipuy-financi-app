@@ -349,6 +349,107 @@ function hideLoading() {
 }
 
 /* ════════════════════════════════════════
+   UNDO DELETE TOAST
+════════════════════════════════════════ */
+(function() {
+  // Inject toast CSS once
+  var style = document.createElement('style');
+  style.textContent = [
+    '.undo-toast {',
+    '  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);',
+    '  background: #23263a; border: 1px solid #3a3d55; border-radius: 10px;',
+    '  padding: 12px 18px; display: flex; align-items: center; gap: 14px;',
+    '  font-size: .88rem; color: #e6e7ee; z-index: 9999;',
+    '  box-shadow: 0 4px 24px rgba(0,0,0,.5);',
+    '  animation: toastIn .18s ease;',
+    '}',
+    '@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(12px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }',
+    '.undo-toast button {',
+    '  background: #6c63ff; color: #fff; border: none; border-radius: 6px;',
+    '  padding: 5px 12px; font-size: .85rem; cursor: pointer; font-family: inherit;',
+    '}',
+    '.undo-toast button:hover { background: #5a52e0; }',
+  ].join('\n');
+  document.head.appendChild(style);
+
+  var _toast = null;
+  var _toastTimer = null;
+
+  function showUndoToast(label, onCommit, onUndo) {
+    // Commit previous pending deletion before showing new toast
+    if (_toastTimer) {
+      clearTimeout(_toastTimer);
+      if (_toast && _toast._commit) _toast._commit();
+      if (_toast && _toast.parentNode) _toast.remove();
+    }
+
+    var t = document.createElement('div');
+    t.className = 'undo-toast';
+    t.innerHTML = '<span>נמחק: <strong>' + escHtml(label) + '</strong></span><button onclick="window._undoLastDelete()">↩ בטל</button>';
+    t._commit = onCommit;
+    t._undo = onUndo;
+    document.body.appendChild(t);
+    _toast = t;
+
+    _toastTimer = setTimeout(function() {
+      if (_toast === t) {
+        onCommit();
+        if (t.parentNode) { t.style.opacity = '0'; t.style.transition = 'opacity .2s'; setTimeout(function(){ if (t.parentNode) t.remove(); }, 220); }
+        _toast = null;
+        _toastTimer = null;
+      }
+    }, 5000);
+  }
+
+  window._undoLastDelete = function() {
+    if (!_toast) return;
+    clearTimeout(_toastTimer);
+    _toastTimer = null;
+    _toast._undo();
+    if (_toast.parentNode) _toast.remove();
+    _toast = null;
+  };
+
+  // Intercept btn-del clicks on mapping rows (capture phase fires before inline onclick)
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-del');
+    if (!btn) return;
+
+    // Only intercept rows that are inside a known mapping list
+    var row = btn.closest('.cat-auto-wrap, .annual-row, .input-row');
+    if (!row) return;
+    var inList = row.closest('#var-list, #fixed-list, #sub-list, #insurance-list, #annual-list, #inst-list, #asset-list, #debt-list, #saving-list, #an-income, #an-fixed, #an-var, #an-sub, #an-debt, #an-sav');
+    if (!inList) return;
+
+    // Prevent the inline onclick from firing now
+    e.stopImmediatePropagation();
+    e.preventDefault();
+
+    var originalOnclick = btn.onclick;
+    var nameInput = row.querySelector('input[type="text"]');
+    var label = (nameInput && nameInput.value) ? nameInput.value.replace(/^[\s\S]*?([^\s].*)$/, '$1').trim() : 'שורה';
+
+    // Hide the row visually (keep in DOM so originalOnclick can still find its parent)
+    row.style.opacity = '0';
+    row.style.pointerEvents = 'none';
+    row.style.transition = 'opacity 0.15s';
+
+    showUndoToast(label,
+      function() {
+        // Commit: run the original onclick (removes el + updates totals + recordDeletedAutoCat)
+        if (originalOnclick) originalOnclick.call(btn);
+        else if (row.parentNode) row.parentNode.removeChild(row);
+      },
+      function() {
+        // Undo: restore row
+        row.style.opacity = '1';
+        row.style.pointerEvents = '';
+      }
+    );
+  }, true); // capture = true
+})();
+
+/* ════════════════════════════════════════
    START
 ════════════════════════════════════════ */
 init();
