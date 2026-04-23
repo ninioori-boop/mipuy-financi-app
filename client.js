@@ -49,11 +49,13 @@ function clientCollectData() {
       ['var-list','fixed-list','sub-list','insurance-list'].forEach(function(lid) {
         var el = document.getElementById(lid); if (!el) return;
         el.querySelectorAll('.cat-auto-wrap').forEach(function(w) {
+          if (w.dataset.pendingDelete) return;
           if (w.dataset.cat) { var inp = w.querySelector('input[type="number"]'); if (inp) autoRows[w.dataset.cat] = parseFloat(inp.value)||0; }
         });
       });
       var annEl = document.getElementById('annual-list');
       if (annEl) annEl.querySelectorAll('.input-row[data-auto]').forEach(function(r) {
+        if (r.dataset.pendingDelete) return;
         if (r.dataset.cat) { var inp = r.querySelector('input[type="number"]'); if (inp) autoRows[r.dataset.cat] = parseFloat(inp.value)||0; }
       });
       return { transactions: [], deletedAutoCats: [], autoRows: autoRows };

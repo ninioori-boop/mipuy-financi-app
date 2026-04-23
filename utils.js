@@ -433,6 +433,7 @@ function hideLoading() {
     row.style.opacity = '0';
     row.style.pointerEvents = 'none';
     row.style.transition = 'opacity 0.15s';
+    row.dataset.pendingDelete = '1';
 
     showUndoToast(label,
       function() {
@@ -442,6 +443,7 @@ function hideLoading() {
       },
       function() {
         // Undo: restore row
+        delete row.dataset.pendingDelete;
         row.style.opacity = '1';
         row.style.pointerEvents = '';
       }
