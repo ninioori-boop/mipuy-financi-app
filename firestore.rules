@@ -11,7 +11,7 @@ service cloud.firestore {
     match /maps/{clientId} {
       allow read, write: if request.auth != null &&
         (request.auth.uid == clientId ||
-         request.auth.uid == resource.data.advisorUid);
+         (resource != null && request.auth.uid == resource.data.advisorUid));
       allow create: if request.auth != null && request.auth.uid == clientId;
     }
 
