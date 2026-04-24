@@ -416,7 +416,7 @@ function hideLoading() {
     if (!btn) return;
 
     // Only intercept rows that are inside a known mapping list
-    var row = btn.closest('.cat-auto-wrap, .annual-row, .input-row');
+    var row = btn.closest('.cat-auto-wrap') || btn.closest('.annual-row') || btn.closest('.input-row');
     if (!row) return;
     var inList = row.closest('#var-list, #fixed-list, #sub-list, #insurance-list, #annual-list, #inst-list, #asset-list, #debt-list, #saving-list, #an-income, #an-fixed, #an-var, #an-sub, #an-debt, #an-sav');
     if (!inList) return;
