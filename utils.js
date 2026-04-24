@@ -425,29 +425,40 @@ function hideLoading() {
     e.stopImmediatePropagation();
     e.preventDefault();
 
-    var originalOnclick = btn.onclick;
     var nameInput = row.querySelector('input[type="text"]');
     var label = (nameInput && nameInput.value) ? nameInput.value.replace(/^[\s\S]*?([^\s].*)$/, '$1').trim() : 'שורה';
 
-    // Hide the row visually (keep in DOM so originalOnclick can still find its parent)
-    row.style.opacity = '0';
-    row.style.pointerEvents = 'none';
-    row.style.transition = 'opacity 0.15s';
-    row.dataset.pendingDelete = '1';
-    // Save immediately so Firestore excludes this row even if user refreshes during undo window
+    // Save state for undo (auto rows only)
+    var isAutoWrap = row.classList.contains('cat-auto-wrap');
+    var isAnnualAuto = row.classList.contains('annual-row') && row.hasAttribute('data-auto');
+    var savedState = null;
+    if (isAutoWrap || isAnnualAuto) {
+      var amtInp = row.querySelector('input[type="number"]');
+      savedState = { cat: row.dataset.cat, amount: amtInp ? (parseFloat(amtInp.value) || 0) : 0 };
+    }
+
+    // Immediately commit the delete — removes from DOM before any fbSaveNow fires
+    var originalOnclick = btn.onclick;
+    if (originalOnclick) originalOnclick.call(btn);
+    else if (row.parentNode) row.parentNode.removeChild(row);
+
+    // Save AFTER row is removed — both localStorage and Firestore now exclude the deleted row
+    if (typeof clientSave === 'function') clientSave();
     if (typeof fbSaveNow === 'function') fbSaveNow();
 
     showUndoToast(label,
+      function() { /* already committed */ },
       function() {
-        // Commit: run the original onclick (removes el + updates totals + recordDeletedAutoCat)
-        if (originalOnclick) originalOnclick.call(btn);
-        else if (row.parentNode) row.parentNode.removeChild(row);
-      },
-      function() {
-        // Undo: restore row
-        delete row.dataset.pendingDelete;
-        row.style.opacity = '1';
-        row.style.pointerEvents = '';
+        // Undo: recreate auto row
+        if (savedState && savedState.cat) {
+          if (typeof deletedAutoCats !== 'undefined') delete deletedAutoCats[savedState.cat];
+          if (typeof rebuildMappingFromAutoRows === 'function') {
+            var rows = {}; rows[savedState.cat] = savedState.amount;
+            rebuildMappingFromAutoRows(rows);
+          }
+        }
+        if (typeof clientSave === 'function') clientSave();
+        if (typeof fbSaveNow === 'function') fbSaveNow();
       }
     );
   }, true); // capture = true
