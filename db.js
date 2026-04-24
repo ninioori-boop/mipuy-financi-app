@@ -4,7 +4,7 @@ function saveUserData(uid, data) {
   return db.collection('users').doc(uid).set({
     data: data,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
+  }, { mergeFields: ['data', 'updatedAt'] });
 }
 
 function loadUserData(uid) {
