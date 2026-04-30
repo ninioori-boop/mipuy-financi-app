@@ -76,7 +76,7 @@ function anMakeRow(listId, secKey, name, yr) {
       '<input type="number" class="an-yr-input" placeholder="0" value="' + (yr||'') + '" oninput="anLive();anSavePlan()">' +
       '<div class="an-mo-disp">—</div>' +
       '<div class="an-act-disp zero">—</div>' +
-      '<button class="bud-del" onclick="this.closest(\'.an-plan-row\').remove();anLive();anSavePlan()">✕</button>' +
+      '<button class="bud-del" onclick="this.closest(\'.an-plan-row\').remove();try{anLive()}catch(e){}anSavePlan()">✕</button>' +
     '</div>';
   return d.firstChild;
 }
@@ -93,7 +93,7 @@ function anAddDebtRow(name, yr, balance) {
       '<div class="an-mo-disp">—</div>' +
       '<div class="an-act-disp zero">—</div>' +
       '<input type="number" class="an-balance" placeholder="יתרה לסגירה" value="' + (balance||'') + '" oninput="anLive();anSavePlan()">' +
-      '<button class="bud-del" onclick="this.closest(\'.an-debt-plan-row\').remove();anLive();anSavePlan()">✕</button>' +
+      '<button class="bud-del" onclick="this.closest(\'.an-debt-plan-row\').remove();try{anLive()}catch(e){}anSavePlan()">✕</button>' +
     '</div>';
   document.getElementById('an-debt').appendChild(d.firstChild);
   anLive();

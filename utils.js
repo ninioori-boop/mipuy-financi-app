@@ -437,10 +437,16 @@ function hideLoading() {
       savedState = { cat: row.dataset.cat, amount: amtInp ? (parseFloat(amtInp.value) || 0) : 0 };
     }
 
-    // Immediately commit the delete — removes from DOM before any fbSaveNow fires
+    // Immediately commit the delete — removes from DOM before any fbSaveNow fires.
+    // Wrap in try/catch so a throw in the inline handler (e.g. updateXxxTotals
+    // touching a missing element) cannot prevent the save lines below.
     var originalOnclick = btn.onclick;
-    if (originalOnclick) originalOnclick.call(btn);
-    else if (row.parentNode) row.parentNode.removeChild(row);
+    try {
+      if (originalOnclick) originalOnclick.call(btn);
+      else if (row.parentNode) row.parentNode.removeChild(row);
+    } catch(e) {
+      if (row.parentNode) row.parentNode.removeChild(row);
+    }
 
     // Save AFTER row is removed — both localStorage and Firestore now exclude the deleted row
     if (typeof clientSave === 'function') clientSave();
