@@ -138,6 +138,13 @@ function clientCollectData() {
 // Restore all DOM from saved data
 function clientRestoreData(data) {
   if (!data) return;
+  // Per-month deleted rows — must be set FIRST so monthly restore + later
+  // syncManualToMonth both filter against it.
+  if (data.deletedMonthlyRows && typeof data.deletedMonthlyRows === 'object') {
+    deletedMonthlyRows = data.deletedMonthlyRows;
+  } else {
+    deletedMonthlyRows = {};
+  }
   // Meta
   if (data.meta) {
     var f = function(id, v) { var el=document.getElementById(id); if(el) el.value=v||''; };
@@ -246,6 +253,7 @@ function clientRestoreData(data) {
         if (!el || !md[sec]) return;
         el.innerHTML = '';
         md[sec].forEach(function(item) {
+          if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, sec, item.name)) return;
           var rowHtml = item.auto
             ? '<div class="bud-row-2 mo-auto-row">' +
                 '<input class="bud-name" type="text" value="" oninput="moLive(this)">' +
@@ -269,6 +277,7 @@ function clientRestoreData(data) {
       if (instEl && md.inst) {
         instEl.innerHTML = '';
         md.inst.forEach(function(item) {
+          if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, 'inst', item.name)) return;
           instEl.insertAdjacentHTML('beforeend', moInstRow());
           var rows = instEl.querySelectorAll('.bud-row-2');
           var last = rows[rows.length-1];
@@ -286,6 +295,7 @@ function clientRestoreData(data) {
       if (moDebtEl && md.debt) {
         moDebtEl.innerHTML = '';
         md.debt.forEach(function(item) {
+          if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, 'debt', item.name)) return;
           moDebtEl.insertAdjacentHTML('beforeend', moDebtRow());
           var rows = moDebtEl.querySelectorAll('.bud-row-2');
           var last = rows[rows.length-1];
@@ -302,6 +312,7 @@ function clientRestoreData(data) {
       if (moSavEl && md.saving) {
         moSavEl.innerHTML = '';
         md.saving.forEach(function(item) {
+          if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, 'saving', item.name)) return;
           moSavEl.insertAdjacentHTML('beforeend', moSavingRow());
           var rows = moSavEl.querySelectorAll('.bud-row-2');
           var last = rows[rows.length-1];
@@ -325,14 +336,6 @@ function clientRestoreData(data) {
     if (data.credit.autoRows && typeof rebuildMappingFromAutoRows === 'function') {
       rebuildMappingFromAutoRows(data.credit.autoRows);
     }
-  }
-
-  // Per-month deleted rows — must be set before any switchTab to a monthly tab,
-  // otherwise syncManualToMonth would rebuild rows the user deleted.
-  if (data.deletedMonthlyRows && typeof data.deletedMonthlyRows === 'object') {
-    deletedMonthlyRows = data.deletedMonthlyRows;
-  } else {
-    deletedMonthlyRows = {};
   }
 
   // Annual tab
