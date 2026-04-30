@@ -222,6 +222,7 @@ function syncManualToMonth(mid) {
     list.innerHTML = '';
     var manualNames = items.map(function(i){ return i.name; });
     items.forEach(function(item) {
+      if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, section, item.name)) return;
       var d = document.createElement('div');
       d.innerHTML = moSimpleRow('');
       var row = d.firstChild;
@@ -234,6 +235,7 @@ function syncManualToMonth(mid) {
     // Re-add auto-rows whose category was not in the manual list
     savedAutoRows.forEach(function(r) {
       if (manualNames.indexOf(r.name) === -1) {
+        if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, section, r.name)) return;
         var d = document.createElement('div');
         d.innerHTML = '<div class="bud-row-2 mo-auto-row">' +
           '<input class="bud-name" type="text" value="' + r.name + '" oninput="moLive(this)">' +
@@ -253,6 +255,7 @@ function syncManualToMonth(mid) {
     if (!list) return;
     list.innerHTML = '';
     items.forEach(function(item) {
+      if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, 'saving', item.name)) return;
       var d = document.createElement('div');
       d.innerHTML = moSavingRow();
       var row = d.firstChild;
@@ -285,6 +288,7 @@ function syncManualToMonth(mid) {
       var cur     = (row.querySelector('.inst-cur')     || {value:''}).value;
       var max     = (row.querySelector('.inst-max')     || {value:''}).value;
       if (!name && !monthly) return;
+      if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, 'inst', name)) return;
       var d = document.createElement('div');
       d.innerHTML = moInstRow();
       var r = d.firstChild;
@@ -315,6 +319,7 @@ function syncManualToMonth(mid) {
       var monthly = (row.querySelector('.debt-monthly') || {value:''}).value;
       var months  = (row.querySelector('.debt-months')  || {value:''}).value;
       if (!name && !monthly) return;
+      if (typeof isDeletedMonthlyRow === 'function' && isDeletedMonthlyRow(mid, 'debt', name)) return;
       var d = document.createElement('div');
       d.innerHTML = moDebtRow();
       var r = d.firstChild;

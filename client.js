@@ -61,7 +61,8 @@ function clientCollectData() {
       return { transactions: [], deletedAutoCats: [], autoRows: autoRows };
     })(),
     learnedDB: window.learnedDB || {},
-    gpPlans: (typeof window.gpGetPlans === 'function') ? window.gpGetPlans() : null
+    gpPlans: (typeof window.gpGetPlans === 'function') ? window.gpGetPlans() : null,
+    deletedMonthlyRows: (typeof deletedMonthlyRows !== 'undefined') ? deletedMonthlyRows : {}
   };
 
   MONTHS_LIST.forEach(function(mo) {
@@ -324,6 +325,14 @@ function clientRestoreData(data) {
     if (data.credit.autoRows && typeof rebuildMappingFromAutoRows === 'function') {
       rebuildMappingFromAutoRows(data.credit.autoRows);
     }
+  }
+
+  // Per-month deleted rows — must be set before any switchTab to a monthly tab,
+  // otherwise syncManualToMonth would rebuild rows the user deleted.
+  if (data.deletedMonthlyRows && typeof data.deletedMonthlyRows === 'object') {
+    deletedMonthlyRows = data.deletedMonthlyRows;
+  } else {
+    deletedMonthlyRows = {};
   }
 
   // Annual tab

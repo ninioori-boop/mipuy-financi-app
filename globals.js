@@ -3616,3 +3616,18 @@ let pendingFiles = [];
 let transTableVisible = false;
 var _ccCtx = ''; // '' = credit tab, 'import-' = budget-import tab
 
+// Per-month per-section deleted rows — survive refresh/login
+var deletedMonthlyRows = {};
+
+function recordDeletedMonthlyRow(mid, section, name) {
+  if (!mid || !section || !name) return;
+  if (!deletedMonthlyRows[mid]) deletedMonthlyRows[mid] = {};
+  if (!deletedMonthlyRows[mid][section]) deletedMonthlyRows[mid][section] = {};
+  deletedMonthlyRows[mid][section][name] = true;
+}
+
+function isDeletedMonthlyRow(mid, section, name) {
+  if (!name) return false;
+  return !!(deletedMonthlyRows[mid] && deletedMonthlyRows[mid][section] && deletedMonthlyRows[mid][section][name]);
+}
+

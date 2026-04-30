@@ -142,7 +142,25 @@ function budAddRow(listId, templateFn) {
   list.appendChild(d.firstChild);
   budLive();
 }
-function budDel(btn) { btn.closest('.bud-row-2').remove(); budLive(); }
+function budDel(btn) {
+  var row = btn.closest('.bud-row-2');
+  if (!row) return;
+  var listEl = row.parentElement;
+  var mid = null, section = null, name = '';
+  if (listEl && listEl.id) {
+    var m = listEl.id.match(/^mo-([a-z]{3})-(.+)$/);
+    if (m) { mid = m[1]; section = m[2]; }
+  }
+  var nameInp = row.querySelector('.bud-name, input[type="text"]');
+  if (nameInp) name = (nameInp.value || '').trim();
+  if (mid && section && name && typeof recordDeletedMonthlyRow === 'function') {
+    recordDeletedMonthlyRow(mid, section, name);
+  }
+  row.remove();
+  budLive();
+  if (typeof clientSave === 'function') clientSave();
+  if (typeof fbSaveNow === 'function') fbSaveNow();
+}
 
 function budAnnualCalc(input) {
   var row = input.closest('.bud-row-2');
