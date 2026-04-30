@@ -157,7 +157,7 @@ function budDel(btn) {
     recordDeletedMonthlyRow(mid, section, name);
   }
   row.remove();
-  budLive();
+  try { budLive(); } catch(e) { /* budLive only relevant in budget tab; safe to ignore from monthly tabs */ }
   if (typeof clientSave === 'function') clientSave();
   if (typeof fbSaveNow === 'function') fbSaveNow();
 }
