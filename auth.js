@@ -154,8 +154,18 @@ function fbGoogleSignIn() {
   });
 }
 
+function fbClearAppState() {
+  if (typeof clientClearAll === 'function') clientClearAll();
+  window.learnedDB = {};
+  try { localStorage.removeItem('finapp_learnedDB'); } catch(e) {}
+  if (typeof deletedMonthlyRows !== 'undefined') deletedMonthlyRows = {};
+  if (typeof deletedAutoCats !== 'undefined') deletedAutoCats = {};
+  if (typeof window.gpSetPlans === 'function') window.gpSetPlans({});
+}
+
 function fbSignOut() {
   if (!confirm('להתנתק מהמערכת?')) return;
+  fbClearAppState();
   _fbSignedInLock = false;
   auth.signOut().then(function() {
     var overlay = document.getElementById('fb-auth-overlay');
@@ -235,6 +245,7 @@ auth.onAuthStateChanged(function(user) {
   try { fbUpdateBar(user); } catch(e) { console.error('fbUpdateBar error:', e); }
 
   loadUserData(user.uid).then(function(data) {
+    fbClearAppState();
     if (data && typeof clientRestoreData === 'function') {
       _fbRestoring = true;
       clearTimeout(_fbAutoSaveTimer);
