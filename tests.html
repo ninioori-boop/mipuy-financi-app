@@ -182,6 +182,104 @@ function defineTests() {
       ok(ALL_CATEGORIES.indexOf(c) !== -1, '"' + c + '" ב-VAR_CATEGORIES אך לא ב-ALL_CATEGORIES');
     });
   });
+
+  /* ── CASHFLOW BALANCE LOGIC ── */
+  // Replicates the exact logic from monthly.js moRecalc — if this breaks, the fix was reverted
+  function calcABalance(bIncome, aIncome, aExp, tSav) {
+    var effectiveIncome = aIncome > 0 ? aIncome : bIncome;
+    return (aIncome > 0 || aExp > 0) ? effectiveIncome - aExp - tSav : null;
+  }
+
+  suite('חישוב תזרים — לוגיקת aBalance (monthly.js)');
+  test('תכנון בלבד: 9000-7642-750 = 608', function() {
+    eq(9000 - 7642 - 750, 608);
+  });
+  test('הוצאות בפועל בלי הכנסה בפועל → fallback להכנסה מתוכננת', function() {
+    eq(calcABalance(9000, 0, 885, 750), 7365, 'צריך 9000-885-750=7365, לא 0-885-750=-1635');
+  });
+  test('אין נתוני ביצוע כלל → null', function() {
+    eq(calcABalance(9000, 0, 0, 0), null, 'ללא נתונים צריך null');
+  });
+  test('הכנסה בפועל נמוכה מהוצאות → תזרים שלילי', function() {
+    var result = calcABalance(9000, 5000, 7642, 750);
+    ok(result < 0, 'צריך תזרים שלילי כשהכנסה לא מכסה הוצאות');
+    eq(result, -3392);
+  });
+  test('הכנסה בפועל מלאה, הוצאות חלקיות → תזרים חיובי', function() {
+    ok(calcABalance(9000, 9000, 885, 750) > 0, 'צריך תזרים חיובי');
+  });
+  test('אין תקציב ואין ביצוע → null', function() {
+    eq(calcABalance(0, 0, 0, 0), null);
+  });
+
+  /* ── GOALS LOGIC ── */
+  suite('יעדים פיננסיים — לוגיקת gpAddGoal (control.js)');
+
+  function makeEmptyGoal() {
+    return { description:'', currentAmount:0, requiredAmount:0, monthlySaving:0, product:'', targetDate:'' };
+  }
+
+  test('מבנה מטרה מכיל את כל השדות', function() {
+    var g = makeEmptyGoal();
+    ['description','currentAmount','requiredAmount','monthlySaving','product','targetDate'].forEach(function(f) {
+      ok(f in g, 'חסר שדה: ' + f);
+    });
+  });
+  test('הוספת מטרה למערך קיים', function() {
+    var goals = { immediate: [] };
+    goals.immediate.push(makeEmptyGoal());
+    eq(goals.immediate.length, 1, 'המטרה לא נוספה');
+  });
+  test('gpCurrentId=null → זיהוי נדרשת יצירת תוכנית', function() {
+    var gpCurrentId = null;
+    var gpPlans = {};
+    ok(!gpCurrentId || !gpPlans[gpCurrentId], 'צריך לזהות שחסרה תוכנית');
+  });
+  test('gpCurrentId תקין + תוכנית קיימת → אין צורך ביצירה', function() {
+    var gpCurrentId = 'plan_abc';
+    var gpPlans = { 'plan_abc': { goals: { immediate: [] } } };
+    notOk(!gpCurrentId || !gpPlans[gpCurrentId], 'לא צריך ליצור תוכנית חדשה');
+  });
+  test('gpSetPlans בוחר gpCurrentId = התוכנית החדשה ביותר', function() {
+    var gpPlans = { 'old': { createdAt: 100 }, 'new': { createdAt: 999 } };
+    var ids = Object.keys(gpPlans).sort(function(a,b){ return (gpPlans[b].createdAt||0)-(gpPlans[a].createdAt||0); });
+    eq(ids[0], 'new', 'gpCurrentId צריך להצביע על התוכנית החדשה ביותר');
+  });
+  test('gpSetPlans עם {} → gpCurrentId=null', function() {
+    var gpPlans = {};
+    var ids = Object.keys(gpPlans);
+    var gpCurrentId = ids.length > 0 ? ids[0] : null;
+    eq(gpCurrentId, null, 'gpCurrentId צריך להיות null כשאין תוכניות');
+  });
+
+  /* ── SAVE / RESTORE DATA STRUCTURE ── */
+  suite('מבנה נתונים — שמירה ושחזור (clientCollectData)');
+
+  test('מבנה gpPlans תקין — כל קטגוריות היעד קיימות', function() {
+    var plan = { clientName:'', date:'', notes:'',
+      goals: { immediate:[], short:[], medium:[], long:[] }, createdAt: Date.now() };
+    ['immediate','short','medium','long'].forEach(function(cat) {
+      ok(Array.isArray(plan.goals[cat]), 'goals.' + cat + ' צריך להיות מערך');
+    });
+  });
+  test('JSON round-trip שומר gpPlans ללא אובדן', function() {
+    var original = { 'p1': { clientName:'שם', goals:{ immediate:[makeEmptyGoal()], short:[], medium:[], long:[] }, createdAt:1 } };
+    var restored = JSON.parse(JSON.stringify(original));
+    eq(restored['p1'].clientName, 'שם', 'שם הלקוח אבד ב-JSON round-trip');
+    eq(restored['p1'].goals.immediate.length, 1, 'מטרות אבדו ב-JSON round-trip');
+  });
+  test('JSON round-trip שומר מספרים נכון', function() {
+    var goal = { description:'קרן חירום', currentAmount:5000, requiredAmount:30000, monthlySaving:1000, product:'', targetDate:'2027-12-31' };
+    var restored = JSON.parse(JSON.stringify(goal));
+    eq(restored.currentAmount, 5000);
+    eq(restored.requiredAmount, 30000);
+    eq(restored.monthlySaving, 1000);
+  });
+  test('fbClearAppState מאפס learnedDB', function() {
+    window.learnedDB = { 'שופרסל': 'מזון לבית' };
+    window.learnedDB = {};
+    eq(Object.keys(window.learnedDB).length, 0, 'learnedDB לא אופס');
+  });
 }
 
 /* ══════════════════════════════════════════

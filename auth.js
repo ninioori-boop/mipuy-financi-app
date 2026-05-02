@@ -523,3 +523,17 @@ window.addEventListener('load', function() {
     saveToLearnedDB._fbPatched = true;
   }
 });
+
+/* ── Global error reporting → Sentry ───────────────────────────── */
+window.addEventListener('error', function(e) {
+  if (typeof Sentry !== 'undefined') {
+    Sentry.captureException(e.error || new Error(e.message), {
+      extra: { file: e.filename, line: e.lineno, col: e.colno }
+    });
+  }
+});
+window.addEventListener('unhandledrejection', function(e) {
+  if (typeof Sentry !== 'undefined') {
+    Sentry.captureException(e.reason instanceof Error ? e.reason : new Error(String(e.reason)));
+  }
+});
