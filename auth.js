@@ -249,11 +249,14 @@ auth.onAuthStateChanged(function(user) {
   try { fbUpdateBar(user); } catch(e) { console.error('fbUpdateBar error:', e); }
 
   loadUserData(user.uid).then(function(data) {
+    _fbRestoring = true;
+    clearTimeout(_fbAutoSaveTimer);
     fbClearAppState();
-    if (data && typeof clientRestoreData === 'function') {
-      _fbRestoring = true;
-      clearTimeout(_fbAutoSaveTimer);
-      clientRestoreData(data);
+    try {
+      if (data && typeof clientRestoreData === 'function') {
+        clientRestoreData(data);
+      }
+    } finally {
       _fbRestoring = false;
     }
     fbUpdateSaveStatus('✓ נטען');
