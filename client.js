@@ -237,7 +237,7 @@ function clientRestoreData(data) {
   }
 
   // Monthly tabs
-  if (data.monthly && typeof moSimpleRow === 'function') {
+  try { if (data.monthly && typeof moSimpleRow === 'function') {
     MONTHS_LIST.forEach(function(mo) {
       var mid = mo.id;
       var md = data.monthly[mid];
@@ -325,21 +325,23 @@ function clientRestoreData(data) {
 
       moRecalc(mid);
     });
-  }
+  } } catch(e) { console.error('clientRestoreData: monthly tabs', e); }
 
   // Credit — mapping persists independently of transactions.
   // creditTransactions is session-only (stays []); mapping rows rebuilt from autoRows.
   // deletedAutoCats is also session-only — so that a new session's uploads can populate
   // categories freely; re-deletion is always an option via × on each row.
-  if (data.credit) {
-    deletedAutoCats = {};
-    if (data.credit.autoRows && typeof rebuildMappingFromAutoRows === 'function') {
-      rebuildMappingFromAutoRows(data.credit.autoRows);
+  try {
+    if (data.credit) {
+      deletedAutoCats = {};
+      if (data.credit.autoRows && typeof rebuildMappingFromAutoRows === 'function') {
+        rebuildMappingFromAutoRows(data.credit.autoRows);
+      }
     }
-  }
+  } catch(e) { console.error('clientRestoreData: credit', e); }
 
   // Annual tab
-  if (data.annual && typeof anAddRow === 'function') {
+  try { if (data.annual && typeof anAddRow === 'function') {
     var an = data.annual;
     ['income','fixed','var','sub','sav'].forEach(function(key) {
       var listId = 'an-' + key;
@@ -355,18 +357,18 @@ function clientRestoreData(data) {
     }
     // Sync localStorage so anLoadPlan() finds correct data when tab is opened
     if (typeof anSavePlan === 'function') anSavePlan();
-  }
+  } } catch(e) { console.error('clientRestoreData: annual tab', e); }
 
-  // learnedDB — learned category overrides
-  if (data.learnedDB && typeof data.learnedDB === 'object') {
-    window.learnedDB = data.learnedDB;
-    try { localStorage.setItem('finapp_learnedDB', JSON.stringify(window.learnedDB)); } catch(e) {}
-  }
-
-  // gpPlans — financial goal plans
-  if (data.gpPlans && typeof window.gpSetPlans === 'function') {
-    window.gpSetPlans(data.gpPlans);
-  }
+  // learnedDB + gpPlans
+  try {
+    if (data.learnedDB && typeof data.learnedDB === 'object') {
+      window.learnedDB = data.learnedDB;
+      try { localStorage.setItem('finapp_learnedDB', JSON.stringify(window.learnedDB)); } catch(e) {}
+    }
+    if (data.gpPlans && typeof window.gpSetPlans === 'function') {
+      window.gpSetPlans(data.gpPlans);
+    }
+  } catch(e) { console.error('clientRestoreData: learnedDB/gpPlans', e); }
 }
 
 // Save active client

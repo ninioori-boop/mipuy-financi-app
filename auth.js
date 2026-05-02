@@ -229,6 +229,7 @@ function fbErrMsg(code) {
 var _fbUid = null;
 var _fbSaveTimer = null;
 var _fbRestoring = false;
+var _fbHasExistingData = false;
 
 
 auth.onAuthStateChanged(function(user) {
@@ -255,6 +256,8 @@ auth.onAuthStateChanged(function(user) {
     try {
       if (data && typeof clientRestoreData === 'function') {
         clientRestoreData(data);
+        _fbHasExistingData = true;
+        try { localStorage.setItem('finapp_backup_' + _fbUid, JSON.stringify(data)); } catch(e) {}
       }
     } finally {
       _fbRestoring = false;
@@ -390,6 +393,13 @@ function fbSaveNow() {
   if (jsonStr.length > 900000) {
     fbUpdateSaveStatus('⚠️ הנתונים גדולים מדי — נא למחוק עסקאות ישנות');
     console.warn('fbSaveNow: data too large', jsonStr.length, 'bytes');
+    return;
+  }
+
+  // 4. guard against overwriting existing data with an empty payload
+  if (_fbHasExistingData && jsonStr.length < 300) {
+    console.warn('fbSaveNow: refusing suspiciously small payload', jsonStr.length, 'bytes — existing data protected');
+    if (typeof Sentry !== 'undefined') Sentry.captureMessage('Refused empty save', { level: 'warning', extra: { size: jsonStr.length } });
     return;
   }
 
