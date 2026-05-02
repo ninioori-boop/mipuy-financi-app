@@ -928,13 +928,18 @@ document.addEventListener('DOMContentLoaded', function() {
   function gpLoad() {
     try { var r=localStorage.getItem(GP_KEY); gpPlans = r ? JSON.parse(r) : {}; } catch(e) { gpPlans={}; }
   }
-  function gpSave() { localStorage.setItem(GP_KEY, JSON.stringify(gpPlans)); }
+  function gpSave() {
+    localStorage.setItem(GP_KEY, JSON.stringify(gpPlans));
+    if (typeof fbDebouncedSave === 'function') fbDebouncedSave();
+  }
 
   // Expose for Firebase save/restore via clientCollectData / clientRestoreData
   window.gpGetPlans = function() { return JSON.parse(JSON.stringify(gpPlans)); };
   window.gpSetPlans = function(p) {
     gpPlans = p || {};
     localStorage.setItem(GP_KEY, JSON.stringify(gpPlans));
+    var ids = Object.keys(gpPlans).sort(function(a,b){ return (gpPlans[b].createdAt||0)-(gpPlans[a].createdAt||0); });
+    gpCurrentId = ids.length > 0 ? ids[0] : null;
     gpRenderList();
   };
 
@@ -1020,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.gpOnFieldChange = function() { gpSaveForm(); gpRecalc(); };
 
   window.gpAddGoal = function(cat) {
+    if (!gpCurrentId || !gpPlans[gpCurrentId]) gpCreateNewPlan();
     if (!gpCurrentId || !gpPlans[gpCurrentId]) return;
     gpPlans[gpCurrentId].goals[cat].push(gpEmptyGoal());
     gpSave();

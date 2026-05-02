@@ -161,6 +161,10 @@ function fbClearAppState() {
   if (typeof deletedMonthlyRows !== 'undefined') deletedMonthlyRows = {};
   if (typeof deletedAutoCats !== 'undefined') deletedAutoCats = {};
   if (typeof window.gpSetPlans === 'function') window.gpSetPlans({});
+  var curYear = new Date().getFullYear();
+  for (var y = curYear - 1; y <= curYear + 3; y++) {
+    try { localStorage.removeItem('anPlan_' + y); } catch(e) {}
+  }
 }
 
 function fbSignOut() {

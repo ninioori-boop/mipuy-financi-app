@@ -236,7 +236,10 @@ function moRecalc(mid) {
   var bExp     = bFixed + bVar + bSub + bIns + tInst + tDebt;
   var aExp     = aFixed + aVar + aSub + aIns + tInst + tDebt;
   var bBalance = bIncome - bExp - tSav;
-  var aBalance = aIncome > 0 || aExp > 0 ? aIncome - aExp - tSav : null;
+  // When actual income isn't entered yet, fall back to planned income so partial
+  // expense entry doesn't falsely trigger a negative-balance alert.
+  var effectiveIncome = aIncome > 0 ? aIncome : bIncome;
+  var aBalance = aIncome > 0 || aExp > 0 ? effectiveIncome - aExp - tSav : null;
 
   // Update compare sections (sections with .bud-sec-compare)
   function setCompare(id, budget, actual, isIncome) {

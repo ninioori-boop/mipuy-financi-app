@@ -483,6 +483,10 @@ function clientClearAll() {
       if (typeof moRecalc === 'function') moRecalc(mid);
     });
   }
+  // Clear annual planning tab
+  ['an-income','an-fixed','an-var','an-sub','an-sav','an-debt'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.innerHTML = '';
+  });
   creditTransactions = [];
   var mi = document.getElementById('months-input'); if (mi) mi.value = '3';
 }
