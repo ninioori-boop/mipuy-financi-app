@@ -149,8 +149,8 @@
       var mode     = qp('mode');
       var oobCode  = qp('oobCode');
 
-      // אם הבקשה הגיעה מהאפליקציה החדשה — continueUrl מחזיר אליה אחרי האיפוס.
-      // בלי continueUrl (המערכת הישנה) — ההתנהגות נשארת כמו שהייתה: חזרה ל-/.
+      // אחרי איפוס — תמיד למערכת החדשה (app.orimipuy.com), גם אם הבקשה
+      // הגיעה מהמערכת הישנה. continueUrl מאושר (למשל staging) גובר אם קיים.
       function continueTarget() {
         try {
           var u = new URL(qp('continueUrl'));
@@ -161,7 +161,7 @@
             return u.href;
           }
         } catch (e) {}
-        return '/';
+        return 'https://app.orimipuy.com/auth';
       }
       var backLink = document.querySelector('.back-link');
       if (backLink) backLink.href = continueTarget();
