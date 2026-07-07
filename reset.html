@@ -154,7 +154,7 @@
       function continueTarget() {
         try {
           var u = new URL(qp('continueUrl'));
-          var allowed = ['orimipuy.com', 'www.orimipuy.com',
+          var allowed = ['orimipuy.com', 'www.orimipuy.com', 'app.orimipuy.com',
                          'mipuy-financi-app-2-3nay.vercel.app', 'localhost'];
           if ((u.protocol === 'https:' || u.hostname === 'localhost') &&
               allowed.indexOf(u.hostname) !== -1) {
