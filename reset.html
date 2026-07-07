@@ -148,6 +148,23 @@
 
       var mode     = qp('mode');
       var oobCode  = qp('oobCode');
+
+      // אם הבקשה הגיעה מהאפליקציה החדשה — continueUrl מחזיר אליה אחרי האיפוס.
+      // בלי continueUrl (המערכת הישנה) — ההתנהגות נשארת כמו שהייתה: חזרה ל-/.
+      function continueTarget() {
+        try {
+          var u = new URL(qp('continueUrl'));
+          var allowed = ['orimipuy.com', 'www.orimipuy.com',
+                         'mipuy-financi-app-2-3nay.vercel.app', 'localhost'];
+          if ((u.protocol === 'https:' || u.hostname === 'localhost') &&
+              allowed.indexOf(u.hostname) !== -1) {
+            return u.href;
+          }
+        } catch (e) {}
+        return '/';
+      }
+      var backLink = document.querySelector('.back-link');
+      if (backLink) backLink.href = continueTarget();
       var loading  = document.getElementById('loading');
       var formWrap = document.getElementById('form-wrap');
       var result   = document.getElementById('result');
@@ -213,7 +230,7 @@
         auth.confirmPasswordReset(oobCode, pw1)
           .then(function() {
             showSuccess('הסיסמה עודכנה בהצלחה.<br>מעביר לעמוד ההתחברות…');
-            setTimeout(function() { location.href = '/'; }, 1800);
+            setTimeout(function() { location.href = continueTarget(); }, 1800);
           })
           .catch(function(err) {
             btn.disabled = false;
