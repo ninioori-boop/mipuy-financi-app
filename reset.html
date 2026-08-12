@@ -149,6 +149,25 @@
       var mode     = qp('mode');
       var oobCode  = qp('oobCode');
 
+      // Firebase sends EVERY email action to ONE url, and that url is this page
+      // — but this page has only ever handled password resets. So every "verify
+      // your email" link the project ever sent landed here and was answered with
+      // "קישור לא תקין… בקש איפוס חדש": a message about password resets, shown to
+      // someone trying to verify their address. No verification link could ever
+      // work; the only way through was signing in with Google, which needs no
+      // link at all. Two clients hit this before it was diagnosed (2026-08-11).
+      //
+      // app.orimipuy.com/auth/action handles every mode Firebase can send.
+      // Forward anything that is not a password reset instead of rejecting it.
+      // Repointing the project's action url would be tidier, but the Admin API
+      // refuses it here (EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED), so the forward
+      // lives where the links actually land. Password resets stay on this page,
+      // unchanged, for both apps.
+      if (mode && mode !== 'resetPassword') {
+        location.replace('https://app.orimipuy.com/auth/action' + location.search);
+        return;
+      }
+
       // אחרי איפוס — תמיד למערכת החדשה (app.orimipuy.com), גם אם הבקשה
       // הגיעה מהמערכת הישנה. continueUrl מאושר (למשל staging) גובר אם קיים.
       function continueTarget() {
